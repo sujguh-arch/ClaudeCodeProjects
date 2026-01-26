@@ -1,3 +1,10 @@
-Increased conversions by 25% by leading end-to-end development of a dynamic pricing system using multi-armed bandits (MAB) to optimize content visibility, increase purchase intent, and drive ad revenue via manufactured savings
-Directed 0→1 development of an AI-powered mobile extension, expanding from 100 to 60K+ sites and driving 2.5x revenue growth across 4M users by improving content distribution, engagement, and cross-platform performance
-Delivered predictive placement recommendations for merchants, driving high-value upsell with performance models
+- responsible for improving customer onboarding
+• worked on a cross-functional team to launch new payment feature
+* helped with the migration of legacy systems to cloud infrastructure
+Led team of 5 engineers to deliver API platform serving 1M requests/day
+Analyzed user behavior data to identify churn patterns and increased retention by 15%
+  - Created roadmap for mobile app features
+was involved in sprint planning and backlog grooming
+tasked with managing vendor relationships
+Improved page load time from 4s to 1.2s, reducing bounce rate by 30%
+Built and shipped internal analytics dashboard used by 50+ stakeholders
