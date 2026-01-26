@@ -1,0 +1,3 @@
+Increased conversions by 25% by leading end-to-end development of a dynamic pricing system using multi-armed bandits (MAB) to optimize content visibility, increase purchase intent, and drive ad revenue via manufactured savings
+Directed 0→1 development of an AI-powered mobile extension, expanding from 100 to 60K+ sites and driving 2.5x revenue growth across 4M users by improving content distribution, engagement, and cross-platform performance
+Delivered predictive placement recommendations for merchants, driving high-value upsell with performance models
