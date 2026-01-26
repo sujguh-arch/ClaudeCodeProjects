@@ -124,11 +124,7 @@ def _convert_gerund_to_past(word: str) -> str:
     # Generic: remove -ing, add -ed
     if lower.endswith("ing") and len(lower) > 4:
         base = lower[:-3]
-        # Double consonant: shipping -> ship -> shipped
-        if len(base) > 1 and base[-1] == base[-2]:
-            result = base + "ed"
-        else:
-            result = base + "ed"
+        result = base + "ed"
         return result.capitalize() if word[0].isupper() else result
 
     return word
@@ -210,12 +206,18 @@ def improve_bullet(text: str, style: str = "pm", max_chars: int = 180) -> str:
     Returns:
         Improved bullet text
     """
+    # Handle empty/whitespace input
+    text = text.strip()
+    if not text:
+        return ""
+
     # Remove filler phrases
     improved = _remove_filler_phrases(text)
+    if not improved:
+        return ""
 
     # Capitalize and force strong verb
-    if improved:
-        improved = improved[0].upper() + improved[1:]
+    improved = improved[0].upper() + improved[1:]
     improved = _force_strong_verb_lead(improved, style)
 
     # Add impact clause if no metrics
