@@ -1,0 +1,10 @@
+- Improved customer onboarding, increasing [metric] by [+X%]
+- Led a cross-functional team to launch new payment feature, increasing [metric] by [+X%]
+- Led the migration of legacy systems to cloud infrastructure, increasing [metric] by [+X%]
+- Led team of 5 engineers to deliver API platform serving 1M requests/day.
+- Analyzed user behavior data to identify churn patterns and increased retention by 15%.
+- Created roadmap for mobile app features, increasing [metric] by [+X%]
+- Prioritized sprint planning and backlog grooming, increasing [metric] by [+X%]
+- Managed vendor relationships, increasing [metric] by [+X%]
+- Improved page load time from 4s to 1.2s, reducing bounce rate by 30%.
+- Built and shipped internal analytics dashboard used by 50+ stakeholders.

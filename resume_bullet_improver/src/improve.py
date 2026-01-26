@@ -1,202 +1,57 @@
 #!/usr/bin/env python3
 """
-Resume Bullet Improver - Rule-based rewriting of resume bullets.
+Resume Bullet Improver - LLM-powered rewriting using Groq.
 
 Public API:
     improve_bullet(text: str, style: str, max_chars: int) -> str
+
+Requires GROQ_API_KEY environment variable.
 """
 
-import re
+import os
+from groq import Groq
 
-# Style-specific preferred verbs (past tense)
-VERB_BANK = {
-    "pm": [
-        "Led", "Launched", "Defined", "Drove", "Delivered", "Designed",
-        "Prioritized", "Analyzed", "Optimized", "Streamlined", "Spearheaded",
-        "Championed", "Coordinated", "Executed", "Improved", "Increased",
-        "Reduced", "Built", "Established", "Managed", "Owned", "Shipped",
-    ],
-    "compact": [
-        "Led", "Built", "Shipped", "Cut", "Grew", "Drove", "Ran", "Set",
-        "Won", "Fixed", "Made", "Hit", "Beat", "Saved", "Sold", "Improved",
-        "Launched", "Managed", "Delivered", "Reduced", "Owned", "Analyzed",
-    ],
-    "impact": [
-        "Delivered", "Achieved", "Generated", "Accelerated", "Maximized",
-        "Transformed", "Revolutionized", "Captured", "Unlocked", "Scaled",
-        "Boosted", "Surpassed", "Exceeded", "Tripled", "Doubled", "Led",
-        "Launched", "Built", "Improved", "Optimized", "Managed", "Analyzed",
-    ],
+# Initialize client (will raise error if GROQ_API_KEY not set)
+def _get_client() -> Groq:
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        raise ValueError("GROQ_API_KEY environment variable is not set. Get a free key at https://console.groq.com")
+    return Groq(api_key=api_key)
+
+# Style-specific prompts
+STYLE_PROMPTS = {
+    "pm": """You are a resume writing expert specializing in Product Manager roles.
+Rewrite the bullet point to:
+- Start with a strong past-tense action verb (Led, Launched, Drove, Delivered, etc.)
+- Follow structure: Verb + What + How + Impact
+- Sound professional and metric-driven
+- If no metrics exist, add a placeholder like [+X%] or [N users] at the end
+- Remove filler phrases like "responsible for", "worked on", "helped with"
+""",
+    "compact": """You are a resume writing expert who writes punchy, concise bullets.
+Rewrite the bullet point to:
+- Start with a strong past-tense action verb
+- Be as concise as possible while keeping meaning
+- Use short, impactful words
+- If no metrics exist, add a brief placeholder like ([+X%]) at the end
+- Remove all filler phrases
+""",
+    "impact": """You are a resume writing expert focused on measurable business impact.
+Rewrite the bullet point to:
+- Start with a strong past-tense action verb emphasizing achievement (Delivered, Achieved, Generated, etc.)
+- Heavily emphasize outcomes and results
+- If no metrics exist, add an aggressive impact placeholder like ", generating [+X%] lift in [metric]"
+- Frame everything in terms of business value
+- Remove all filler phrases
+""",
 }
 
-# Filler phrases to remove (case-insensitive)
-FILLER_PHRASES = [
-    r"\bresponsible\s+for\b",
-    r"\bworked\s+on\b",
-    r"\bhelped\s+with\b",
-    r"\bhelped\s+to\b",
-    r"\bwas\s+involved\s+in\b",
-    r"\bparticipated\s+in\b",
-    r"\bassisted\s+with\b",
-    r"\btasked\s+with\b",
-    r"\bin\s+charge\s+of\b",
-]
-
-# Impact clause templates by style
-IMPACT_TEMPLATES = {
-    "pm": ", increasing [metric] by [+X%]",
-    "compact": " ([+X%])",
-    "impact": ", generating [+X%] lift in [metric]",
-}
-
-# Irregular gerund conversions (common cases only)
-GERUND_TO_PAST = {
-    "leading": "led",
-    "building": "built",
-    "driving": "drove",
-    "growing": "grew",
-    "running": "ran",
-    "setting": "set",
-    "cutting": "cut",
-    "hitting": "hit",
-    "winning": "won",
-    "shipping": "shipped",
-}
-
-
-def _remove_filler_phrases(text: str) -> str:
-    """Remove filler phrases like 'responsible for', 'worked on', etc."""
-    for pattern in FILLER_PHRASES:
-        text = re.sub(pattern, "", text, flags=re.IGNORECASE)
-    return re.sub(r"\s+", " ", text).strip()
-
-
-def _has_numbers(text: str) -> bool:
-    """Check if text contains any numbers (metrics)."""
-    return bool(re.search(r"\d", text))
-
-
-def _is_strong_verb(word: str) -> bool:
-    """Check if word is a strong action verb (from any style)."""
-    title = word.capitalize()
-    for verbs in VERB_BANK.values():
-        if title in verbs:
-            return True
-    return False
-
-
-def _get_best_verb(text: str, style: str) -> str:
-    """Determine the best action verb based on content keywords."""
-    text_lower = text.lower()
-    verbs = VERB_BANK.get(style, VERB_BANK["pm"])
-
-    keyword_map = {
-        ("team", "cross-functional", "stakeholder"): ["Led", "Coordinated", "Spearheaded"],
-        ("launch", "release", "ship", "deploy"): ["Launched", "Shipped", "Delivered"],
-        ("build", "create", "develop", "implement"): ["Built", "Developed", "Designed"],
-        ("improve", "optimize", "enhance"): ["Improved", "Optimized", "Streamlined"],
-        ("reduce", "cut", "decrease"): ["Reduced", "Cut", "Eliminated"],
-        ("increase", "grow", "expand"): ["Increased", "Grew", "Expanded"],
-        ("analyze", "research", "study"): ["Analyzed", "Researched", "Assessed"],
-        ("manage", "own", "oversee"): ["Managed", "Owned", "Directed"],
-        ("define", "establish", "set"): ["Defined", "Established", "Set"],
-        ("prioritize", "roadmap", "plan"): ["Prioritized", "Planned", "Drove"],
-    }
-
-    for keywords, candidates in keyword_map.items():
-        if any(w in text_lower for w in keywords):
-            for verb in candidates:
-                if verb in verbs:
-                    return verb
-
-    return verbs[0]
-
-
-def _convert_gerund_to_past(word: str) -> str:
-    """Convert a gerund (-ing) to past tense."""
-    lower = word.lower()
-
-    # Check irregular cases
-    if lower in GERUND_TO_PAST:
-        result = GERUND_TO_PAST[lower]
-        return result.capitalize() if word[0].isupper() else result
-
-    # Generic: remove -ing, add -ed
-    if lower.endswith("ing") and len(lower) > 4:
-        base = lower[:-3]
-        result = base + "ed"
-        return result.capitalize() if word[0].isupper() else result
-
-    return word
-
-
-def _force_strong_verb_lead(text: str, style: str) -> str:
-    """Ensure the bullet starts with a strong action verb."""
-    if not text:
-        return text
-
-    words = text.split()
-    if not words:
-        return text
-
-    first_word = words[0]
-    first_lower = first_word.lower()
-
-    # Already starts with strong verb
-    if _is_strong_verb(first_word):
-        words[0] = first_word.capitalize()
-        return " ".join(words)
-
-    # Convert gerund to past tense
-    if first_lower.endswith("ing") and len(first_word) > 4:
-        words[0] = _convert_gerund_to_past(first_word).capitalize()
-        return " ".join(words)
-
-    # Handle weak verbs
-    weak_verbs = {"was", "been", "being", "had", "did", "got", "made", "used", "helped", "worked", "handled"}
-    if first_lower in weak_verbs:
-        words = words[1:]
-        if words:
-            words[0] = words[0].capitalize()
-            return _force_strong_verb_lead(" ".join(words), style)
-
-    # Handle articles - prepend a verb
-    if first_lower in {"a", "an", "the"}:
-        best_verb = _get_best_verb(text, style)
-        return f"{best_verb} {text[0].lower()}{text[1:]}"
-
-    # Default: prepend best verb
-    best_verb = _get_best_verb(text, style)
-    return f"{best_verb} {text[0].lower()}{text[1:]}"
-
-
-def _add_impact_clause(text: str, style: str) -> str:
-    """Add an impact clause with metric placeholders if no numbers exist."""
-    if _has_numbers(text) or re.search(r"\[[^\]]+\]", text):
-        return text
-    return text.rstrip(".") + IMPACT_TEMPLATES.get(style, IMPACT_TEMPLATES["pm"])
-
-
-def _trim_to_max_length(text: str, max_chars: int) -> str:
-    """Trim text to max length at clause boundaries."""
-    if len(text) <= max_chars:
-        return text
-
-    truncated = text[:max_chars]
-
-    # Find best break point
-    for sep in [". ", ", ", "; ", " "]:
-        pos = truncated.rfind(sep)
-        if pos > max_chars * 0.5:
-            result = text[:pos].rstrip(",:;")
-            return result if result.endswith(".") else result + "."
-
-    return text[:max_chars - 3].rstrip() + "..."
+MODEL = "llama-3.3-70b-versatile"
 
 
 def improve_bullet(text: str, style: str = "pm", max_chars: int = 180) -> str:
     """
-    Apply all improvement rules to a single bullet.
+    Improve a resume bullet using Groq LLM.
 
     Args:
         text: The bullet text to improve
@@ -205,28 +60,51 @@ def improve_bullet(text: str, style: str = "pm", max_chars: int = 180) -> str:
 
     Returns:
         Improved bullet text
+
+    Raises:
+        ValueError: If GROQ_API_KEY is not set
+        Exception: If API call fails
     """
-    # Handle empty/whitespace input
     text = text.strip()
     if not text:
         return ""
 
-    # Remove filler phrases
-    improved = _remove_filler_phrases(text)
-    if not improved:
-        return ""
+    client = _get_client()
 
-    # Capitalize and force strong verb
-    improved = improved[0].upper() + improved[1:]
-    improved = _force_strong_verb_lead(improved, style)
+    system_prompt = STYLE_PROMPTS.get(style, STYLE_PROMPTS["pm"])
+    system_prompt += f"\n\nIMPORTANT: Keep the output under {max_chars} characters. Output ONLY the improved bullet, nothing else."
 
-    # Add impact clause if no metrics
-    improved = improved.rstrip(".")
-    improved = _add_impact_clause(improved, style)
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"Improve this resume bullet:\n{text}"}
+        ],
+        temperature=0.7,
+        max_tokens=256,
+    )
 
-    # Ensure proper ending
-    if not improved.endswith(".") and not improved.endswith("]"):
-        improved += "."
+    result = response.choices[0].message.content.strip()
 
-    # Trim to max length
-    return _trim_to_max_length(improved, max_chars)
+    # Clean up any quotes or bullet markers the LLM might add
+    result = result.strip('"\'')
+    if result.startswith("- "):
+        result = result[2:]
+    if result.startswith("• "):
+        result = result[2:]
+
+    # Enforce max length (LLM might not respect it perfectly)
+    if len(result) > max_chars:
+        # Trim at last sentence or clause boundary
+        truncated = result[:max_chars]
+        for sep in [". ", ", ", " "]:
+            pos = truncated.rfind(sep)
+            if pos > max_chars * 0.5:
+                result = truncated[:pos].rstrip(",:;")
+                if not result.endswith("."):
+                    result += "."
+                break
+        else:
+            result = truncated[:max_chars - 3].rstrip() + "..."
+
+    return result
