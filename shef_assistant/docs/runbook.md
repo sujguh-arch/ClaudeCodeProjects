@@ -73,6 +73,35 @@ npm run shef:prefill
 
 ## Debugging
 
+### Debug Mode
+
+Debug mode keeps the browser open on errors and provides additional logging. Enable it using either method:
+
+**Option 1: Command line flag**
+```bash
+npx ts-node automation/prefill.ts --debug
+```
+
+**Option 2: Environment variable**
+```bash
+DEBUG_SHEF=1 npm run shef:prefill
+```
+
+When debug mode is enabled:
+- Browser stays open on errors for manual inspection
+- Screenshots are saved to `artifacts/prefill-error-<timestamp>.png`
+- Additional logging shows which locators were tried
+- Process doesn't exit on failure, allowing you to inspect state
+
+### Error Screenshots
+
+When the prefill script fails to find an "Add to Cart" button or encounters an error, it automatically saves a screenshot to:
+```
+artifacts/prefill-error-<timestamp>.png
+```
+
+Review these screenshots to see the page state at the time of failure.
+
 ### Browser profile issues
 
 If login is not persisting:
