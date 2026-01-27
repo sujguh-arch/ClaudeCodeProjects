@@ -1,0 +1,16 @@
+{
+  "shefHomeUrl": "https://shef.com",
+  "cartUrl": "https://shef.com/cart",
+  "items": [
+    {
+      "name": "Example Dish Name",
+      "url": "https://shef.com/shef/username/dish-slug",
+      "quantity": 2
+    },
+    {
+      "name": "Another Dish",
+      "url": "https://shef.com/shef/username/another-dish",
+      "quantity": 1
+    }
+  ]
+}

@@ -29,3 +29,12 @@ npm run lint     # Run ESLint
 - `src/app/page.tsx` - Main page component
 - `next.config.ts` - Next.js configuration
 - `eslint.config.mjs` - ESLint config using next/core-web-vitals and next/typescript
+
+## Project constraints (must follow)
+- Do not place orders automatically. Never click a final "Place order" or equivalent.
+- No credential storage in code or config. Login is manual in a real browser.
+- No captcha bypassing. If encountered, stop and ask for manual takeover.
+- Use Playwright with a persistent userDataDir so I stay logged in between runs.
+- Automation must stop at the cart or checkout review page and require manual confirmation.
+- Keep everything local-first. No cloud services for MVP.
+- Add clear logs for every automation step and failure reason.
