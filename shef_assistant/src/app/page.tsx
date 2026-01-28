@@ -1,151 +1,114 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import styles from "./page.module.css";
-
-const STORAGE_KEY_MEALS = "shef_meal_count";
-const STORAGE_KEY_THRESHOLD = "shef_low_threshold";
-const DEFAULT_SHEF_URL = "https://shef.com";
+import { useItems } from "@/hooks/useItems";
+import { useAutomation } from "@/hooks/useAutomation";
+import { ItemForm, ItemList } from "@/components/features/items";
+import { AutomationPanel } from "@/components/features/automation";
+import { LoginStatus } from "@/components/features/auth";
 
 export default function Home() {
-  const [mealCount, setMealCount] = useState<number>(0);
-  const [lowThreshold, setLowThreshold] = useState<number>(3);
-  const [shefUrl, setShefUrl] = useState<string>(DEFAULT_SHEF_URL);
-  const [prefillStatus, setPrefillStatus] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [logs, setLogs] = useState<string[]>([]);
+  const { items, isLoading, error, addItem, updateItem, deleteItem } = useItems();
+  const { state, progress, logs, message, startPrefill, reset } = useAutomation();
 
-  useEffect(() => {
-    const savedMeals = localStorage.getItem(STORAGE_KEY_MEALS);
-    const savedThreshold = localStorage.getItem(STORAGE_KEY_THRESHOLD);
-
-    if (savedMeals) setMealCount(parseInt(savedMeals, 10));
-    if (savedThreshold) setLowThreshold(parseInt(savedThreshold, 10));
-
-    // Try to load shefHomeUrl from config
-    fetch("/api/config")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.shefHomeUrl) setShefUrl(data.shefHomeUrl);
-      })
-      .catch(() => {
-        // Config endpoint doesn't exist or failed, use default
-      });
-  }, []);
-
-  const handleMealCountChange = (value: number) => {
-    const newValue = Math.max(0, value);
-    setMealCount(newValue);
-    localStorage.setItem(STORAGE_KEY_MEALS, newValue.toString());
+  const handleAddItem = async (name: string, url: string, quantity: number) => {
+    await addItem(name, url, quantity);
   };
 
-  const handleThresholdChange = (value: number) => {
-    const newValue = Math.max(0, value);
-    setLowThreshold(newValue);
-    localStorage.setItem(STORAGE_KEY_THRESHOLD, newValue.toString());
+  const handleQuantityChange = async (id: string, quantity: number) => {
+    await updateItem(id, { quantity });
   };
 
-  const openShef = () => {
-    window.open(shefUrl, "_blank");
+  const handleDelete = async (id: string) => {
+    await deleteItem(id);
   };
 
-  const prefillCart = async () => {
-    setIsLoading(true);
-    setPrefillStatus("Starting prefill...");
-    setLogs([]);
-
-    try {
-      const response = await fetch("/api/prefill", { method: "POST" });
-      const data = await response.json();
-
-      if (data.success) {
-        setPrefillStatus("Cart prefilled successfully!");
-        setLogs(data.logs || []);
-      } else {
-        setPrefillStatus(`Failed: ${data.message}`);
-        setLogs(data.logs || []);
-      }
-    } catch (error) {
-      setPrefillStatus(`Error: ${error instanceof Error ? error.message : "Unknown error"}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const isLow = mealCount <= lowThreshold;
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const isPrefilling = state === "running";
 
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <div className={styles.header}>
-          <h1>Shef Assistant</h1>
-          <p>Manage your meal inventory and automate Shef orders</p>
-        </div>
-
-        <div className={styles.card}>
-          <h2>Meal Inventory</h2>
-          <div className={styles.counter}>
-            <button
-              className={styles.counterBtn}
-              onClick={() => handleMealCountChange(mealCount - 1)}
-              aria-label="Decrease meal count"
-            >
-              -
-            </button>
-            <span className={`${styles.count} ${isLow ? styles.low : ""}`}>
-              {mealCount}
-            </span>
-            <button
-              className={styles.counterBtn}
-              onClick={() => handleMealCountChange(mealCount + 1)}
-              aria-label="Increase meal count"
-            >
-              +
-            </button>
+    <div className="min-h-screen bg-[var(--background)] py-8 px-4">
+      <main className="max-w-lg mx-auto space-y-6">
+        {/* Header */}
+        <header className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-2xl font-bold text-[var(--text-primary)]">
+              Shef Assistant
+            </h1>
+            <LoginStatus />
           </div>
-          {isLow && (
-            <p className={styles.warning}>Meal count is low! Time to order.</p>
-          )}
-        </div>
+          <p className="text-sm text-[var(--text-secondary)]">
+            Manage your cart items and prefill your Shef order
+          </p>
+        </header>
 
-        <div className={styles.card}>
-          <h2>Settings</h2>
-          <label className={styles.inputGroup}>
-            <span>Low threshold:</span>
-            <input
-              type="number"
-              min="0"
-              value={lowThreshold}
-              onChange={(e) => handleThresholdChange(parseInt(e.target.value, 10) || 0)}
-              className={styles.input}
-            />
-          </label>
-        </div>
-
-        <div className={styles.actions}>
-          <button className={styles.primary} onClick={openShef}>
-            Open Shef
-          </button>
-          <button
-            className={styles.secondary}
-            onClick={prefillCart}
-            disabled={isLoading}
-          >
-            {isLoading ? "Prefilling..." : "Prefill Cart"}
-          </button>
-        </div>
-
-        {prefillStatus && (
-          <div className={styles.status}>
-            <p>{prefillStatus}</p>
-            {logs.length > 0 && (
-              <details className={styles.logs}>
-                <summary>View logs ({logs.length} lines)</summary>
-                <pre>{logs.join("\n")}</pre>
-              </details>
-            )}
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
+
+        {/* Add Item Form */}
+        <section className="bg-[var(--foreground)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <h2 className="text-lg font-semibold text-[var(--text-primary)] mb-4">
+            Add New Item
+          </h2>
+          <ItemForm onAdd={handleAddItem} />
+        </section>
+
+        {/* Item List */}
+        <section className="bg-[var(--foreground)] rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+              Your Items
+            </h2>
+            {items.length > 0 && (
+              <span className="text-sm text-[var(--text-secondary)]">
+                {items.length} {items.length === 1 ? "item" : "items"} ({totalItems} total)
+              </span>
+            )}
+          </div>
+
+          {isLoading ? (
+            <div className="text-center py-8 text-[var(--text-secondary)]">
+              Loading items...
+            </div>
+          ) : (
+            <ItemList
+              items={items}
+              onQuantityChange={handleQuantityChange}
+              onDelete={handleDelete}
+            />
+          )}
+        </section>
+
+        {/* Prefill Button */}
+        <div className="flex gap-3">
+          <a
+            href="https://shef.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 py-3 px-4 text-center border border-gray-300 dark:border-gray-600 rounded-lg text-[var(--text-primary)] font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          >
+            Open Shef
+          </a>
+          <button
+            onClick={startPrefill}
+            disabled={isPrefilling || items.length === 0}
+            className="flex-1 py-3 px-4 bg-shef-red text-white font-semibold rounded-lg hover:bg-shef-red-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {isPrefilling ? "Prefilling..." : "Prefill Cart"}
+          </button>
+        </div>
+
+        {/* Automation Status Panel */}
+        <AutomationPanel
+          state={state}
+          progress={progress}
+          logs={logs}
+          message={message}
+          onReset={reset}
+        />
       </main>
     </div>
   );
