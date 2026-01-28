@@ -8,7 +8,13 @@
     "start": "next start",
     "lint": "eslint",
     "shef:login": "npx tsx automation/login.ts",
-    "shef:prefill": "npx tsx automation/prefill.ts"
+    "shef:prefill": "npx tsx automation/prefill.ts",
+    "shef:test-config": "npx tsx automation/lib/config.ts",
+    "shef:test-session": "npx tsx automation/lib/session.ts",
+    "shef:test-nav": "npx tsx automation/lib/navigation.ts",
+    "shef:test-add": "npx tsx automation/lib/cart.ts",
+    "shef:test-cart": "npx tsx automation/lib/cart-verify.ts",
+    "shef:clear-cart": "npx tsx automation/lib/cart-clear.ts"
   },
   "dependencies": {
     "next": "16.1.5",

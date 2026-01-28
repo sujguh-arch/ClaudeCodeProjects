@@ -18,7 +18,6 @@ const CONFIG_PATH = path.join(__dirname, "..", "data", "config.json");
 const PROFILE_DIR = path.join(__dirname, "..", ".pw-profile");
 const ARTIFACTS_DIR = path.join(__dirname, "..", "artifacts");
 
-// Check for debug mode via --debug flag or DEBUG_SHEF env var
 const DEBUG_MODE = process.argv.includes("--debug") || process.env.DEBUG_SHEF === "1";
 
 export function log(message: string): void {
@@ -28,9 +27,7 @@ export function log(message: string): void {
 
 function loadConfig(): Config {
   if (!fs.existsSync(CONFIG_PATH)) {
-    throw new Error(
-      "config.json not found. Copy data/config.example.json to data/config.json and customize it."
-    );
+    throw new Error("config.json not found. Copy data/config.example.json to data/config.json and customize it.");
   }
   return JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
 }
@@ -41,7 +38,7 @@ function ensureArtifactsDir(): void {
   }
 }
 
-async function takeErrorScreenshot(page: Page, prefix: string = "prefill-error"): Promise<string> {
+async function takeScreenshot(page: Page, prefix: string): Promise<string> {
   ensureArtifactsDir();
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const screenshotPath = path.join(ARTIFACTS_DIR, `${prefix}-${timestamp}.png`);
@@ -50,330 +47,251 @@ async function takeErrorScreenshot(page: Page, prefix: string = "prefill-error")
   return screenshotPath;
 }
 
-/**
- * Attempts to dismiss common overlays/popups that may block interaction.
- * Safe to call even when no overlays are present.
- */
 async function dismissOverlays(page: Page): Promise<void> {
-  log("  Checking for overlays to dismiss...");
-
-  // Common close button patterns to try
-  const closePatterns = [
-    // Role-based buttons with common close text
-    { type: "role", name: "close" },
-    { type: "role", name: "Close" },
-    { type: "role", name: "×" },
-    { type: "role", name: "X" },
-    // Aria-label based
-    { type: "selector", selector: '[aria-label="close"]' },
-    { type: "selector", selector: '[aria-label="Close"]' },
-    // Data-testid patterns
-    { type: "selector", selector: '[data-testid*="close"]' },
-    { type: "selector", selector: '[data-testid*="Close"]' },
-    { type: "selector", selector: '[data-testid*="dismiss"]' },
-    // Modal-specific close buttons
-    { type: "selector", selector: '#shef-modal-root button[aria-label="close"]' },
-    { type: "selector", selector: '#shef-modal-root button[aria-label="Close"]' },
-    { type: "selector", selector: '#shef-modal-root [data-testid*="close"]' },
-    // Common modal close button selectors
-    { type: "selector", selector: '.modal-close' },
-    { type: "selector", selector: '.close-button' },
-    { type: "selector", selector: '[class*="close"]' },
-    // Continue shopping / Got it buttons that dismiss modals
-    { type: "role", name: "Continue Shopping" },
-    { type: "role", name: "Continue shopping" },
-    { type: "role", name: "Got it" },
-    { type: "role", name: "Dismiss" },
+  const closeSelectors = [
+    'button[aria-label="close"]',
+    'button[aria-label="Close"]',
+    '[data-testid*="close"]',
   ];
 
-  let dismissed = 0;
-
-  for (const pattern of closePatterns) {
+  for (const selector of closeSelectors) {
     try {
-      let locator;
-      if (pattern.type === "role") {
-        locator = page.getByRole("button", { name: pattern.name });
-      } else {
-        locator = page.locator(pattern.selector);
-      }
-
-      // Check if any matching element is visible (short timeout)
-      const count = await locator.count();
-      for (let i = 0; i < count; i++) {
-        const element = locator.nth(i);
-        try {
-          if (await element.isVisible({ timeout: 500 })) {
-            if (await element.isEnabled({ timeout: 500 })) {
-              const identifier = pattern.type === "role" ? `role=button[name="${pattern.name}"]` : pattern.selector;
-              log(`    Found overlay close button: ${identifier}`);
-              await element.click({ timeout: 1000 });
-              dismissed++;
-              // Small delay after clicking
-              await page.waitForTimeout(300);
-            }
-          }
-        } catch {
-          // Element not interactable, continue
-        }
+      const btn = page.locator(selector).first();
+      if (await btn.isVisible({ timeout: 300 })) {
+        await btn.click({ timeout: 500 });
+        await page.waitForTimeout(300);
       }
     } catch {
-      // Pattern not found or not clickable, continue to next
+      // Continue
     }
-  }
-
-  if (dismissed > 0) {
-    log(`    Dismissed ${dismissed} overlay(s)`);
-  } else {
-    log("    No overlays found");
   }
 }
 
-/**
- * Attempts to find and click an "Add to cart" button using various strategies.
- * Returns true if successful, false otherwise.
- */
-async function findAndClickAddToCart(page: Page): Promise<{ success: boolean; triedLocators: string[] }> {
-  const triedLocators: string[] = [];
+async function addItemToCart(page: Page, item: ConfigItem): Promise<boolean> {
+  log(`Adding ${item.quantity}x ${item.name}`);
 
-  // Primary strategy: getByRole with exact and partial matches
-  const roleNames = [
-    "Add to cart",
-    "Add to Cart",
-    "Add",
-    "Add to order",
-    "Add to Order",
-    "Add to bag",
-    "Add to Bag",
-  ];
+  // Navigate to the item URL - this opens the dish detail modal
+  await page.goto(item.url, { waitUntil: "domcontentloaded", timeout: 30000 });
+  await page.waitForTimeout(4000);
 
-  log("  Trying role-based button locators...");
-  for (const name of roleNames) {
-    const locatorDesc = `getByRole('button', { name: '${name}' })`;
-    triedLocators.push(locatorDesc);
-    try {
-      const button = page.getByRole("button", { name });
-      const count = await button.count();
+  // Dismiss any popups
+  await dismissOverlays(page);
 
-      for (let i = 0; i < count; i++) {
-        const btn = button.nth(i);
-        try {
-          const isVisible = await btn.isVisible({ timeout: 1000 });
-          const isEnabled = await btn.isEnabled({ timeout: 500 });
+  // The dish modal opens as an overlay. We need to find and interact with it.
+  // First, scroll the page to top to ensure modal is visible
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(500);
 
-          if (isVisible && isEnabled) {
-            log(`  Found button: ${locatorDesc} (instance ${i + 1}/${count})`);
-            await btn.click();
-            return { success: true, triedLocators };
+  // Take a debug screenshot to see current state
+  if (DEBUG_MODE) {
+    await takeScreenshot(page, `debug-before-${item.name.replace(/[^a-z0-9]/gi, "-")}`);
+  }
+
+  // Find the modal - usually has overflow-y:auto or similar
+  // Scroll within the modal to show quantity controls
+  log("  Looking for quantity controls in modal...");
+  await page.evaluate(() => {
+    // Find elements that look like modals/drawers and scroll them
+    const allElements = document.querySelectorAll('*');
+    for (const el of allElements) {
+      const style = window.getComputedStyle(el);
+      const isScrollable = style.overflowY === 'auto' || style.overflowY === 'scroll';
+      const hasHeight = el.scrollHeight > el.clientHeight;
+      if (isScrollable && hasHeight && el.clientHeight > 200) {
+        el.scrollTop = el.scrollHeight;
+      }
+    }
+  });
+  await page.waitForTimeout(1000);
+
+  const targetQty = item.quantity;
+  let success = false;
+
+  // Strategy 1: Look for Update button (item already in cart, just need to adjust qty)
+  log("  Checking for Update button...");
+  const updateBtn = page.locator('button:has-text("Update")').first();
+  const hasUpdate = await updateBtn.isVisible({ timeout: 2000 }).catch(() => false);
+
+  if (hasUpdate) {
+    log("  Found Update button - item is in cart, adjusting quantity...");
+
+    // Find + button and click to increase quantity
+    const plusBtn = page.locator('button:has-text("+")').first();
+    if (await plusBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+      // Read current quantity if possible
+      let currentQty = 1;
+      try {
+        // Look for a number between - and + or near them
+        const qtyLocator = page.locator('button:has-text("-")').locator('..').locator('*');
+        const count = await qtyLocator.count();
+        for (let i = 0; i < count; i++) {
+          const text = await qtyLocator.nth(i).textContent().catch(() => '');
+          const num = parseInt(text?.trim() || '', 10);
+          if (!isNaN(num) && num > 0 && num < 100) {
+            currentQty = num;
+            break;
           }
-        } catch {
-          // This instance not available
+        }
+      } catch { }
+
+      const clicksNeeded = targetQty - currentQty;
+      log(`  Current qty: ${currentQty}, target: ${targetQty}, clicks needed: ${clicksNeeded}`);
+
+      for (let i = 0; i < clicksNeeded; i++) {
+        await plusBtn.click();
+        log(`  Clicked + (${i + 1}/${clicksNeeded})`);
+        await page.waitForTimeout(300);
+      }
+    }
+
+    // Click Update
+    await updateBtn.click();
+    await page.waitForTimeout(1500);
+    log(`  Updated to ${targetQty}x ${item.name}`);
+    success = true;
+  } else {
+    // Strategy 2: Look for Add button (item not in cart)
+    log("  Checking for Add button...");
+    const addBtn = page.locator('button:has-text("Add")').first();
+    if (await addBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      log("  Clicking Add button...");
+      await addBtn.click();
+      await page.waitForTimeout(2000);
+      log("  Added 1x to cart");
+
+      // If we need more than 1, re-navigate and use Update flow
+      if (targetQty > 1) {
+        log("  Need more quantity, re-navigating...");
+        await page.goto(item.url, { waitUntil: "domcontentloaded", timeout: 30000 });
+        await page.waitForTimeout(3000);
+        await page.evaluate(() => window.scrollTo(0, 0));
+
+        // Scroll modal
+        await page.evaluate(() => {
+          const allElements = document.querySelectorAll('*');
+          for (const el of allElements) {
+            const style = window.getComputedStyle(el);
+            if ((style.overflowY === 'auto' || style.overflowY === 'scroll') &&
+                el.scrollHeight > el.clientHeight && el.clientHeight > 200) {
+              el.scrollTop = el.scrollHeight;
+            }
+          }
+        });
+        await page.waitForTimeout(1000);
+
+        // Now use + and Update
+        const plusBtn = page.locator('button:has-text("+")').first();
+        const updateBtn2 = page.locator('button:has-text("Update")').first();
+
+        if (await plusBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+          for (let i = 0; i < targetQty - 1; i++) {
+            await plusBtn.click();
+            log(`  Clicked + (${i + 1}/${targetQty - 1})`);
+            await page.waitForTimeout(300);
+          }
+        }
+
+        if (await updateBtn2.isVisible({ timeout: 2000 }).catch(() => false)) {
+          await updateBtn2.click();
+          await page.waitForTimeout(1500);
         }
       }
-    } catch {
-      // This locator didn't work
+      success = true;
     }
   }
 
-  // Fallback: CSS selector patterns
-  log("  Trying CSS selector fallbacks...");
-  const selectorPatterns = [
-    'button:has-text("Add to Cart")',
-    'button:has-text("Add to cart")',
-    '[data-testid="add-to-cart"]',
-    '[data-testid*="add-to-cart"]',
-    'button[aria-label*="cart" i]',
-    'button[aria-label*="add" i]',
-    ".add-to-cart-button",
-    ".add-to-cart",
-    '[class*="addToCart"]',
-    '[class*="add-to-cart"]',
-  ];
-
-  for (const selector of selectorPatterns) {
-    triedLocators.push(selector);
-    try {
-      const button = page.locator(selector).first();
-      if (await button.isVisible({ timeout: 1000 })) {
-        if (await button.isEnabled({ timeout: 500 })) {
-          log(`  Found button with selector: ${selector}`);
-          await button.click();
-          return { success: true, triedLocators };
-        }
-      }
-    } catch {
-      // Try next selector
-    }
+  if (success) {
+    log(`  Successfully set ${targetQty}x ${item.name}`);
+    return true;
   }
 
-  // Last resort: scan all buttons for "Add" text
-  log("  Scanning all buttons for 'Add' text...");
-  triedLocators.push("(scanning all buttons)");
+  // If nothing worked, log visible buttons and fail
+  log("  ERROR: Could not add item. Visible buttons:");
   try {
     const allButtons = page.locator("button");
     const count = await allButtons.count();
-    log(`    Found ${count} buttons on page`);
-
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < Math.min(count, 30); i++) {
       const btn = allButtons.nth(i);
-      try {
-        const text = await btn.textContent({ timeout: 500 });
-        const isVisible = await btn.isVisible({ timeout: 500 });
-        const isEnabled = await btn.isEnabled({ timeout: 500 });
-
-        if (text && text.toLowerCase().includes("add") && isVisible && isEnabled) {
-          log(`    Found fallback button: "${text.trim()}"`);
-          await btn.click();
-          return { success: true, triedLocators };
+      if (await btn.isVisible({ timeout: 200 })) {
+        const text = await btn.textContent();
+        if (text && text.trim().length > 0 && text.trim().length < 40) {
+          log(`    - "${text.trim()}"`);
         }
-      } catch {
-        // Skip this button
       }
     }
   } catch {
-    // Button scan failed
+    // Ignore
   }
 
-  return { success: false, triedLocators };
+  await takeScreenshot(page, `failed-${item.name.replace(/[^a-z0-9]/gi, "-")}`);
+  return false;
 }
 
-async function addItemToCart(
-  page: Page,
-  item: ConfigItem
-): Promise<void> {
-  log(`Processing: ${item.name} (quantity: ${item.quantity})`);
-
-  for (let i = 0; i < item.quantity; i++) {
-    log(`  [${i + 1}/${item.quantity}] Navigating to ${item.url}`);
-    await page.goto(item.url, { waitUntil: "domcontentloaded", timeout: 30000 });
-
-    // Wait for page to stabilize
-    await page.waitForTimeout(1500);
-
-    // Dismiss any overlays before trying to click Add to Cart
-    await dismissOverlays(page);
-
-    // Try to find and click Add to Cart button
-    const { success, triedLocators } = await findAndClickAddToCart(page);
-
-    if (!success) {
-      log(`  ERROR: Could not find Add to Cart button for ${item.name}`);
-      log(`  Locators tried:`);
-      for (const loc of triedLocators) {
-        log(`    - ${loc}`);
-      }
-
-      // Take screenshot for debugging
-      await takeErrorScreenshot(page, `add-to-cart-failed-${item.name.replace(/[^a-z0-9]/gi, "-")}`);
-
-      throw new Error(`Failed to add ${item.name} to cart - no Add button found. See screenshot in artifacts/`);
-    }
-
-    // Wait for cart update
-    log(`  Waiting for cart to update...`);
-    await page.waitForTimeout(2000);
-
-    // Dismiss any modals that may have appeared after adding to cart
-    await dismissOverlays(page);
-  }
-
-  log(`  Added ${item.quantity}x ${item.name} to cart`);
-}
-
-export async function runPrefill(): Promise<string[]> {
-  const logs: string[] = [];
-  const originalLog = log;
-  const captureLog = (msg: string) => {
-    originalLog(msg);
-    logs.push(msg);
-  };
-
+export async function runPrefill(): Promise<void> {
   const config = loadConfig();
 
-  captureLog("=".repeat(60));
-  captureLog("SHEF CART PREFILL");
-  captureLog(`Debug mode: ${DEBUG_MODE ? "ON" : "OFF"}`);
-  captureLog("=".repeat(60));
+  log("=".repeat(50));
+  log("SHEF CART PREFILL");
+  log(`Debug mode: ${DEBUG_MODE ? "ON" : "OFF"}`);
+  log("=".repeat(50));
 
   if (!fs.existsSync(PROFILE_DIR)) {
-    throw new Error(
-      "Browser profile not found. Run 'npm run shef:login' first to create a session."
-    );
+    throw new Error("Browser profile not found. Run 'npm run shef:login' first.");
   }
 
-  captureLog(`Using profile: ${PROFILE_DIR}`);
-  captureLog(`Items to add: ${config.items.length}`);
+  log(`Items to add: ${config.items.length}`);
 
-  // Launch browser with persistent context
   const context: BrowserContext = await chromium.launchPersistentContext(PROFILE_DIR, {
-    headless: false,
-    viewport: { width: 1280, height: 800 },
+    headless: !DEBUG_MODE,
+    viewport: { width: 1280, height: 900 },
   });
 
   const page = context.pages()[0] || (await context.newPage());
 
   try {
-    // Process each item
     for (const item of config.items) {
-      await addItemToCart(page, item);
+      const success = await addItemToCart(page, item);
+      if (!success) {
+        throw new Error(`Failed to add ${item.name} to cart`);
+      }
+      await page.waitForTimeout(1000);
     }
 
     // Navigate to cart
-    captureLog("=".repeat(60));
-    captureLog("Navigating to cart...");
+    log("=".repeat(50));
+    log("Navigating to cart...");
     await page.goto(config.cartUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
     await page.waitForTimeout(2000);
 
-    // Dismiss any overlays on cart page
-    await dismissOverlays(page);
-
-    captureLog("=".repeat(60));
-    captureLog("SUCCESS: Cart prefilled!");
-    captureLog("IMPORTANT: Review your cart and complete checkout manually.");
-    captureLog("This script will NOT click any purchase/checkout buttons.");
-    captureLog("=".repeat(60));
-
-    // Keep browser open for manual review
-    captureLog("Browser left open for manual review. Close it when done.");
+    log("=".repeat(50));
+    log("SUCCESS: Cart prefilled!");
+    log("Review your cart and complete checkout manually.");
+    log("=".repeat(50));
 
     if (DEBUG_MODE) {
-      captureLog("[DEBUG] Browser will remain open. Press Ctrl+C to exit.");
-    }
-  } catch (error) {
-    captureLog(`ERROR: ${error}`);
-
-    // Take screenshot on error
-    try {
-      await takeErrorScreenshot(page, "prefill-error");
-    } catch (screenshotError) {
-      captureLog(`Failed to take error screenshot: ${screenshotError}`);
-    }
-
-    if (DEBUG_MODE) {
-      captureLog("[DEBUG] Error occurred. Browser left open for inspection.");
-      captureLog("[DEBUG] Press Ctrl+C to exit when done debugging.");
-      // Don't close the context in debug mode
+      log("[DEBUG] Browser left open. Press Ctrl+C to exit.");
     } else {
-      // Close browser on error only if not in debug mode
       await context.close();
     }
+  } catch (error) {
+    log(`ERROR: ${error}`);
+    await takeScreenshot(page, "prefill-error");
 
+    if (DEBUG_MODE) {
+      log("[DEBUG] Browser left open for inspection.");
+    } else {
+      await context.close();
+    }
     throw error;
   }
-
-  return logs;
 }
 
-// Run if executed directly
 if (require.main === module) {
   if (DEBUG_MODE) {
-    log("Debug mode enabled via " + (process.argv.includes("--debug") ? "--debug flag" : "DEBUG_SHEF env var"));
+    log("Debug mode enabled");
   }
-
   runPrefill().catch((err) => {
-    console.error("Prefill failed:", err);
-    if (!DEBUG_MODE) {
-      process.exit(1);
-    }
-    // In debug mode, don't exit so user can inspect the browser
+    console.error("Prefill failed:", err.message);
+    if (!DEBUG_MODE) process.exit(1);
   });
 }

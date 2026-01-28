@@ -75,11 +75,11 @@ npm run shef:prefill
 
 ### Debug Mode
 
-Debug mode keeps the browser open on errors and provides additional logging. Enable it using either method:
+Debug mode runs headful (visible browser), keeps the browser open on failure, and saves screenshots with timestamps. Enable it using either method:
 
-**Option 1: Command line flag**
+**Option 1: npm script with flag (recommended)**
 ```bash
-npx ts-node automation/prefill.ts --debug
+npm run shef:prefill -- --debug
 ```
 
 **Option 2: Environment variable**
@@ -89,14 +89,40 @@ DEBUG_SHEF=1 npm run shef:prefill
 
 When debug mode is enabled:
 - Browser stays open on errors for manual inspection
-- Screenshots are saved to `artifacts/prefill-error-<timestamp>.png`
-- Additional logging shows which locators were tried
+- Screenshots are saved to `artifacts/<item-name>-<timestamp>.png`
+- All tried locators are logged to console
+- All visible button names are logged for diagnosis
 - Process doesn't exit on failure, allowing you to inspect state
+
+### Debugging Steps
+
+When the script fails to find the "Add to cart" button:
+
+1. **Run in debug mode:**
+   ```bash
+   npm run shef:prefill -- --debug
+   ```
+
+2. **Check the screenshot:** Look in `artifacts/` for the timestamped screenshot showing the page state at failure.
+
+3. **Review the logs:** The script logs:
+   - All locators it tried (role-based, CSS selectors)
+   - All visible button names on the page (helps identify new button text)
+
+4. **Inspect the browser:** In debug mode, the browser stays open. Use DevTools to:
+   - Right-click the Add button → Inspect
+   - Note the button's text, aria-label, data-testid, or class names
+   - Check if a modal/overlay is blocking the button
+
+5. **Check for overlays:** The script tries to dismiss common modals, but new ones may need to be added to `dismissOverlays()` in `automation/prefill.ts`.
+
+6. **Update selectors:** If Shef changed their button, add the new selector pattern to `findAndClickAddToCart()` in `automation/prefill.ts`.
 
 ### Error Screenshots
 
-When the prefill script fails to find an "Add to Cart" button or encounters an error, it automatically saves a screenshot to:
+When the prefill script fails to find an "Add to Cart" button or encounters an error, it automatically saves a full-page screenshot to:
 ```
+artifacts/<item-name>-<timestamp>.png
 artifacts/prefill-error-<timestamp>.png
 ```
 
