@@ -91,76 +91,79 @@ async function dismissDishPopups(page: Page): Promise<void> {
 // Helper: Handle Required Options (Portion size, etc.)
 // ============================================================================
 
-async function handleRequiredOptions(page: Page): Promise<void> {
+export async function handleRequiredOptions(page: Page): Promise<void> {
   log("  Checking for required options...");
 
-  // Look for "Required" labels or dropdowns that need selection
   try {
-    // Find dropdown/select elements or buttons that look like option selectors
-    // On Shef, "Portion size" shows as a button with "Required" text
-
-    // Strategy 1: Look for elements with "Required" text and click to open options
-    const requiredElements = page.locator('text=Required');
-    const count = await requiredElements.count();
-
-    if (count > 0) {
-      log(`    Found ${count} required option(s)`);
-
-      for (let i = 0; i < count; i++) {
-        try {
-          const el = requiredElements.nth(i);
-          if (await el.isVisible({ timeout: 500 })) {
-            // Click to open the dropdown/options
-            await el.click({ force: true });
-            await page.waitForTimeout(500);
-
-            // Look for option buttons that appeared
-            const optionButtons = page.locator('[role="option"], [role="menuitem"], [class*="option"], [class*="Option"]');
-            const optCount = await optionButtons.count();
-
-            if (optCount > 0) {
-              // Click the first option
-              const firstOption = optionButtons.first();
-              if (await firstOption.isVisible({ timeout: 500 })) {
-                await firstOption.click({ force: true });
-                log(`    Selected first option`);
-                await page.waitForTimeout(500);
-              }
-            } else {
-              // Maybe it's a list of buttons - look for any clickable items
-              const listItems = page.locator('button, [role="button"]').filter({ hasText: /^\d+|small|medium|large|regular/i });
-              if (await listItems.count() > 0) {
-                await listItems.first().click({ force: true });
-                log(`    Selected option from list`);
-                await page.waitForTimeout(500);
-              }
-            }
-          }
-        } catch {
-          // Continue to next required element
-        }
-      }
+    // Check if "Select portion size" button is visible (means portion not yet selected)
+    const selectPortionBtn = page.locator('button:has-text("Select portion size")').first();
+    const needsPortionSelection = await selectPortionBtn.isVisible({ timeout: 2000 }).catch(() => false);
+    
+    if (!needsPortionSelection) {
+      log("    No portion selection required");
+      return;
     }
 
-    // Strategy 2: Look for Portion size specifically
-    const portionSize = page.locator('text=Portion size').first();
-    if (await portionSize.isVisible({ timeout: 500 })) {
-      // Find the associated dropdown/button
-      const parent = portionSize.locator('..');
-      const dropdown = parent.locator('button, select, [role="combobox"]').first();
+    log("    Portion size selection required...");
 
-      if (await dropdown.isVisible({ timeout: 500 })) {
-        await dropdown.click({ force: true });
-        await page.waitForTimeout(500);
-
-        // Select first option
-        const options = page.locator('[role="option"], [role="menuitem"], [class*="option"]');
-        if (await options.count() > 0) {
-          await options.first().click({ force: true });
-          log(`    Selected portion size`);
-          await page.waitForTimeout(500);
+    // Step 1: Scroll the modal content to reveal portion options
+    // The portion options are in a fieldset with labels, often hidden below the fold
+    await page.evaluate(() => {
+      // Find scrollable elements with data-scroll-lock-scrollable attribute
+      const scrollables = document.querySelectorAll('[data-scroll-lock-scrollable]');
+      scrollables.forEach(el => {
+        const htmlEl = el as HTMLElement;
+        if (htmlEl.scrollHeight > htmlEl.clientHeight + 50) {
+          htmlEl.scrollTop = 300; // Scroll to reveal portion options
         }
+      });
+      
+      // Also try scrolling any modal-like containers
+      const modals = document.querySelectorAll('[class*="modal"], [class*="Modal"], [class*="drawer"]');
+      modals.forEach(el => {
+        const htmlEl = el as HTMLElement;
+        if (htmlEl.scrollHeight > htmlEl.clientHeight + 50) {
+          htmlEl.scrollTop = 300;
+        }
+      });
+    });
+    await page.waitForTimeout(1000);
+
+    // Step 2: Find and click the first portion option label
+    // Portion options are in <fieldset><label> elements with price info
+    const portionLabels = page.locator('fieldset label');
+    const labelCount = await portionLabels.count();
+    log(`    Found ${labelCount} portion option labels`);
+
+    if (labelCount > 0) {
+      const firstLabel = portionLabels.first();
+      const labelText = await firstLabel.textContent({ timeout: 500 }).catch(() => '');
+      
+      if (await firstLabel.isVisible({ timeout: 1000 }).catch(() => false)) {
+        log(`    Selecting first portion: "${labelText?.substring(0, 50).trim()}"`);
+        await firstLabel.click({ force: true });
+        await page.waitForTimeout(1500);
+
+        // Step 3: Verify "Add to cart" button is now visible
+        const addBtn = page.locator('button:has-text("Add to cart")').first();
+        const addVisible = await addBtn.isVisible({ timeout: 2000 }).catch(() => false);
+        log(`    After portion selection, Add to cart visible: ${addVisible}`);
+        
+        if (!addVisible) {
+          // Try clicking the label again with scrollIntoView
+          await firstLabel.scrollIntoViewIfNeeded();
+          await firstLabel.click({ force: true });
+          await page.waitForTimeout(1500);
+        }
+      } else {
+        log("    Portion label not visible, trying to scroll into view...");
+        await firstLabel.scrollIntoViewIfNeeded().catch(() => {});
+        await page.waitForTimeout(500);
+        await firstLabel.click({ force: true }).catch(() => {});
+        await page.waitForTimeout(1500);
       }
+    } else {
+      log("    No portion labels found in fieldset");
     }
   } catch (e) {
     log(`    Error handling required options: ${e}`);

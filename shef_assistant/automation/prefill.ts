@@ -2,6 +2,7 @@ import { chromium, Page, BrowserContext, Locator } from "playwright";
 import * as fs from "fs";
 import * as path from "path";
 import { checkAllItems, filterAvailableItems } from "./lib/availability";
+import { handleRequiredOptions } from "./lib/cart";
 
 interface ConfigItem {
   name: string;
@@ -90,6 +91,96 @@ async function scrollModalToBottom(page: Page): Promise<void> {
 }
 
 /**
+ * Clear cart sidebar on the current page (without navigating away).
+ * The cart sidebar appears on the right side when viewing menu items.
+ * Clicks minus buttons in the cart section until all items are removed.
+ */
+async function clearCartSidebar(page: Page): Promise<number> {
+  log("Clearing cart sidebar...");
+  
+  let itemsCleared = 0;
+  const maxAttempts = 50; // Safety limit
+  
+  for (let i = 0; i < maxAttempts; i++) {
+    // The cart sidebar uses the same sc-futREh class for quantity buttons
+    // But we need to find minus buttons in the CART section, not the dish modal
+    // Cart section is usually on the right side of the page
+    
+    // Strategy: Find all minus buttons that are NOT in the dish modal
+    // The dish modal typically has "Add to cart" or "Update" buttons
+    // Cart sidebar items have a different structure
+    
+    // Look for minus buttons in the cart/order summary section
+    // These are typically outside the main modal
+    const cartMinusButtons = page.locator('button.sc-futREh').filter({
+      hasNot: page.locator('button:has-text("Add"), button:has-text("Update")').locator('..')
+    });
+    
+    // Simpler approach: Find cart item rows and click their minus buttons
+    // Cart items often have the dish name + price + quantity controls
+    // Try finding minus buttons that are siblings of price displays
+    
+    // First, check if there are any items in cart by looking for cart total
+    const cartTotal = page.locator('text=/\\$[\\d.]+\\s*\\/\\s*\\d+\\s*Items?/i');
+    const hasCartItems = await cartTotal.isVisible({ timeout: 1000 }).catch(() => false);
+    
+    if (!hasCartItems && i > 0) {
+      log(`  Cart appears empty after clearing ${itemsCleared} items`);
+      break;
+    }
+    
+    // Find the first visible minus button in the cart area
+    // Cart items are typically in a container with cart-related classes
+    // or positioned on the right side of the screen
+    
+    // Get all minus buttons and try to find one in the cart (not the modal)
+    const allMinusButtons = page.locator('button.sc-futREh');
+    const count = await allMinusButtons.count();
+    
+    if (count === 0) {
+      log("  No minus buttons found");
+      break;
+    }
+    
+    let clickedCart = false;
+    
+    // Iterate through buttons and find one that's in the cart section
+    // Cart section is typically: x > 800px (right side of screen)
+    for (let j = 0; j < count; j++) {
+      const btn = allMinusButtons.nth(j);
+      try {
+        if (!await btn.isVisible({ timeout: 300 })) continue;
+        
+        const box = await btn.boundingBox();
+        if (!box) continue;
+        
+        // Cart is on the right side (x > 750px typically on 1280px viewport)
+        // The dish modal is usually centered
+        if (box.x > 750) {
+          await jsClick(page, btn);
+          await page.waitForTimeout(500);
+          itemsCleared++;
+          log(`  Removed cart item (${itemsCleared})`);
+          clickedCart = true;
+          break;
+        }
+      } catch {
+        continue;
+      }
+    }
+    
+    if (!clickedCart) {
+      // No cart items found on the right side
+      log("  No cart items found in sidebar");
+      break;
+    }
+  }
+  
+  log(`  Cleared ${itemsCleared} items from cart sidebar`);
+  return itemsCleared;
+}
+
+/**
  * Wait for a button to become enabled (not disabled).
  * Returns true if the button became enabled, false if timeout.
  */
@@ -153,6 +244,23 @@ async function increaseQuantity(page: Page, plusBtn: Locator, times: number): Pr
       await plusBtn.click({ force: true, timeout: 3000 });
       log(`    Clicked + via force (${i + 1}/${times})`);
     }
+    await page.waitForTimeout(400);
+  }
+}
+
+/**
+ * Decrease quantity by clicking minus button.
+ */
+async function decreaseQuantity(page: Page, minusBtn: Locator, times: number): Promise<void> {
+  for (let i = 0; i < times; i++) {
+    try {
+      await jsClick(page, minusBtn);
+      log(`    Clicked - via JS (${i + 1}/${times})`);
+    } catch {
+      log(`    JS click failed, trying force click...`);
+      await minusBtn.click({ force: true, timeout: 3000 });
+      log(`    Clicked - via force (${i + 1}/${times})`);
+    }
     // Wait for UI to acknowledge the click
     await page.waitForTimeout(600);
   }
@@ -163,30 +271,28 @@ async function increaseQuantity(page: Page, plusBtn: Locator, times: number): Pr
 async function addItemToCart(page: Page, item: ConfigItem): Promise<boolean> {
   log(`Adding ${item.quantity}x ${item.name}`);
 
-  // Reset page state - close any open modals by pressing Escape
+  // Reset page state - close any open modals
   await page.keyboard.press('Escape').catch(() => {});
   await page.waitForTimeout(500);
 
-  // Navigate to the item URL - this may or may not open the dish modal directly
+  // Navigate to the item URL
   await page.goto(item.url, { waitUntil: "domcontentloaded", timeout: 30000 });
 
   // Wait for page content to load (menu items to appear)
   log("  Waiting for page content to load...");
   try {
-    // Wait for any dish button to appear (indicates menu loaded)
     await page.waitForSelector('button:has-text("$")', { timeout: 15000 });
     log("  Menu items loaded");
   } catch {
     log("  WARNING: Menu items may not have loaded, trying reload...");
-    // Try reloading the page
     await page.reload({ waitUntil: "domcontentloaded", timeout: 30000 });
     await page.waitForTimeout(3000);
   }
 
-  // Extra time for any animations/transitions (longer wait for modal to open from URL)
+  // Extra time for modal to open from URL
   await page.waitForTimeout(4000);
 
-  // Dismiss any popups (do this early as they can block modal)
+  // Dismiss any popups
   await dismissOverlays(page);
   await page.waitForTimeout(1000);
 
@@ -195,10 +301,12 @@ async function addItemToCart(page: Page, item: ConfigItem): Promise<boolean> {
 
   // Check if modal opened from URL
   log("  Checking if modal opened...");
-  let addVisible = await page.locator('button:has-text("Add")').first().isVisible({ timeout: 1000 }).catch(() => false);
+  let addToCartVisible = await page.locator('button:has-text("Add to cart")').first().isVisible({ timeout: 2000 }).catch(() => false);
+  let addVisible = addToCartVisible || await page.locator('button:has-text("Add")').first().isVisible({ timeout: 1000 }).catch(() => false);
+  let selectPortionVisible = await page.locator('button:has-text("Select portion size")').first().isVisible({ timeout: 1000 }).catch(() => false);
   let updateVisible = await page.locator('button:has-text("Update")').first().isVisible({ timeout: 1000 }).catch(() => false);
 
-  if (!addVisible && !updateVisible) {
+  if (!addVisible && !selectPortionVisible && !updateVisible) {
     // Modal didn't open from URL - try clicking on the dish card by name
     log("  Modal not open from URL, looking for dish card...");
 
@@ -211,17 +319,31 @@ async function addItemToCart(page: Page, item: ConfigItem): Promise<boolean> {
       await page.waitForTimeout(3000);
 
       // Check again for modal
-      addVisible = await page.locator('button:has-text("Add")').first().isVisible({ timeout: 2000 }).catch(() => false);
+      addToCartVisible = await page.locator('button:has-text("Add to cart")').first().isVisible({ timeout: 2000 }).catch(() => false);
+      addVisible = addToCartVisible || await page.locator('button:has-text("Add")').first().isVisible({ timeout: 1000 }).catch(() => false);
+      selectPortionVisible = await page.locator('button:has-text("Select portion size")').first().isVisible({ timeout: 1000 }).catch(() => false);
       updateVisible = await page.locator('button:has-text("Update")').first().isVisible({ timeout: 1000 }).catch(() => false);
     } else {
       log(`  Dish card "${item.name}" not found on page`);
     }
   }
 
-  const modalOpen = addVisible || updateVisible;
+  const modalOpen = addVisible || selectPortionVisible || updateVisible;
 
   if (modalOpen) {
-    log(`  Modal opened (Add=${addVisible}, Update=${updateVisible})`);
+    log(`  Modal opened (Add=${addVisible}, SelectPortion=${selectPortionVisible}, Update=${updateVisible})`);
+    
+    // Handle "Select portion size" - this will click the button and select a portion
+    if (selectPortionVisible) {
+      log("  Handling portion size selection...");
+      await handleRequiredOptions(page);
+      await page.waitForTimeout(1000);
+      
+      // Re-check for Add button after portion selection
+      addVisible = await page.locator('button:has-text("Add to cart"), button:has-text("Add")').first().isVisible({ timeout: 2000 }).catch(() => false);
+      updateVisible = await page.locator('button:has-text("Update")').first().isVisible({ timeout: 1000 }).catch(() => false);
+      log(`  After portion selection: Add=${addVisible}, Update=${updateVisible}`);
+    }
   } else {
     log("  WARNING: Modal did not open, taking screenshot...");
     await takeScreenshot(page, `modal-not-open-${item.name.replace(/[^a-z0-9]/gi, "-")}`);
@@ -248,8 +370,11 @@ async function addItemToCart(page: Page, item: ConfigItem): Promise<boolean> {
 
   // Strategy: Find the plus button by looking for the second SVG button in the quantity container
   // The plus button's SVG path contains specific coordinates for the cross shape
-  const plusBtn = page.locator('button.sc-futREh').nth(1);  // Second button is the plus
+  // Find quantity buttons: [minus button] [qty span] [plus button]
+  const minusBtn = page.locator('button.sc-futREh').nth(0);  // First button is minus
+  const plusBtn = page.locator('button.sc-futREh').nth(1);   // Second button is plus
   let hasPlusBtn = await plusBtn.isVisible({ timeout: 2000 }).catch(() => false);
+  const hasMinusBtn = await minusBtn.isVisible({ timeout: 1000 }).catch(() => false);
 
   // Fallback: Try finding by SVG content
   if (!hasPlusBtn) {
@@ -272,10 +397,30 @@ async function addItemToCart(page: Page, item: ConfigItem): Promise<boolean> {
   // STRATEGY: Set quantity FIRST, then click Add/Update
   // This avoids the re-navigation issue entirely
 
-  if (hasAddBtn && hasPlusBtn && targetQty > 1) {
-    // Item NOT in cart yet, need to set quantity before adding
-    log(`  Setting quantity to ${targetQty} before adding...`);
-    await increaseQuantity(page, plusBtn, targetQty - 1);
+  if (hasAddBtn && hasPlusBtn) {
+    // Item NOT in cart yet - read current quantity first (modal may have a default)
+    let currentQty = 1;
+    try {
+      const qtySpan = page.locator('span.mt-\\[3px\\]').first();
+      const qtyText = await qtySpan.textContent();
+      const num = parseInt(qtyText?.trim() || '', 10);
+      if (!isNaN(num) && num > 0 && num < 100) {
+        currentQty = num;
+      }
+    } catch {
+      // Default to 1
+    }
+    
+    const clicksNeeded = targetQty - currentQty;
+    log(`  Current qty: ${currentQty}, target: ${targetQty}, clicks needed: ${clicksNeeded}`);
+    
+    if (clicksNeeded > 0) {
+      log(`  Setting quantity to ${targetQty} before adding...`);
+      await increaseQuantity(page, plusBtn, clicksNeeded);
+    } else if (clicksNeeded < 0 && hasMinusBtn) {
+      log(`  Decreasing quantity to ${targetQty} before adding...`);
+      await decreaseQuantity(page, minusBtn, Math.abs(clicksNeeded));
+    }
 
     // Wait for Add button to be enabled
     log("  Waiting for Add button to be ready...");
@@ -291,11 +436,11 @@ async function addItemToCart(page: Page, item: ConfigItem): Promise<boolean> {
     return true;
 
   } else if (hasAddBtn) {
-    // Item NOT in cart, quantity = 1
-    log("  Clicking Add button (qty=1)...");
+    // Item NOT in cart, no quantity controls visible
+    log("  Clicking Add button (no qty controls visible)...");
     await addBtn.click();
     await page.waitForTimeout(2000);
-    log(`  Added 1x to cart`);
+    log(`  Added to cart`);
     return true;
 
   } else if (hasUpdateBtn && hasPlusBtn) {
@@ -321,6 +466,8 @@ async function addItemToCart(page: Page, item: ConfigItem): Promise<boolean> {
 
     if (clicksNeeded > 0) {
       await increaseQuantity(page, plusBtn, clicksNeeded);
+    } else if (clicksNeeded < 0 && hasMinusBtn) {
+      await decreaseQuantity(page, minusBtn, Math.abs(clicksNeeded));
     }
 
     // Scroll modal to ensure Update button is visible
@@ -436,6 +583,37 @@ export async function runPrefill(): Promise<void> {
   const page = context.pages()[0] || (await context.newPage());
 
   try {
+    // Step 0: Go to first item's page and clear cart sidebar
+    log("=".repeat(50));
+    log("CLEARING CART FROM MENU PAGE...");
+    log("=".repeat(50));
+    
+    const firstItem = config.items[0];
+    log(`Navigating to first item: ${firstItem.name}`);
+    await page.goto(firstItem.url, { waitUntil: "domcontentloaded", timeout: 30000 });
+    
+    // Wait for page to load
+    try {
+      await page.waitForSelector('button:has-text("$")', { timeout: 15000 });
+      log("Menu items loaded");
+    } catch {
+      log("WARNING: Menu may not have loaded fully");
+    }
+    await page.waitForTimeout(4000);
+    
+    // Close any dish modal that opened
+    await page.keyboard.press('Escape').catch(() => {});
+    await page.waitForTimeout(1000);
+    
+    // Dismiss popups
+    await dismissOverlays(page);
+    await page.waitForTimeout(500);
+    
+    // Clear the cart sidebar
+    const itemsCleared = await clearCartSidebar(page);
+    log(`Cleared ${itemsCleared} items from cart sidebar`);
+    await page.waitForTimeout(1000);
+
     // Step 1: Check availability for all items
     log("=".repeat(50));
     log("CHECKING AVAILABILITY...");

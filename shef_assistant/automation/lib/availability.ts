@@ -74,7 +74,8 @@ export async function checkDishAvailability(
     }
 
     // Wait for page to stabilize (modal may take time to open from URL)
-    await page.waitForTimeout(5000);
+    // Increased from 5s to 6s to handle slower connections
+    await page.waitForTimeout(6000);
 
     await debugScreenshot(page, `after-load-${name.replace(/[^a-z0-9]/gi, "-")}`);
 
@@ -94,11 +95,14 @@ export async function checkDishAvailability(
     }
 
     // Check if modal opened from URL
-    let addVisible = await page.locator('button:has-text("Add")').first().isVisible({ timeout: 1000 }).catch(() => false);
+    // Look for multiple button patterns: "Add to cart", "Add", "Select portion size", "Update"
+    let addToCartVisible = await page.locator('button:has-text("Add to cart")').first().isVisible({ timeout: 3000 }).catch(() => false);
+    let addVisible = addToCartVisible || await page.locator('button:has-text("Add")').first().isVisible({ timeout: 1000 }).catch(() => false);
+    let selectPortionVisible = await page.locator('button:has-text("Select portion size")').first().isVisible({ timeout: 1000 }).catch(() => false);
     let updateVisible = await page.locator('button:has-text("Update")').first().isVisible({ timeout: 1000 }).catch(() => false);
-    log(`  Initial check: Add=${addVisible}, Update=${updateVisible}`);
+    log(`  Initial check: AddToCart=${addToCartVisible}, Add=${addVisible}, SelectPortion=${selectPortionVisible}, Update=${updateVisible}`);
 
-    if (!addVisible && !updateVisible) {
+    if (!addVisible && !selectPortionVisible && !updateVisible) {
       // Modal didn't open from URL - try clicking dish card
       log(`  Looking for dish card "${name}"...`);
 
@@ -130,13 +134,15 @@ export async function checkDishAvailability(
         await debugScreenshot(page, `no-card-${name.replace(/[^a-z0-9]/gi, "-")}`);
       }
 
-      // Check again for modal
-      addVisible = await page.locator('button:has-text("Add")').first().isVisible({ timeout: 2000 }).catch(() => false);
+      // Check again for modal with all button patterns
+      addToCartVisible = await page.locator('button:has-text("Add to cart")').first().isVisible({ timeout: 2000 }).catch(() => false);
+      addVisible = addToCartVisible || await page.locator('button:has-text("Add")').first().isVisible({ timeout: 1000 }).catch(() => false);
+      selectPortionVisible = await page.locator('button:has-text("Select portion size")').first().isVisible({ timeout: 1000 }).catch(() => false);
       updateVisible = await page.locator('button:has-text("Update")').first().isVisible({ timeout: 1000 }).catch(() => false);
-      log(`  After click: Add=${addVisible}, Update=${updateVisible}`);
+      log(`  After click: AddToCart=${addToCartVisible}, Add=${addVisible}, SelectPortion=${selectPortionVisible}, Update=${updateVisible}`);
     }
 
-    const modalOpen = addVisible || updateVisible;
+    const modalOpen = addVisible || selectPortionVisible || updateVisible;
 
     if (!modalOpen) {
       log(`  ✗ ${name} is unavailable (Modal did not open - dish may be sold out)`);
@@ -148,7 +154,7 @@ export async function checkDishAvailability(
       };
     }
 
-    log(`  Modal opened (Add=${addVisible}, Update=${updateVisible})`);
+    log(`  Modal opened (Add=${addVisible}, SelectPortion=${selectPortionVisible}, Update=${updateVisible})`);
 
     // If Update button is visible, item is already in cart - still available
     if (updateVisible) {
@@ -160,8 +166,18 @@ export async function checkDishAvailability(
       };
     }
 
+    // If Select portion size is visible, dish is available but needs portion selection
+    if (selectPortionVisible) {
+      log(`  ✓ ${name} is available (requires portion size selection)`);
+      return {
+        name,
+        url,
+        available: true,
+      };
+    }
+
     // Check if Add button is enabled
-    const addButton = page.locator('button:has-text("Add")').first();
+    const addButton = page.locator('button:has-text("Add to cart"), button:has-text("Add")').first();
     const isDisabled = await addButton.isDisabled().catch(() => false);
 
     if (isDisabled) {
