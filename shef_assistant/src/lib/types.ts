@@ -19,6 +19,21 @@ export interface AutomationStatus {
   logs: string[];
 }
 
+export interface AvailabilityResult {
+  name: string;
+  url: string;
+  available: boolean;
+  reason?: string; // "Sold out", "Button disabled", "Error: 404", etc.
+}
+
+export interface AvailabilityCheckResponse {
+  available: ShefItem[];
+  unavailable: Array<{
+    item: ShefItem;
+    reason: string;
+  }>;
+}
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;

@@ -12,10 +12,12 @@ export default function LoginStatus({ className = "" }: LoginStatusProps) {
   const [status, setStatus] = useState<Status>("checking");
   const [isLaunching, setIsLaunching] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showInstructions, setShowInstructions] = useState(false);
 
   const checkStatus = useCallback(async () => {
     setStatus("checking");
     setErrorMessage(null);
+    setShowInstructions(false);
 
     try {
       const response = await fetch("/api/login/status");
@@ -43,12 +45,15 @@ export default function LoginStatus({ className = "" }: LoginStatusProps) {
 
   const handleLaunchLogin = async () => {
     setIsLaunching(true);
+    setErrorMessage(null);
 
     try {
       const response = await fetch("/api/login/launch", { method: "POST" });
       const data = await response.json();
 
-      if (!data.success) {
+      if (data.success) {
+        setShowInstructions(true);
+      } else {
         setErrorMessage(data.message);
       }
     } catch (err) {
@@ -87,56 +92,78 @@ export default function LoginStatus({ className = "" }: LoginStatusProps) {
   };
 
   const config = statusConfig[status];
-  const showLoginButton = status === "logged_out" || status === "no_profile";
+  const showLoginButton = (status === "logged_out" || status === "no_profile") && !showInstructions;
 
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
-      {/* Status Indicator */}
-      <div className="flex items-center gap-2">
-        <div className={`w-2.5 h-2.5 rounded-full ${config.dot}`} />
-        <span className={`text-sm font-medium ${config.textColor}`}>
-          {config.text}
-        </span>
+    <div className={`flex flex-col gap-2 ${className}`}>
+      <div className="flex items-center gap-3">
+        {/* Status Indicator */}
+        <div className="flex items-center gap-2">
+          <div className={`w-2.5 h-2.5 rounded-full ${config.dot}`} />
+          <span className={`text-sm font-medium ${config.textColor}`}>
+            {config.text}
+          </span>
+        </div>
+
+        {/* Refresh Button */}
+        <button
+          onClick={checkStatus}
+          disabled={status === "checking"}
+          className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50 transition-colors"
+          title="Refresh status"
+        >
+          <svg
+            className={`w-4 h-4 ${status === "checking" ? "animate-spin" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+        </button>
+
+        {/* Login Button */}
+        {showLoginButton && (
+          <button
+            onClick={handleLaunchLogin}
+            disabled={isLaunching}
+            className="px-3 py-1 text-xs font-medium bg-shef-red text-white rounded hover:bg-shef-red-dark disabled:opacity-50 transition-colors"
+          >
+            {isLaunching ? "Opening..." : "Log In"}
+          </button>
+        )}
+
+        {/* Error Message */}
+        {errorMessage && (
+          <span className="text-xs text-red-500" title={errorMessage}>
+            {errorMessage.length > 20 ? errorMessage.slice(0, 20) + "..." : errorMessage}
+          </span>
+        )}
       </div>
 
-      {/* Refresh Button */}
-      <button
-        onClick={checkStatus}
-        disabled={status === "checking"}
-        className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50 transition-colors"
-        title="Refresh status"
-      >
-        <svg
-          className={`w-4 h-4 ${status === "checking" ? "animate-spin" : ""}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-          />
-        </svg>
-      </button>
-
-      {/* Login Button */}
-      {showLoginButton && (
-        <button
-          onClick={handleLaunchLogin}
-          disabled={isLaunching}
-          className="px-3 py-1 text-xs font-medium bg-shef-red text-white rounded hover:bg-shef-red-dark disabled:opacity-50 transition-colors"
-        >
-          {isLaunching ? "Opening..." : "Log In"}
-        </button>
-      )}
-
-      {/* Error Tooltip */}
-      {errorMessage && (
-        <span className="text-xs text-red-500" title={errorMessage}>
-          {errorMessage.length > 20 ? errorMessage.slice(0, 20) + "..." : errorMessage}
-        </span>
+      {/* Login Instructions */}
+      {showInstructions && (
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 text-xs">
+          <p className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+            Browser opened!
+          </p>
+          <ol className="text-yellow-700 dark:text-yellow-300 space-y-1 list-decimal list-inside">
+            <li>Log in to Shef in the browser window</li>
+            <li>Return to the <strong>terminal</strong> and press Enter</li>
+            <li>Click the refresh button above to verify</li>
+          </ol>
+          <button
+            onClick={() => setShowInstructions(false)}
+            className="mt-2 text-yellow-600 dark:text-yellow-400 hover:underline"
+          >
+            Dismiss
+          </button>
+        </div>
       )}
     </div>
   );

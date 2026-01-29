@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "shef:login": "npx tsx automation/login.ts",
+    "shef:check-availability": "npx tsx automation/check-availability.ts",
     "shef:prefill": "npx tsx automation/prefill.ts",
     "shef:test-config": "npx tsx automation/lib/config.ts",
     "shef:test-session": "npx tsx automation/lib/session.ts",

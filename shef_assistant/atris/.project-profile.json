@@ -1,0 +1,11 @@
+{
+  "type": "nodejs",
+  "framework": "react",
+  "hasCode": true,
+  "testCommand": "npm test",
+  "fileStructure": [
+    "src/",
+    "docs/"
+  ],
+  "conventions": {}
+}
