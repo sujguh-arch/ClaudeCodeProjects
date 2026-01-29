@@ -47,20 +47,24 @@ export async function GET(): Promise<Response> {
         };
 
         let stdoutBuffer = "";
-        child.stdout.on("data", (data: Buffer) => {
-          stdoutBuffer += data.toString();
-          const lines = stdoutBuffer.split("\n");
-          stdoutBuffer = lines.pop() || "";
-          lines.forEach(processLine);
-        });
+        if (child.stdout) {
+          child.stdout.on("data", (data: Buffer) => {
+            stdoutBuffer += data.toString();
+            const lines = stdoutBuffer.split("\n");
+            stdoutBuffer = lines.pop() || "";
+            lines.forEach(processLine);
+          });
+        }
 
         let stderrBuffer = "";
-        child.stderr.on("data", (data: Buffer) => {
-          stderrBuffer += data.toString();
-          const lines = stderrBuffer.split("\n");
-          stderrBuffer = lines.pop() || "";
-          lines.forEach(processLine);
-        });
+        if (child.stderr) {
+          child.stderr.on("data", (data: Buffer) => {
+            stderrBuffer += data.toString();
+            const lines = stderrBuffer.split("\n");
+            stderrBuffer = lines.pop() || "";
+            lines.forEach(processLine);
+          });
+        }
 
         child.on("close", (code: number | null) => {
           // Process any remaining buffered content
