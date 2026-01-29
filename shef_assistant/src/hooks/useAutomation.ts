@@ -47,24 +47,38 @@ export function useAutomation(): UseAutomationResult {
     eventSourceRef.current = eventSource;
 
     eventSource.addEventListener("log", (event) => {
-      const logMessage = JSON.parse(event.data);
-      setLogs((prev) => [...prev, logMessage]);
+      try {
+        const logMessage = JSON.parse(event.data);
+        setLogs((prev) => [...prev, logMessage]);
+      } catch (error) {
+        console.error("Failed to parse log message:", error);
+      }
     });
 
     eventSource.addEventListener("progress", (event) => {
-      const progressValue = parseInt(JSON.parse(event.data), 10);
-      setProgress(progressValue);
+      try {
+        const progressValue = parseInt(JSON.parse(event.data), 10);
+        setProgress(progressValue);
+      } catch (error) {
+        console.error("Failed to parse progress:", error);
+      }
     });
 
     eventSource.addEventListener("complete", (event) => {
-      const result = JSON.parse(event.data);
-      if (result === "success") {
-        setState("success");
-        setMessage("Cart prefilled successfully!");
-        setProgress(100);
-      } else {
+      try {
+        const result = JSON.parse(event.data);
+        if (result === "success") {
+          setState("success");
+          setMessage("Cart prefilled successfully!");
+          setProgress(100);
+        } else {
+          setState("error");
+          setMessage(result.replace("error: ", ""));
+        }
+      } catch (error) {
+        console.error("Failed to parse completion result:", error);
         setState("error");
-        setMessage(result.replace("error: ", ""));
+        setMessage("Failed to parse automation result");
       }
       eventSource.close();
       eventSourceRef.current = null;

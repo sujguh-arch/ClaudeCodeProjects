@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { spawn, ChildProcess } from "child_process";
 import path from "path";
 
 export const runtime = "nodejs";
@@ -14,6 +14,7 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(): Promise<Response> {
   const encoder = new TextEncoder();
+  let child: ChildProcess | null = null;
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -27,7 +28,7 @@ export async function GET(): Promise<Response> {
 
         const scriptPath = path.join(process.cwd(), "automation", "prefill.ts");
 
-        const child = spawn("npx", ["tsx", scriptPath], {
+        child = spawn("npx", ["tsx", scriptPath], {
           cwd: process.cwd(),
           stdio: ["ignore", "pipe", "pipe"],
         });
@@ -61,7 +62,7 @@ export async function GET(): Promise<Response> {
           lines.forEach(processLine);
         });
 
-        child.on("close", (code) => {
+        child.on("close", (code: number | null) => {
           // Process any remaining buffered content
           if (stdoutBuffer.trim()) processLine(stdoutBuffer);
           if (stderrBuffer.trim()) processLine(stderrBuffer);
@@ -75,14 +76,23 @@ export async function GET(): Promise<Response> {
           controller.close();
         });
 
-        child.on("error", (err) => {
+        child.on("error", (err: Error) => {
           sendEvent("complete", `error: ${err.message}`);
           controller.close();
         });
 
       } catch (error) {
+        if (child) {
+          child.kill();
+        }
         sendEvent("complete", `error: ${error instanceof Error ? error.message : "Unknown error"}`);
         controller.close();
+      }
+    },
+    cancel() {
+      // Client disconnected, clean up the child process
+      if (child) {
+        child.kill();
       }
     },
   });

@@ -34,7 +34,11 @@ function loadConfig(): Config {
   if (!fs.existsSync(CONFIG_PATH)) {
     throw new Error("config.json not found. Copy data/config.example.json to data/config.json and customize it.");
   }
-  return JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
+  try {
+    return JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
+  } catch (error) {
+    throw new Error(`Failed to parse config.json: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 function ensureArtifactsDir(): void {
@@ -221,11 +225,13 @@ async function waitForOverlayToDisappear(page: Page): Promise<void> {
  */
 async function jsClick(page: Page, locator: Locator): Promise<void> {
   const handle = await locator.elementHandle();
-  if (handle) {
-    await page.evaluate((el) => {
-      (el as HTMLElement).click();
-    }, handle);
+  if (!handle) {
+    log("  WARNING: jsClick - element handle is null, element may not exist or be visible");
+    return;
   }
+  await page.evaluate((el) => {
+    (el as HTMLElement).click();
+  }, handle);
 }
 
 /**

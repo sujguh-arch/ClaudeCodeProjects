@@ -10,6 +10,41 @@ import type { ShefItem, ShefConfig } from "./types";
 import { generateId } from "./types";
 
 const CONFIG_PATH = path.join(process.cwd(), "data", "config.json");
+const LOCK_PATH = CONFIG_PATH + ".lock";
+const LOCK_TIMEOUT = 5000; // 5 seconds max wait for lock
+const LOCK_CHECK_INTERVAL = 10; // Check every 10ms
+
+function acquireLockSync(): void {
+  const startTime = Date.now();
+
+  while (true) {
+    try {
+      // Try to create lock file exclusively
+      fs.writeFileSync(LOCK_PATH, String(process.pid), { flag: "wx" });
+      return; // Lock acquired
+    } catch {
+      // Lock file exists, wait and retry
+      if (Date.now() - startTime > LOCK_TIMEOUT) {
+        throw new Error("Failed to acquire config lock (timeout after 5s)");
+      }
+      // Busy wait with small sleep
+      const end = Date.now() + LOCK_CHECK_INTERVAL;
+      while (Date.now() < end) {
+        // Spin loop for sync sleep
+      }
+    }
+  }
+}
+
+function releaseLock(): void {
+  try {
+    if (fs.existsSync(LOCK_PATH)) {
+      fs.unlinkSync(LOCK_PATH);
+    }
+  } catch {
+    // Ignore errors during cleanup
+  }
+}
 
 function ensureDataDir(): void {
   const dataDir = path.dirname(CONFIG_PATH);
@@ -28,20 +63,38 @@ function getDefaultConfig(): ShefConfig {
 
 export function readConfig(): ShefConfig {
   ensureDataDir();
+  acquireLockSync();
 
-  if (!fs.existsSync(CONFIG_PATH)) {
-    const defaultConfig = getDefaultConfig();
-    writeConfig(defaultConfig);
-    return defaultConfig;
+  try {
+    if (!fs.existsSync(CONFIG_PATH)) {
+      const defaultConfig = getDefaultConfig();
+      // writeConfigUnsafe to avoid recursive lock
+      fs.writeFileSync(CONFIG_PATH, JSON.stringify(defaultConfig, null, 2) + "\n");
+      return defaultConfig;
+    }
+
+    const content = fs.readFileSync(CONFIG_PATH, "utf-8");
+    try {
+      return JSON.parse(content) as ShefConfig;
+    } catch (error) {
+      console.error("Failed to parse config.json:", error instanceof Error ? error.message : String(error));
+      console.warn("Returning default config due to parse error");
+      return getDefaultConfig();
+    }
+  } finally {
+    releaseLock();
   }
-
-  const content = fs.readFileSync(CONFIG_PATH, "utf-8");
-  return JSON.parse(content) as ShefConfig;
 }
 
 export function writeConfig(config: ShefConfig): void {
   ensureDataDir();
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2) + "\n");
+  acquireLockSync();
+
+  try {
+    fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2) + "\n");
+  } finally {
+    releaseLock();
+  }
 }
 
 // ============================================================================

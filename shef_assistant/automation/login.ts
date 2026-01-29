@@ -18,7 +18,13 @@ function loadConfig(): Config {
     console.error("Copy data/config.example.json to data/config.json and customize it.");
     process.exit(1);
   }
-  return JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
+  try {
+    return JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
+  } catch (error) {
+    console.error("ERROR: Failed to parse config.json:", error instanceof Error ? error.message : String(error));
+    console.error("Make sure config.json is valid JSON.");
+    process.exit(1);
+  }
 }
 
 function waitForEnter(): Promise<void> {
