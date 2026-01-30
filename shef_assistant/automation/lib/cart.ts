@@ -91,20 +91,26 @@ async function dismissDishPopups(page: Page): Promise<void> {
 // Helper: Handle Required Options (Portion size, etc.)
 // ============================================================================
 
-export async function handleRequiredOptions(page: Page): Promise<void> {
+export async function handleRequiredOptions(
+  page: Page,
+  preferredPortion?: string
+): Promise<void> {
   log("  Checking for required options...");
 
   try {
     // Check if "Select portion size" button is visible (means portion not yet selected)
     const selectPortionBtn = page.locator('button:has-text("Select portion size")').first();
     const needsPortionSelection = await selectPortionBtn.isVisible({ timeout: 2000 }).catch(() => false);
-    
+
     if (!needsPortionSelection) {
       log("    No portion selection required");
       return;
     }
 
     log("    Portion size selection required...");
+    if (preferredPortion) {
+      log(`    Preferred portion: "${preferredPortion}"`);
+    }
 
     // Step 1: Scroll the modal content to reveal portion options
     // The portion options are in a fieldset with labels, often hidden below the fold
@@ -117,7 +123,7 @@ export async function handleRequiredOptions(page: Page): Promise<void> {
           htmlEl.scrollTop = 300; // Scroll to reveal portion options
         }
       });
-      
+
       // Also try scrolling any modal-like containers
       const modals = document.querySelectorAll('[class*="modal"], [class*="Modal"], [class*="drawer"]');
       modals.forEach(el => {
@@ -129,37 +135,59 @@ export async function handleRequiredOptions(page: Page): Promise<void> {
     });
     await page.waitForTimeout(1000);
 
-    // Step 2: Find and click the first portion option label
+    // Step 2: Find and click the appropriate portion option label
     // Portion options are in <fieldset><label> elements with price info
     const portionLabels = page.locator('fieldset label');
     const labelCount = await portionLabels.count();
     log(`    Found ${labelCount} portion option labels`);
 
     if (labelCount > 0) {
-      const firstLabel = portionLabels.first();
-      const labelText = await firstLabel.textContent({ timeout: 500 }).catch(() => '');
-      
-      if (await firstLabel.isVisible({ timeout: 1000 }).catch(() => false)) {
-        log(`    Selecting first portion: "${labelText?.substring(0, 50).trim()}"`);
-        await firstLabel.click({ force: true });
+      // Try to find preferred portion, or fall back to first
+      let targetLabel = portionLabels.first();
+      let selectedPortionText = "";
+
+      if (preferredPortion) {
+        // Search for matching portion label
+        for (let i = 0; i < labelCount; i++) {
+          const label = portionLabels.nth(i);
+          const text = await label.textContent({ timeout: 500 }).catch(() => '');
+
+          if (text && text.toLowerCase().includes(preferredPortion.toLowerCase())) {
+            targetLabel = label;
+            selectedPortionText = text.trim();
+            log(`    Found preferred portion at index ${i}: "${text.substring(0, 50).trim()}"`);
+            break;
+          }
+        }
+
+        if (!selectedPortionText) {
+          log(`    Preferred portion "${preferredPortion}" not found, using first option`);
+        }
+      }
+
+      const labelText = selectedPortionText || await targetLabel.textContent({ timeout: 500 }).catch(() => '');
+
+      if (await targetLabel.isVisible({ timeout: 1000 }).catch(() => false)) {
+        log(`    Selecting portion: "${labelText?.substring(0, 50).trim()}"`);
+        await targetLabel.click({ force: true });
         await page.waitForTimeout(1500);
 
         // Step 3: Verify "Add to cart" button is now visible
         const addBtn = page.locator('button:has-text("Add to cart")').first();
         const addVisible = await addBtn.isVisible({ timeout: 2000 }).catch(() => false);
         log(`    After portion selection, Add to cart visible: ${addVisible}`);
-        
+
         if (!addVisible) {
           // Try clicking the label again with scrollIntoView
-          await firstLabel.scrollIntoViewIfNeeded();
-          await firstLabel.click({ force: true });
+          await targetLabel.scrollIntoViewIfNeeded();
+          await targetLabel.click({ force: true });
           await page.waitForTimeout(1500);
         }
       } else {
         log("    Portion label not visible, trying to scroll into view...");
-        await firstLabel.scrollIntoViewIfNeeded().catch(() => {});
+        await targetLabel.scrollIntoViewIfNeeded().catch(() => {});
         await page.waitForTimeout(500);
-        await firstLabel.click({ force: true }).catch(() => {});
+        await targetLabel.click({ force: true }).catch(() => {});
         await page.waitForTimeout(1500);
       }
     } else {
@@ -424,7 +452,7 @@ export async function addItemToCart(page: Page, item: ConfigItem): Promise<AddTo
     await takeScreenshot(page, `add-step1-${item.name.replace(/\s+/g, '-')}`);
 
     // Handle required options (like Portion size) before adding
-    await handleRequiredOptions(page);
+    await handleRequiredOptions(page, item.preferredPortion);
 
     // Find quantity controls
     const controls = await findQuantityControls(page);

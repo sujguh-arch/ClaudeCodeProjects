@@ -1,14 +1,20 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import type { ShefItem, ApiResponse } from "@/lib/types";
+import type { ShefItem, ApiResponse, DayOfWeek } from "@/lib/types";
+
+interface AddItemOptions {
+  availableDays?: DayOfWeek[];
+  preferredPortion?: string;
+  tags?: string[];
+}
 
 interface UseItemsResult {
   items: ShefItem[];
   isLoading: boolean;
   error: string | null;
   fetchItems: () => Promise<void>;
-  addItem: (name: string, url: string, quantity: number) => Promise<boolean>;
+  addItem: (name: string, url: string, quantity: number, options?: AddItemOptions) => Promise<boolean>;
   updateItem: (id: string, updates: Partial<Omit<ShefItem, "id">>) => Promise<boolean>;
   deleteItem: (id: string) => Promise<boolean>;
 }
@@ -39,14 +45,14 @@ export function useItems(): UseItemsResult {
   }, []);
 
   const addItem = useCallback(
-    async (name: string, url: string, quantity: number): Promise<boolean> => {
+    async (name: string, url: string, quantity: number, options?: AddItemOptions): Promise<boolean> => {
       setError(null);
 
       try {
         const response = await fetch("/api/items", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, url, quantity }),
+          body: JSON.stringify({ name, url, quantity, ...options }),
         });
 
         const data: ApiResponse<ShefItem> = await response.json();

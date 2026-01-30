@@ -15,6 +15,7 @@ export interface ConfigItem {
   name: string;        // Human-readable name for logging
   url: string;         // Full URL to the dish page
   quantity: number;    // Desired quantity to add
+  preferredPortion?: string;  // Optional portion preference (e.g., "Large (16oz)")
 }
 
 export interface Config {

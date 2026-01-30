@@ -53,6 +53,23 @@ export async function POST() {
         logs: result.output.split("\n").filter((l) => l.trim()),
       });
     } else {
+      // Check for browser profile lock conflicts
+      const output = result.output;
+      if (
+        output.includes("SingletonLock") ||
+        output.includes("ProcessSingleton") ||
+        output.includes("Another browser is using")
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Browser session conflict. Close any open Shef browser windows or run 'npm run shef:cleanup' in your terminal.",
+            logs: result.output.split("\n").filter((l) => l.trim()),
+          },
+          { status: 409 } // 409 Conflict
+        );
+      }
+
       return NextResponse.json(
         {
           success: false,

@@ -6,8 +6,8 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import type { ShefItem, ShefConfig } from "./types";
-import { generateId } from "./types";
+import type { ShefItem, ShefConfig, DayOfWeek } from "./types";
+import { generateId, validateDays } from "./types";
 
 const CONFIG_PATH = path.join(process.cwd(), "data", "config.json");
 const LOCK_PATH = CONFIG_PATH + ".lock";
@@ -111,10 +111,20 @@ export function getItemById(id: string): ShefItem | null {
   return config.items.find((item) => item.id === id) || null;
 }
 
+export interface CreateItemOptions {
+  name: string;
+  url: string;
+  quantity: number;
+  availableDays?: DayOfWeek[];
+  preferredPortion?: string;
+  tags?: string[];
+}
+
 export function createItem(
   name: string,
   url: string,
-  quantity: number
+  quantity: number,
+  options?: Partial<Pick<ShefItem, "availableDays" | "preferredPortion" | "tags">>
 ): ShefItem {
   const config = readConfig();
 
@@ -124,6 +134,17 @@ export function createItem(
     url: url.trim(),
     quantity: Math.max(1, quantity),
   };
+
+  // Add optional extended fields if provided
+  if (options?.availableDays && options.availableDays.length > 0) {
+    newItem.availableDays = validateDays(options.availableDays);
+  }
+  if (options?.preferredPortion?.trim()) {
+    newItem.preferredPortion = options.preferredPortion.trim();
+  }
+  if (options?.tags && options.tags.length > 0) {
+    newItem.tags = options.tags.map((t) => t.trim()).filter(Boolean);
+  }
 
   config.items.push(newItem);
   writeConfig(config);
@@ -144,13 +165,42 @@ export function updateItem(
 
   const updatedItem: ShefItem = {
     ...config.items[index],
-    ...updates,
     id, // Ensure ID cannot be changed
   };
 
-  // Validate quantity
-  if (updatedItem.quantity < 1) {
-    updatedItem.quantity = 1;
+  // Apply basic field updates
+  if (updates.name !== undefined) {
+    updatedItem.name = updates.name;
+  }
+  if (updates.url !== undefined) {
+    updatedItem.url = updates.url;
+  }
+  if (updates.quantity !== undefined) {
+    updatedItem.quantity = Math.max(1, updates.quantity);
+  }
+
+  // Apply extended field updates
+  if (updates.availableDays !== undefined) {
+    if (updates.availableDays === null || updates.availableDays.length === 0) {
+      delete updatedItem.availableDays;
+    } else {
+      updatedItem.availableDays = validateDays(updates.availableDays);
+    }
+  }
+  if (updates.preferredPortion !== undefined) {
+    if (!updates.preferredPortion?.trim()) {
+      delete updatedItem.preferredPortion;
+    } else {
+      updatedItem.preferredPortion = updates.preferredPortion.trim();
+    }
+  }
+  if (updates.tags !== undefined) {
+    if (updates.tags === null || updates.tags.length === 0) {
+      delete updatedItem.tags;
+    } else {
+      const validTags = updates.tags.map((t) => t.trim()).filter(Boolean);
+      updatedItem.tags = validTags.length > 0 ? validTags : undefined;
+    }
   }
 
   config.items[index] = updatedItem;

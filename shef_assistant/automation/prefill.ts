@@ -3,17 +3,48 @@ import * as fs from "fs";
 import * as path from "path";
 import { checkAllItems, filterAvailableItems } from "./lib/availability";
 import { handleRequiredOptions } from "./lib/cart";
+import type { ShefItem, ShefConfig, DayOfWeek } from "../src/lib/types";
 
-interface ConfigItem {
+// Re-export ConfigItem for backward compatibility with lib/config.ts
+export interface ConfigItem {
   name: string;
   url: string;
   quantity: number;
+  availableDays?: DayOfWeek[];
+  preferredPortion?: string;
 }
 
-interface Config {
-  shefHomeUrl: string;
-  cartUrl: string;
-  items: ConfigItem[];
+type Config = ShefConfig;
+
+/**
+ * Get current day of week
+ */
+function getCurrentDayOfWeek(): DayOfWeek {
+  const dayIndex = new Date().getDay();
+  const dayMap: DayOfWeek[] = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
+  return dayMap[dayIndex];
+}
+
+/**
+ * Filter items to only those available today
+ */
+function filterItemsForToday(items: ShefItem[]): ShefItem[] {
+  const today = getCurrentDayOfWeek();
+  return items.filter((item) => {
+    // No availableDays = available every day
+    if (!item.availableDays || item.availableDays.length === 0) {
+      return true;
+    }
+    return item.availableDays.includes(today);
+  });
 }
 
 const CONFIG_PATH = path.join(__dirname, "..", "data", "config.json");
@@ -342,7 +373,7 @@ async function addItemToCart(page: Page, item: ConfigItem): Promise<boolean> {
     // Handle "Select portion size" - this will click the button and select a portion
     if (selectPortionVisible) {
       log("  Handling portion size selection...");
-      await handleRequiredOptions(page);
+      await handleRequiredOptions(page, item.preferredPortion);
       await page.waitForTimeout(1000);
       
       // Re-check for Add button after portion selection
@@ -579,7 +610,28 @@ export async function runPrefill(): Promise<void> {
     throw new Error("Browser profile not found. Run 'npm run shef:login' first.");
   }
 
-  log(`Items to check: ${config.items.length}`);
+  // Filter items for today's day
+  const today = getCurrentDayOfWeek();
+  const todayItems = filterItemsForToday(config.items);
+
+  log(`Today is: ${today}`);
+  log(`Items in config: ${config.items.length}`);
+  log(`Items available today: ${todayItems.length}`);
+
+  if (todayItems.length < config.items.length) {
+    const skipped = config.items.filter(i => !todayItems.includes(i));
+    log("Skipping items not available today:");
+    skipped.forEach(i => {
+      log(`  - ${i.name} (available: ${i.availableDays?.join(", ") || "all days"})`);
+    });
+  }
+
+  if (todayItems.length === 0) {
+    log("No items available for today. Nothing to prefill.");
+    return;
+  }
+
+  log(`Items to check: ${todayItems.length}`);
 
   const context: BrowserContext = await chromium.launchPersistentContext(PROFILE_DIR, {
     headless: HEADLESS_MODE, // Default: visible browser (Shef blocks headless)
@@ -593,8 +645,8 @@ export async function runPrefill(): Promise<void> {
     log("=".repeat(50));
     log("CLEARING CART FROM MENU PAGE...");
     log("=".repeat(50));
-    
-    const firstItem = config.items[0];
+
+    const firstItem = todayItems[0];
     log(`Navigating to first item: ${firstItem.name}`);
     await page.goto(firstItem.url, { waitUntil: "domcontentloaded", timeout: 30000 });
     
@@ -625,8 +677,8 @@ export async function runPrefill(): Promise<void> {
     log("CHECKING AVAILABILITY...");
     log("=".repeat(50));
 
-    const availabilityResults = await checkAllItems(page, config.items);
-    const availableItems = filterAvailableItems(config.items, availabilityResults);
+    const availabilityResults = await checkAllItems(page, todayItems);
+    const availableItems = filterAvailableItems(todayItems, availabilityResults);
     const unavailableResults = availabilityResults.filter(r => !r.available);
 
     log("=".repeat(50));

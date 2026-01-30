@@ -17,7 +17,9 @@
     "shef:test-nav": "npx tsx automation/lib/navigation.ts",
     "shef:test-add": "npx tsx automation/lib/cart.ts",
     "shef:test-cart": "npx tsx automation/lib/cart-verify.ts",
-    "shef:clear-cart": "npx tsx automation/lib/cart-clear.ts"
+    "shef:clear-cart": "npx tsx automation/lib/cart-clear.ts",
+    "shef:scheduled": "npx tsx automation/scheduled-prefill.ts",
+    "shef:cleanup": "npx tsx automation/cleanup.ts"
   },
   "dependencies": {
     "next": "16.1.5",

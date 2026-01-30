@@ -7,6 +7,7 @@
 import { chromium, BrowserContext, Page } from "playwright";
 import { PATHS, log } from "./config";
 import * as fs from "fs";
+import * as path from "path";
 
 // ============================================================================
 // Types
@@ -23,6 +24,131 @@ export interface LoginStatus {
 }
 
 // ============================================================================
+// Browser Profile Lock Management
+// ============================================================================
+
+/**
+ * Clean up stale SingletonLock if the browser process is dead.
+ * Returns true if cleanup was performed.
+ */
+export function cleanupStaleLock(): boolean {
+  const lockPath = path.join(PATHS.profile, "SingletonLock");
+
+  if (!fs.existsSync(lockPath)) {
+    return false; // No lock file
+  }
+
+  try {
+    // SingletonLock is a symlink like: hostname-PID
+    const target = fs.readlinkSync(lockPath);
+    const pidMatch = target.match(/-(\d+)$/);
+
+    if (!pidMatch) {
+      // Can't parse PID, remove it
+      fs.unlinkSync(lockPath);
+      log("Removed unparseable lock file");
+      return true;
+    }
+
+    const pid = parseInt(pidMatch[1], 10);
+
+    // Check if process is running
+    try {
+      process.kill(pid, 0); // Signal 0 = just check if exists
+      return false; // Process is running, lock is valid
+    } catch {
+      // Process not running, remove stale lock
+      fs.unlinkSync(lockPath);
+      // Also remove related files
+      const cookiePath = path.join(PATHS.profile, "SingletonCookie");
+      const socketPath = path.join(PATHS.profile, "SingletonSocket");
+      if (fs.existsSync(cookiePath)) fs.unlinkSync(cookiePath);
+      if (fs.existsSync(socketPath)) fs.unlinkSync(socketPath);
+      log(`Cleaned up stale lock from dead process (PID ${pid})`);
+      return true;
+    }
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Force cleanup of browser lock by killing any running browser process.
+ * Use with caution - will close user's browser!
+ */
+export function forceCleanupLock(): { killed: boolean; cleaned: boolean } {
+  const lockPath = path.join(PATHS.profile, "SingletonLock");
+
+  if (!fs.existsSync(lockPath)) {
+    log("No lock file to clean up");
+    return { killed: false, cleaned: false };
+  }
+
+  try {
+    const target = fs.readlinkSync(lockPath);
+    const pidMatch = target.match(/-(\d+)$/);
+
+    if (pidMatch) {
+      const pid = parseInt(pidMatch[1], 10);
+      try {
+        process.kill(pid, "SIGTERM");
+        log(`Killed browser process (PID ${pid})`);
+        // Wait a moment for process to exit
+        const startTime = Date.now();
+        while (Date.now() - startTime < 2000) {
+          try {
+            process.kill(pid, 0);
+            // Still running, wait
+          } catch {
+            break; // Process is gone
+          }
+        }
+      } catch {
+        // Process already dead
+      }
+    }
+
+    // Remove lock files
+    if (fs.existsSync(lockPath)) fs.unlinkSync(lockPath);
+    const cookiePath = path.join(PATHS.profile, "SingletonCookie");
+    const socketPath = path.join(PATHS.profile, "SingletonSocket");
+    if (fs.existsSync(cookiePath)) fs.unlinkSync(cookiePath);
+    if (fs.existsSync(socketPath)) fs.unlinkSync(socketPath);
+    log("Lock files removed");
+    return { killed: true, cleaned: true };
+  } catch (error) {
+    log(`Force cleanup failed: ${error}`);
+    return { killed: false, cleaned: false };
+  }
+}
+
+/**
+ * Check if browser is currently running with the profile.
+ */
+export function isBrowserRunning(): boolean {
+  const lockPath = path.join(PATHS.profile, "SingletonLock");
+
+  if (!fs.existsSync(lockPath)) {
+    return false;
+  }
+
+  try {
+    const target = fs.readlinkSync(lockPath);
+    const pidMatch = target.match(/-(\d+)$/);
+
+    if (!pidMatch) {
+      return false;
+    }
+
+    const pid = parseInt(pidMatch[1], 10);
+    process.kill(pid, 0); // Check if process exists
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ============================================================================
 // Browser Launch
 // ============================================================================
 
@@ -34,6 +160,19 @@ export async function launchBrowser(options: SessionOptions = {}): Promise<Brows
     throw new Error(
       `Browser profile not found at ${PATHS.profile}\n` +
       `Run 'npm run shef:login' first to create a session.`
+    );
+  }
+
+  // Clean up stale locks before launching
+  if (cleanupStaleLock()) {
+    log("Cleaned up stale browser lock");
+  }
+
+  // Check if lock still exists (browser actually running)
+  if (isBrowserRunning()) {
+    throw new Error(
+      "Another browser is using the Shef profile.\n" +
+      "Close the Shef browser window or run: npm run shef:cleanup"
     );
   }
 

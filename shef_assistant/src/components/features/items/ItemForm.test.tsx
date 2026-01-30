@@ -28,7 +28,7 @@ describe('ItemForm', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Add Item' }));
 
-    expect(onAdd).toHaveBeenCalledWith('New Dish', 'https://shef.com/order/new-dish', 3);
+    expect(onAdd).toHaveBeenCalledWith('New Dish', 'https://shef.com/order/new-dish', 3, { availableDays: undefined, preferredPortion: undefined });
   });
 
   it('shows error for invalid URL', () => {

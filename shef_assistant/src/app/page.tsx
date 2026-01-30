@@ -1,20 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useItems } from "@/hooks/useItems";
 import { useAutomation } from "@/hooks/useAutomation";
-import { ItemForm, ItemList } from "@/components/features/items";
+import { ItemForm, ItemList, ItemSearch } from "@/components/features/items";
+import { TomorrowWarning } from "@/components/ui";
 import { AutomationPanel } from "@/components/features/automation";
-import { LoginStatus } from "@/components/features/auth";
 import { CartPreview } from "@/components/features/cart";
+import { getTomorrowDayOfWeek, type DayOfWeek, type ShefItem } from "@/lib/types";
 
 export default function Home() {
   const { items, isLoading, error, addItem, updateItem, deleteItem } = useItems();
   const { state, progress, logs, message, startPrefill, reset } = useAutomation();
   const [showPreview, setShowPreview] = useState(false);
 
-  const handleAddItem = async (name: string, url: string, quantity: number) => {
-    await addItem(name, url, quantity);
+  // Filter items for tomorrow's availability
+  const filteredItems = useMemo(() => {
+    const tomorrow = getTomorrowDayOfWeek();
+
+    return items.filter((item: ShefItem) => {
+      // No availableDays = available every day
+      if (!item.availableDays || item.availableDays.length === 0) {
+        return true;
+      }
+      return item.availableDays.includes(tomorrow);
+    });
+  }, [items]);
+
+  const handleAddItem = async (
+    name: string,
+    url: string,
+    quantity: number,
+    options?: { availableDays?: DayOfWeek[] }
+  ) => {
+    await addItem(name, url, quantity, options);
   };
 
   const handleQuantityChange = async (id: string, quantity: number) => {
@@ -23,6 +42,10 @@ export default function Home() {
 
   const handleDelete = async (id: string) => {
     await deleteItem(id);
+  };
+
+  const handleSearchSelect = async (result: { name: string; url: string }) => {
+    await addItem(result.name, result.url, 1);
   };
 
   const handlePrefillClick = () => {
@@ -34,7 +57,7 @@ export default function Home() {
     startPrefill();
   };
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalItems = filteredItems.reduce((sum, item) => sum + item.quantity, 0);
   const isPrefilling = state === "running";
 
   return (
@@ -46,7 +69,14 @@ export default function Home() {
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">
               Shef Assistant
             </h1>
-            <LoginStatus />
+            <a
+              href="https://shef.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-shef-red hover:underline font-medium"
+            >
+              Shef.com →
+            </a>
           </div>
           <p className="text-sm text-[var(--text-secondary)]">
             Manage your cart items and prefill your Shef order
@@ -60,26 +90,40 @@ export default function Home() {
           </div>
         )}
 
+        {/* Search Shef */}
+        <section className="bg-[var(--foreground)] rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+          <h2 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] mb-4">
+            Search Shef
+          </h2>
+          <ItemSearch onSelect={handleSearchSelect} />
+        </section>
+
         {/* Add Item Form */}
         <section className="bg-[var(--foreground)] rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
           <h2 className="text-base sm:text-lg font-semibold text-[var(--text-primary)] mb-4">
-            Add New Item
+            Add Item by URL
           </h2>
           <ItemForm onAdd={handleAddItem} />
         </section>
 
         {/* Item List */}
         <section className="bg-[var(--foreground)] rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-4 gap-2">
+          <div className="flex items-center justify-between mb-3 gap-2">
             <h2 className="text-base sm:text-lg font-semibold text-[var(--text-primary)]">
               Your Items
             </h2>
             {items.length > 0 && (
               <span className="text-xs sm:text-sm text-[var(--text-secondary)] whitespace-nowrap">
-                {items.length} {items.length === 1 ? "item" : "items"} ({totalItems} total)
+                {filteredItems.length === items.length
+                  ? `${items.length} ${items.length === 1 ? "item" : "items"}`
+                  : `${filteredItems.length} of ${items.length}`}
+                {" "}({totalItems} total)
               </span>
             )}
           </div>
+
+          {/* Tomorrow Warning */}
+          <TomorrowWarning />
 
           {isLoading ? (
             <div className="text-center py-8 text-[var(--text-secondary)]">
@@ -88,7 +132,7 @@ export default function Home() {
             </div>
           ) : (
             <ItemList
-              items={items}
+              items={filteredItems}
               onQuantityChange={handleQuantityChange}
               onDelete={handleDelete}
             />
@@ -101,14 +145,14 @@ export default function Home() {
             href="https://shef.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 py-3 px-4 text-center border border-gray-300 dark:border-gray-600 rounded-lg text-[var(--text-primary)] font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm sm:text-base"
+            className="btn-press flex-1 py-3 px-4 text-center border border-gray-300 dark:border-gray-600 rounded-lg text-[var(--text-primary)] font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500 transition-all text-sm sm:text-base shadow-sm"
           >
             Open Shef
           </a>
           <button
             onClick={handlePrefillClick}
-            disabled={isPrefilling || items.length === 0}
-            className="flex-1 py-3 px-4 bg-shef-red text-white font-semibold rounded-lg hover:bg-shef-red-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
+            disabled={isPrefilling || filteredItems.length === 0}
+            className="btn-gradient flex-1 py-3 px-4 text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
           >
             {isPrefilling ? "Prefilling..." : "Prefill Cart"}
           </button>
@@ -128,7 +172,7 @@ export default function Home() {
           isOpen={showPreview}
           onClose={() => setShowPreview(false)}
           onConfirm={handleConfirmPrefill}
-          items={items}
+          items={filteredItems}
         />
       </main>
     </div>

@@ -29,14 +29,14 @@ export async function GET(): Promise<NextResponse<ApiResponse<ShefItem[]>>> {
 
 /**
  * POST /api/items - Create a new item
- * Body: { name: string, url: string, quantity: number }
+ * Body: { name: string, url: string, quantity: number, availableDays?: string[], preferredPortion?: string, tags?: string[] }
  */
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<ShefItem>>> {
   try {
     const body = await request.json();
-    const { name, url, quantity } = body;
+    const { name, url, quantity, availableDays, preferredPortion, tags } = body;
 
     // Validate required fields
     if (!name || typeof name !== "string" || !name.trim()) {
@@ -80,7 +80,19 @@ export async function POST(
       );
     }
 
-    const newItem = createItem(name, url, qty);
+    // Build options object for extended fields
+    const options: { availableDays?: typeof availableDays; preferredPortion?: string; tags?: string[] } = {};
+    if (Array.isArray(availableDays) && availableDays.length > 0) {
+      options.availableDays = availableDays;
+    }
+    if (preferredPortion && typeof preferredPortion === "string") {
+      options.preferredPortion = preferredPortion;
+    }
+    if (Array.isArray(tags) && tags.length > 0) {
+      options.tags = tags;
+    }
+
+    const newItem = createItem(name, url, qty, options);
 
     return NextResponse.json(
       {
