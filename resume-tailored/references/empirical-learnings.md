@@ -94,3 +94,33 @@ Same char count can produce wildly different fill depending on letter widths.
 | Plaid | 2 | 93.6% | ✅ PASS |
 | Descript | 3 | 93.1% | ✅ PASS |
 | Nectar (blind) | 3 | 93.6% | ✅ PASS |
+
+## Codified Integration Techniques
+
+Patterns extracted from the 5 builds above. Now formalized in SKILL.md Step 2 as the Theme-Bridge-Rewrite method and six integration patterns.
+
+### Culture-Word Weaving
+- **Plaid**: "end-to-end" and "platform" woven throughout — not in one bullet but across headers and multiple roles. These are Plaid's culture words; density matters.
+- **Descript**: "fog sculptor" language ("ambiguous", "no existing playbook") used to reframe existing 0-to-1 experience. The JD's most colorful language is the best signal of what they value.
+- **Nectar**: "AI workflows", "ship fast", "ownership" — mapped to existing facts about agentic AI, fast iteration, P&L ownership.
+- **Technique**: Identify the JD's 2-3 culture words. Use them in at least 2 headers and 4+ bullets across different roles. Creates "cultural resonance" that reads as genuine fit, not keyword stuffing.
+
+### JD-Native Language Mirroring
+- **Uber**: "ruthless prioritization", "metric-moving", "fuzzy user pain", "launching fast and iterating faster" — used the JD's own phrases as bullet openers or qualifiers.
+- **Technique**: Quote or closely paraphrase 2-3 distinctive JD phrases. Place in headers or as bullet context-setters. Signals the candidate speaks the company's language.
+
+### Domain-Bridging from Adjacent Experience
+- **Plaid**: JPM enterprise banking experience reframed as "financial services platform" work — directly relevant to Plaid's fintech domain.
+- **Technique**: When the JD's domain doesn't match a role exactly, find the Adaptable Theme in fact-set.md that bridges the gap. Reframe the header and 1-2 bullets per role to emphasize the bridging theme.
+
+### Theme-Activation Mapping
+
+Each JD activates a different subset of Adaptable Themes from fact-set.md:
+
+| Resume | Primary Themes Activated | Secondary Themes |
+|--------|------------------------|-----------------|
+| Scale AI | RL in production, Agentic AI, Enterprise clients | Platform strategy, 0-to-1 |
+| Uber | Revenue optimization, Consumer product, Growth | P&L ownership, Experimentation |
+| Plaid | Enterprise fintech, Platform strategy, Risk/compliance | ML automation, Promotion trajectory |
+| Descript | 0-to-1 development, Ambiguity/builder culture, Product craft | User research, Vision setting |
+| Nectar | AI workflows, Ship fast, Social commerce | Consumer product, Growth strategy |
