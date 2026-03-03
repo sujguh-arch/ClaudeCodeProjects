@@ -95,6 +95,60 @@ Same char count can produce wildly different fill depending on letter widths.
 | Descript | 3 | 93.1% | ✅ PASS |
 | Nectar (blind) | 3 | 93.6% | ✅ PASS |
 
+## Meta Iteration (2 builds to pass)
+- Keyword Ledger: 18 keywords, 15 must-have, all 5 categories — first use of structured ledger
+- Culture words: "product vision", "strategy and roadmaps", "entrepreneurial", "rapid execution", "customer feedback"
+- First build: D4 "landscape" orphan, C header wrap, J1/J3/W2 orphans — 5 dead-zone violations
+- Fix: D4 changed verb "Shipped"→"Engineered", trimmed C header, removed "banking" from J3
+- 2 iterations to pass — keyword ledger accelerated placement (100% must-have coverage first try)
+
+## Anthropic Iteration (3 builds to pass)
+- Keyword Ledger: 19 keywords, 15 must-have — "frontier AI", "zero-to-one" (spelled out), "safe, beneficial"
+- **KEY LEARNING: Wide-char header limit is ~103 chars, not 115-117** — Headers containing "$8–12M" + "cross-functional" + "data-driven" overflow at 110 chars. Bold italic + em-dash + wide words compound width.
+- Build 1: 2 pages with 4 dead-zone orphans — most violations of any test
+- Build 2: 1 page, QA PASS but visual caught C header "execution" orphan at 8.1%
+- Build 3: Trimmed C header from 110→103 chars. Clean pass.
+- Lesson: Visual verification catches what QA misses — Boris Cherny's "verification is the most important tip"
+
+## StackAI Iteration (2 builds to pass)
+- Keyword Ledger: 19 keywords, 15 must-have — "B2B SaaS", "end-to-end", "product discovery", "fast-paced"
+- First build: J3 "revenue" orphan (6.7%) + missing vision signal ("roadmap" ≠ "vision")
+- Fix: J3 removed "banking" (consistent pattern), D header changed "roadmap"→"vision"
+- **KEY LEARNING: QA vision signal requires "vision" explicitly** — "roadmap" alone doesn't trigger it
+- 2 iterations — the J3 "enterprise banking workflows" overflow is now a known pattern: always trim "banking"
+
+## Stripe Iteration (2 builds to pass)
+- Keyword Ledger: 18 keywords, 15 must-have — "ML-powered", "infrastructure", "product suite", "innovative", "product quality"
+- Fintech domain bridging: JPM experience directly relevant (same as Plaid pattern)
+- First build: D1 "throughput" orphan (9%) + missing vision signal
+- Fix: D1 removed "production" + added "static", D header added "vision and strategy"
+- 2 iterations — most efficient fintech build yet (Plaid was also 2)
+
+## UPDATED SCORECARD
+| Resume | Iterations | Page Fill | QA Result | Keyword Coverage |
+|--------|-----------|-----------|-----------|-----------------|
+| Scale AI | 5 | 93.6% | PASS | N/A (pre-ledger) |
+| Uber | 2 | 93.6% | PASS | N/A (pre-ledger) |
+| Plaid | 2 | 93.6% | PASS | N/A (pre-ledger) |
+| Descript | 3 | 93.1% | PASS | N/A (pre-ledger) |
+| Nectar (blind) | 3 | 93.6% | PASS | N/A (pre-ledger) |
+| **Meta** | **2** | **93.7%** | **PASS** | **100% (15/15)** |
+| **Anthropic** | **3** | **93.7%** | **PASS** | **100% (15/15)** |
+| **StackAI** | **2** | **93.7%** | **PASS** | **100% (15/15)** |
+| **Stripe** | **2** | **93.7%** | **PASS** | **100% (15/15)** |
+
+### Keyword Ledger Impact
+- Pre-ledger average: 3.0 iterations, no keyword tracking
+- Post-ledger average: 2.25 iterations, 100% keyword coverage on all 4
+- Structured extraction → placement in first draft → fewer content-driven rewrites
+- Dead Zone Prevention Protocol catches orphans in pre-build, reducing fix cycles
+
+### Recurring Fix Patterns
+1. **J3 "enterprise banking workflows"** — always overflows. Remove "banking" every time.
+2. **C header with wide chars** — "$8–12M" + "cross-functional" = max 103 chars (not 117)
+3. **"vision" signal** — QA requires the literal word "vision"; "roadmap" or "strategy" alone fail
+4. **First build always has 1-4 orphans** — the pre-build char count catches most but proportional font means some slip through. Expect 2 iterations minimum.
+
 ## Codified Integration Techniques
 
 Patterns extracted from the 5 builds above. Now formalized in SKILL.md Step 2 as the Theme-Bridge-Rewrite method and six integration patterns.
@@ -124,3 +178,7 @@ Each JD activates a different subset of Adaptable Themes from fact-set.md:
 | Plaid | Enterprise fintech, Platform strategy, Risk/compliance | ML automation, Promotion trajectory |
 | Descript | 0-to-1 development, Ambiguity/builder culture, Product craft | User research, Vision setting |
 | Nectar | AI workflows, Ship fast, Social commerce | Consumer product, Growth strategy |
+| Meta | Machine learning, Large-scale consumer, Product vision | Entrepreneurial, Cross-functional leadership |
+| Anthropic | Frontier AI, Zero-to-one, Safe/beneficial | Engineering collaboration, Rapid prototyping |
+| StackAI | B2B SaaS, End-to-end, Product discovery | Fast-paced, Technical literacy, Workflow automation |
+| Stripe | ML infrastructure, Financial/fintech, Product quality | Innovation, Quantitative analysis, Third-party |
