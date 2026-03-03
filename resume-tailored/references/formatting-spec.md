@@ -45,6 +45,11 @@ Same char count produces different fill depending on letter widths.
 | 226+ chars (wide words) | Overflows to 3 lines |
 | 232+ chars (narrow words) | Overflows to 3 lines |
 
+**Dead Zone Resolution** (common after keyword rewriting):
+- **Preferred**: Expand to 215+ by adding a second metric, JD-context phrase, or qualifier from fact-set.md
+- **Fallback**: Compress to <118 by stripping to core verb + object + metric
+- The QA validator and build script both flag dead-zone bullets with resolution guidance
+
 ### Spacing Parameters
 Spacing must be tuned based on total bullet count to hit 93-98% page fill:
 | Total Bullets | line_spacing | bullet_spacing | role_spacing | Expected Fill |
@@ -76,7 +81,7 @@ Formula: fewer bullets → more spacing to fill the page.
 9. ✅ No repeated action verbs within same role
 10. ✅ No verb starting >2 bullets across entire resume
 11. ✅ Staff signals present (team size, P&L, promotion, vision — all 4 required)
-12. ✅ Keyword coverage ≥90% of must-haves
+12. ✅ Keyword coverage ≥90% of must-haves (enforced via `--keywords` flag in QA; hard-fail at <80%)
 
 ## Staff-Level Signaling (Required)
 Every resume MUST include these signals — they are NOT optional:
