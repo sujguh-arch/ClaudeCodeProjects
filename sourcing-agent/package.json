@@ -1,0 +1,24 @@
+{
+  "name": "sourcing-agent",
+  "version": "1.0.0",
+  "description": "Automated sourcing agent that finds senior contacts at target companies and collects their emails",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "search": "node dist/index.js --once",
+    "dev": "tsx src/index.ts",
+    "dev:once": "tsx src/index.ts --once"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "googleapis": "^144.0.0",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

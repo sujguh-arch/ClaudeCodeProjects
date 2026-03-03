@@ -1,0 +1,19 @@
+{
+  "profiles": [
+    {
+      "name": "PM Leadership at Top Tech",
+      "companies": ["stripe.com", "figma.com", "notion.so", "vercel.com"],
+      "titles": [
+        "Product Manager",
+        "Senior Product Manager",
+        "Group Product Manager",
+        "Director of Product",
+        "VP Product",
+        "Head of Product"
+      ],
+      "seniorities": ["director", "vp", "c_suite", "senior"],
+      "locations": ["United States"],
+      "maxResultsPerRun": 25
+    }
+  ]
+}
