@@ -125,7 +125,7 @@ export class HunterClient implements SourceClient {
     const params = new URLSearchParams();
     params.set("domain", domain);
     params.set("api_key", this.apiKey);
-    params.set("limit", String(Math.min(limit, 100)));
+    params.set("limit", String(Math.min(limit, 10))); // Free plan caps at 10
     params.set("type", "personal"); // Skip generic emails like info@
 
     // Hunter accepts one seniority per request, but we can pass comma-separated

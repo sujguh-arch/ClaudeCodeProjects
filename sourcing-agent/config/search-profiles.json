@@ -13,7 +13,7 @@
       ],
       "seniorities": ["director", "vp", "c_suite", "senior"],
       "locations": ["United States"],
-      "maxResultsPerRun": 25
+      "maxResultsPerRun": 10
     }
   ]
 }
