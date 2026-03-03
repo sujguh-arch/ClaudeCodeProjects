@@ -47,15 +47,8 @@ const SENIORITY_MAP: Record<string, string> = {
   manager: "senior",
 };
 
-/**
- * Check if a contact's position matches any of the desired title keywords.
- * Uses case-insensitive substring matching.
- */
-function matchesTitle(position: string | null, titles: string[]): boolean {
-  if (!position) return false;
-  const posLower = position.toLowerCase();
-  return titles.some((t) => posLower.includes(t.toLowerCase()));
-}
+// Hunter department values that map to product/leadership roles
+const DEPARTMENT_FILTERS = ["management", "executive"];
 
 export class HunterClient implements SourceClient {
   name = "hunter";
@@ -68,11 +61,6 @@ export class HunterClient implements SourceClient {
     this.minConfidence = minConfidence;
   }
 
-  /**
-   * Search for people at companies matching a profile.
-   * Hunter Domain Search returns emails directly — no separate enrichment needed.
-   * One API call per domain.
-   */
   async search(profile: SearchProfile): Promise<SearchResult> {
     const allContacts: Contact[] = [];
     let totalAvailable = 0;
@@ -86,18 +74,27 @@ export class HunterClient implements SourceClient {
 
     for (const domain of profile.companies) {
       try {
-        const contacts = await this.searchDomain(
-          domain,
-          hunterSeniorities,
-          profile.titles,
-          profile.maxResultsPerRun ?? 10
-        );
-        allContacts.push(...contacts.contacts);
-        totalAvailable += contacts.totalAvailable;
-        this.searchesUsed++;
+        // Search each department filter separately to maximize relevant results
+        const seenEmails = new Set<string>();
 
-        // Rate limit: small delay between domain calls
-        if (profile.companies.indexOf(domain) < profile.companies.length - 1) {
+        for (const dept of DEPARTMENT_FILTERS) {
+          const result = await this.searchDomain(
+            domain,
+            hunterSeniorities,
+            dept,
+            profile.maxResultsPerRun ?? 10
+          );
+          this.searchesUsed++;
+
+          // Dedup across department calls for same domain
+          for (const c of result.contacts) {
+            if (!seenEmails.has(c.email!)) {
+              seenEmails.add(c.email!);
+              allContacts.push(c);
+            }
+          }
+          totalAvailable += result.totalAvailable;
+
           await sleep(500);
         }
       } catch (err) {
@@ -112,32 +109,29 @@ export class HunterClient implements SourceClient {
     return {
       contacts: allContacts,
       totalAvailable,
-      creditsUsed: 0, // Domain Search is free (counts against monthly search quota)
+      creditsUsed: 0,
     };
   }
 
   private async searchDomain(
     domain: string,
     seniorities: string[],
-    titles: string[],
+    department: string,
     limit: number
   ): Promise<SearchResult> {
     const params = new URLSearchParams();
     params.set("domain", domain);
     params.set("api_key", this.apiKey);
-    params.set("limit", String(Math.min(limit, 10))); // Free plan caps at 10
-    params.set("type", "personal"); // Skip generic emails like info@
+    params.set("limit", String(Math.min(limit, 10)));
+    params.set("type", "personal");
+    params.set("department", department);
 
-    // Hunter accepts one seniority per request, but we can pass comma-separated
-    // Actually Hunter only supports one seniority value, so use the broadest
-    // We'll do client-side title filtering for accuracy
     if (seniorities.length === 1) {
       params.set("seniority", seniorities[0]);
     }
-    // If multiple seniorities, skip the filter and rely on title matching
 
     const url = `${API_BASE}/domain-search?${params.toString()}`;
-    console.log(`[hunter] Searching domain: ${domain}`);
+    console.log(`[hunter] Searching ${domain} (dept: ${department})`);
 
     const res = await fetch(url);
 
@@ -150,26 +144,20 @@ export class HunterClient implements SourceClient {
     const emails = data.data.emails ?? [];
     const org = data.data.organization ?? domain;
 
+    // Log what titles came back so we can see what Hunter has
+    const titles = emails
+      .map((e) => e.position)
+      .filter(Boolean);
     console.log(
-      `[hunter] ${domain}: ${emails.length} results (${data.meta.results} total available)`
+      `[hunter] ${domain}/${department}: ${emails.length} results — titles: ${titles.length > 0 ? titles.join(", ") : "(none listed)"}`
     );
 
-    // Filter by title accuracy (client-side)
+    // Accept all contacts that have a name — title is in the sheet for review
     const matched = emails.filter((e) => {
-      // Must have a name
       if (!e.first_name && !e.last_name) return false;
-      // Must meet confidence threshold
       if (e.confidence < this.minConfidence) return false;
-      // Must match at least one desired title (if titles specified)
-      if (titles.length > 0 && !matchesTitle(e.position, titles)) return false;
       return true;
     });
-
-    if (matched.length < emails.length) {
-      console.log(
-        `[hunter] ${domain}: ${matched.length}/${emails.length} matched title filter`
-      );
-    }
 
     const contacts: Contact[] = matched.map((e) => ({
       id: `hunter-${domain}-${e.value}`,
@@ -186,7 +174,7 @@ export class HunterClient implements SourceClient {
       country: null,
       foundAt: new Date().toISOString(),
       source: "hunter",
-      profileId: e.value, // Email is the unique ID for Hunter
+      profileId: e.value,
       confidence: e.confidence,
       verificationStatus: e.verification?.status ?? null,
     }));
