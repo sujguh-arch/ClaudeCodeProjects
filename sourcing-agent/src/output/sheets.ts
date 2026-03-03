@@ -18,6 +18,8 @@ const HEADER_ROW = [
   "Country",
   "Found At",
   "Source",
+  "Confidence",
+  "Verification",
 ];
 
 export class SheetsWriter {
@@ -53,7 +55,7 @@ export class SheetsWriter {
 
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: this.spreadsheetId,
-      range: "Sheet1!A1:M1",
+      range: "Sheet1!A1:O1",
     });
 
     const existingHeaders = res.data.values?.[0];
@@ -61,7 +63,7 @@ export class SheetsWriter {
       console.log("[sheets] Writing header row");
       await sheets.spreadsheets.values.update({
         spreadsheetId: this.spreadsheetId,
-        range: "Sheet1!A1:M1",
+        range: "Sheet1!A1:O1",
         valueInputOption: "RAW",
         requestBody: {
           values: [HEADER_ROW],
@@ -96,11 +98,13 @@ export class SheetsWriter {
       c.country ?? "",
       c.foundAt,
       c.source,
+      c.confidence != null ? String(c.confidence) : "",
+      c.verificationStatus ?? "",
     ]);
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: this.spreadsheetId,
-      range: "Sheet1!A:M",
+      range: "Sheet1!A:O",
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
       requestBody: {

@@ -1,7 +1,7 @@
 import "dotenv/config";
 import cron from "node-cron";
 import { loadAgentConfig, loadSearchProfiles } from "./config.js";
-import { ApolloClient } from "./sources/apollo.js";
+import { HunterClient } from "./sources/hunter.js";
 import { SheetsWriter } from "./output/sheets.js";
 import { DedupTracker } from "./dedup.js";
 
@@ -9,9 +9,9 @@ async function runOnce(): Promise<void> {
   const config = loadAgentConfig();
   const profiles = await loadSearchProfiles();
 
-  const apollo = new ApolloClient(
-    config.apollo.apiKey,
-    config.apollo.maxCreditsPerDay
+  const hunter = new HunterClient(
+    config.hunter.apiKey,
+    config.hunter.minConfidence
   );
   const sheets = new SheetsWriter(
     config.sheets.spreadsheetId,
@@ -22,17 +22,21 @@ async function runOnce(): Promise<void> {
   await dedup.load();
 
   let totalNew = 0;
-  let totalEnriched = 0;
 
   for (const profile of profiles) {
     console.log(`\n--- Running profile: ${profile.name} ---`);
 
     try {
-      // Step 1: Search (free)
-      const result = await apollo.search(profile);
+      // Step 1: Search — Hunter returns emails directly, no enrichment needed
+      const result = await hunter.search(profile);
       console.log(
         `[run] Found ${result.contacts.length} contacts (${result.totalAvailable} total available)`
       );
+
+      if (result.contacts.length === 0) {
+        console.log("[run] No contacts found for this profile");
+        continue;
+      }
 
       // Step 2: Dedup
       const newContacts = dedup.filterNew(result.contacts);
@@ -42,20 +46,20 @@ async function runOnce(): Promise<void> {
       }
       console.log(`[run] ${newContacts.length} new contact(s) to process`);
 
-      // Step 3: Enrich emails (costs credits)
-      const enriched = await apollo.enrichEmails(newContacts);
-      const withEmail = enriched.filter((c) => c.email);
+      // Log quality summary
+      const withEmail = newContacts.filter((c) => c.email);
+      const highConf = newContacts.filter((c) => (c.confidence ?? 0) >= 80);
+      const verified = newContacts.filter((c) => c.verificationStatus === "valid");
       console.log(
-        `[run] Enriched: ${withEmail.length}/${enriched.length} have emails`
+        `[run] Quality: ${withEmail.length} with email, ${highConf.length} high-confidence (≥80), ${verified.length} verified`
       );
 
-      // Step 4: Write to Google Sheet
-      const written = await sheets.appendContacts(enriched);
+      // Step 3: Write to Google Sheet
+      const written = await sheets.appendContacts(newContacts);
       totalNew += written;
-      totalEnriched += withEmail.length;
 
-      // Step 5: Mark as seen
-      dedup.markSeen(enriched);
+      // Step 4: Mark as seen
+      dedup.markSeen(newContacts);
     } catch (err) {
       console.error(`[run] Error processing profile "${profile.name}":`, err);
     }
@@ -63,10 +67,8 @@ async function runOnce(): Promise<void> {
 
   await dedup.save();
 
-  console.log(
-    `\n=== Run complete: ${totalNew} new contacts, ${totalEnriched} with emails ===`
-  );
-  console.log(`[run] Apollo credits remaining today: ${apollo.creditsRemaining}`);
+  console.log(`\n=== Run complete: ${totalNew} new contacts written to sheet ===`);
+  console.log(`[run] Hunter: ${hunter.searchesRemaining}`);
 }
 
 async function main(): Promise<void> {
@@ -80,7 +82,7 @@ async function main(): Promise<void> {
 
     const config = loadAgentConfig();
     console.log("Config loaded:");
-    console.log(`  Apollo max credits/day: ${config.apollo.maxCreditsPerDay}`);
+    console.log(`  Hunter min confidence: ${config.hunter.minConfidence}`);
     console.log(`  Spreadsheet ID: ${config.sheets.spreadsheetId}`);
     console.log(`  Schedule: ${config.schedule.cronExpression} (${config.schedule.timezone})`);
 
@@ -107,12 +109,8 @@ async function main(): Promise<void> {
   const config = loadAgentConfig();
   const { cronExpression, timezone } = config.schedule;
 
-  console.log(
-    `=== Sourcing Agent started ===`
-  );
-  console.log(
-    `Schedule: ${cronExpression} (${timezone})`
-  );
+  console.log(`=== Sourcing Agent started ===`);
+  console.log(`Schedule: ${cronExpression} (${timezone})`);
   console.log("Waiting for next scheduled run...\n");
 
   // Run once immediately on startup

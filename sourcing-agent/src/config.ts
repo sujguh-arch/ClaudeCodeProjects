@@ -3,9 +3,9 @@ import { resolve } from "path";
 import type { AgentConfig, SearchProfile } from "./sources/types.js";
 
 export function loadAgentConfig(): AgentConfig {
-  const apolloKey = process.env.APOLLO_API_KEY;
-  if (!apolloKey) {
-    throw new Error("APOLLO_API_KEY environment variable is required");
+  const hunterKey = process.env.HUNTER_API_KEY;
+  if (!hunterKey) {
+    throw new Error("HUNTER_API_KEY environment variable is required");
   }
 
   const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
@@ -17,10 +17,10 @@ export function loadAgentConfig(): AgentConfig {
     process.env.GOOGLE_CREDENTIALS_PATH ?? "./credentials.json";
 
   return {
-    apollo: {
-      apiKey: apolloKey,
-      maxCreditsPerDay: parseInt(
-        process.env.APOLLO_MAX_CREDITS_PER_DAY ?? "10",
+    hunter: {
+      apiKey: hunterKey,
+      minConfidence: parseInt(
+        process.env.HUNTER_MIN_CONFIDENCE ?? "0",
         10
       ),
     },
@@ -29,7 +29,7 @@ export function loadAgentConfig(): AgentConfig {
       credentialsPath: resolve(credentialsPath),
     },
     schedule: {
-      cronExpression: process.env.CRON_SCHEDULE ?? "0 8 * * *", // Default: 8am daily
+      cronExpression: process.env.CRON_SCHEDULE ?? "0 8 * * *",
       timezone: process.env.CRON_TIMEZONE ?? "America/Los_Angeles",
     },
     dataDir: resolve(process.env.DATA_DIR ?? "./data"),
@@ -65,7 +65,7 @@ export async function loadSearchProfiles(
       titles: p.titles,
       seniorities: p.seniorities ?? ["director", "vp"],
       locations: p.locations,
-      maxResultsPerRun: p.maxResultsPerRun ?? 25,
+      maxResultsPerRun: p.maxResultsPerRun ?? 10,
     });
   }
 

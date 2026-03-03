@@ -3,7 +3,7 @@ import { dirname, resolve } from "path";
 import type { Contact } from "./sources/types.js";
 
 interface DedupStore {
-  seenIds: string[]; // Apollo profile IDs we've already processed
+  seenIds: string[]; // profile IDs (emails for Hunter) we've already processed
   lastUpdated: string;
 }
 

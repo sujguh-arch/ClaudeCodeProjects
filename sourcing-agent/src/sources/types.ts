@@ -12,8 +12,10 @@ export interface Contact {
   state: string | null;
   country: string | null;
   foundAt: string; // ISO date string
-  source: string; // e.g. "apollo"
+  source: string; // e.g. "hunter"
   profileId: string; // source-specific ID for dedup
+  confidence?: number; // Hunter confidence score (0-100)
+  verificationStatus?: string | null; // "valid", "invalid", "accept_all"
 }
 
 export interface SearchProfile {
@@ -44,9 +46,9 @@ export interface SourceClient {
 }
 
 export interface AgentConfig {
-  apollo: {
+  hunter: {
     apiKey: string;
-    maxCreditsPerDay: number;
+    minConfidence: number;
   };
   sheets: {
     spreadsheetId: string;
