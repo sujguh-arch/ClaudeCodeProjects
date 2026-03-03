@@ -118,6 +118,57 @@ const EDUCATION = [
 ];
 
 // ============================================================================
+// PRE-BUILD VALIDATION — Character count warnings
+// ============================================================================
+
+const DEAD_ZONE_MIN = 119;
+const DEAD_ZONE_MAX = 195;
+const SINGLE_MAX = 118;
+const DOUBLE_MIN = 210;
+const DOUBLE_MAX_NARROW = 232;
+
+let warnings = 0;
+for (const role of ROLES) {
+  if (role.header.length > 117) {
+    console.warn(`⚠️  HEADER may wrap (${role.header.length} chars): ${role.title}`);
+    warnings++;
+  }
+  for (const bullet of role.bullets) {
+    const len = bullet.length;
+    if (len >= DEAD_ZONE_MIN && len <= DEAD_ZONE_MAX) {
+      console.warn(
+        `❌ DEAD ZONE (${len} chars) in ${role.title}: "${bullet.substring(0, 60)}..."\n` +
+        `   → Expand to ${DOUBLE_MIN}+ chars (double) or compress to <${SINGLE_MAX} chars (single)`
+      );
+      warnings++;
+    } else if (len > DOUBLE_MAX_NARROW) {
+      console.warn(
+        `⚠️  OVERFLOW RISK (${len} chars) in ${role.title}: "${bullet.substring(0, 60)}..."\n` +
+        `   → May overflow to 3 lines. Trim to <225 if wide chars present.`
+      );
+      warnings++;
+    }
+  }
+}
+
+const techLen = SKILLS.technical.length;
+const prodLen = SKILLS.product.length;
+if (techLen > 100) {
+  console.warn(`⚠️  Technical skills may wrap (${techLen} chars content, ~12 chars label)`);
+  warnings++;
+}
+if (prodLen > 100) {
+  console.warn(`⚠️  Product skills may wrap (${prodLen} chars content, ~10 chars label)`);
+  warnings++;
+}
+
+if (warnings > 0) {
+  console.warn(`\n⚠️  ${warnings} pre-build warning(s). Fix before building for best results.\n`);
+} else {
+  console.log("✅ Pre-build char count check: all content in safe ranges.");
+}
+
+// ============================================================================
 // FORMATTING — DO NOT MODIFY BELOW THIS LINE
 // ============================================================================
 
