@@ -7,6 +7,7 @@ PASS CRITERIA:
 1. Exactly 1 page
 2. Page fill 93-98% (warn at 91-93)
 3. Every content line ≥80% filled; 2nd lines of doubles ≥85%
+3b. No dead-zone bullets (continuation lines with <50% fill)
 4. No 3-line bullets (no very short orphan lines)
 5. Headers on 1 line each, well-filled
 6. At least 1 single-line bullet for visual variety
@@ -14,6 +15,7 @@ PASS CRITERIA:
 8. Education visible
 9. No repeated action verbs within same role section
 10. Staff-level signals present (org size, P&L, promotion, vision, enterprise clients)
+11. Keyword coverage ≥90% of must-haves (via --keywords flag, hard-fail at <80%)
 """
 
 import subprocess
@@ -255,7 +257,43 @@ def check_staff_signals(full_text):
     return found, missing_required
 
 
-def validate_resume(pdf_path):
+def check_keyword_coverage(full_text, keywords_must_have=None):
+    """Check what percentage of must-have keywords appear in the resume text.
+
+    Args:
+        full_text: The extracted resume text.
+        keywords_must_have: Optional list of must-have keyword strings.
+            If None, skip this check.
+
+    Returns:
+        (found, missing, coverage_pct) tuple
+    """
+    if not keywords_must_have:
+        return [], [], 100.0
+
+    text_lower = full_text.lower()
+    found = []
+    missing = []
+
+    for kw in keywords_must_have:
+        kw_lower = kw.strip().lower()
+        if kw_lower in text_lower:
+            found.append(kw)
+        else:
+            # Try without hyphens / with hyphens as variants
+            kw_no_hyphen = kw_lower.replace('-', ' ')
+            kw_hyphenated = kw_lower.replace(' ', '-')
+            if kw_no_hyphen in text_lower or kw_hyphenated in text_lower:
+                found.append(kw)
+            else:
+                missing.append(kw)
+
+    total = len(keywords_must_have)
+    coverage = (len(found) / total * 100) if total > 0 else 100.0
+    return found, missing, coverage
+
+
+def validate_resume(pdf_path, keywords_must_have=None):
     """Run full QA validation on a resume PDF."""
     results = {
         'file': str(pdf_path),
@@ -323,6 +361,30 @@ def validate_resume(pdf_path):
         for sl in short_lines:
             results['warnings'].append(f"  WARN SHORT ({sl['fill_pct']:.0f}%): {sl['text']}")
 
+    # --- Check 3b: Dead zone detection ---
+    dead_zone_lines = []
+    for i, ld in enumerate(line_data):
+        text = ld['text'].strip()
+        if any(text.startswith(h) for h in section_headers):
+            continue
+        if len(text) < 5:
+            continue
+        is_continuation = ld['is_indented'] and not text.startswith('●') and not text.startswith('•')
+        if is_continuation and ld['fill_pct'] < 50 and len(text) > 3:
+            dead_zone_lines.append(ld)
+
+    n_dead_zone = len(dead_zone_lines)
+    if n_dead_zone > 0:
+        results['checks'].append(f"{'❌'} Dead zone bullets (2nd line <50% fill): {n_dead_zone}")
+        results['pass'] = False
+        for dz in dead_zone_lines:
+            results['issues'].append(
+                f"  DEAD ZONE ({dz['fill_pct']:.0f}% fill): \"{dz['text']}\" "
+                f"— Expand bullet to 215+ chars (double) or compress to <118 chars (single)"
+            )
+    else:
+        results['checks'].append(f"{'✅'} Dead zone bullets: 0")
+
     # --- Check 4: Education ---
     text_result = subprocess.run(['pdftotext', pdf_path, '-'], capture_output=True, text=True)
     full_text = text_result.stdout
@@ -360,6 +422,31 @@ def validate_resume(pdf_path):
         for ms in missing_signals:
             results['warnings'].append(f"  MISSING SIGNAL: {ms}")
     results['staff_signals_found'] = found_signals
+
+    # --- Check 8: Keyword coverage ---
+    kw_found, kw_missing, kw_coverage = check_keyword_coverage(full_text, keywords_must_have)
+    if keywords_must_have:
+        ok = kw_coverage >= 90
+        results['checks'].append(
+            f"{'✅' if ok else '⚠️'} Keyword coverage: {kw_coverage:.0f}% "
+            f"({len(kw_found)}/{len(keywords_must_have)} must-haves)"
+        )
+        if kw_coverage < 80:
+            results['pass'] = False
+            results['issues'].append(
+                f"FAIL: Keyword coverage {kw_coverage:.0f}% (need ≥80%). "
+                f"Missing: {', '.join(kw_missing)}"
+            )
+        elif kw_coverage < 90:
+            results['warnings'].append(
+                f"WARN: Keyword coverage {kw_coverage:.0f}% (target ≥90%). "
+                f"Missing: {', '.join(kw_missing)}"
+            )
+        results['keyword_coverage'] = {
+            'found': kw_found,
+            'missing': kw_missing,
+            'coverage_pct': kw_coverage,
+        }
 
     # --- Summary ---
     results['line_count'] = len(line_data)
@@ -434,13 +521,20 @@ def print_line_detail(pdf_path):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("Usage: python validate_resume.py <pdf_path> [--detail]")
+        print("Usage: python validate_resume.py <pdf_path> [--detail] [--keywords kw1,kw2,kw3]")
         sys.exit(1)
 
     pdf_path = sys.argv[1]
     detail = '--detail' in sys.argv
 
-    results = validate_resume(pdf_path)
+    # Parse optional keywords
+    keywords = None
+    if '--keywords' in sys.argv:
+        kw_idx = sys.argv.index('--keywords')
+        if kw_idx + 1 < len(sys.argv):
+            keywords = [k.strip() for k in sys.argv[kw_idx + 1].split(',')]
+
+    results = validate_resume(pdf_path, keywords_must_have=keywords)
     passed = print_results(results)
 
     if detail:
