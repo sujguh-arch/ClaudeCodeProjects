@@ -1,0 +1,27 @@
+RL-as-Optimizer Evaluation Results
+==================================================
+
+Scenario: Straight road — clear
+  Rule-Based: reward=49.1, collisions=0, goal_rate=100%
+  RL-as-Optimizer: reward=51.7, collisions=0, goal_rate=100%
+  End-to-End RL: reward=19.3, collisions=0, goal_rate=50%
+
+Scenario: Car following — slow lead
+  Rule-Based: reward=-309.4, collisions=0, goal_rate=0%
+  RL-as-Optimizer: reward=0.5, collisions=0, goal_rate=0%
+  End-to-End RL: reward=-555.0, collisions=0, goal_rate=30%
+
+Scenario: Unprotected left turn
+  Rule-Based: reward=15.7, collisions=0, goal_rate=100%
+  RL-as-Optimizer: reward=48.6, collisions=0, goal_rate=100%
+  End-to-End RL: reward=47.6, collisions=0, goal_rate=100%
+
+Scenario: 4-way intersection
+  Rule-Based: reward=-132.9, collisions=20, goal_rate=0%
+  RL-as-Optimizer: reward=-112.3, collisions=0, goal_rate=100%
+  End-to-End RL: reward=-1.8, collisions=0, goal_rate=0%
+
+Scenario: Pedestrian with occlusion
+  Rule-Based: reward=-585.4, collisions=0, goal_rate=0%
+  RL-as-Optimizer: reward=-112.6, collisions=0, goal_rate=0%
+  End-to-End RL: reward=16.0, collisions=2, goal_rate=50%

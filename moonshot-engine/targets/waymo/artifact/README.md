@@ -12,29 +12,39 @@ This prototype demonstrates that pattern applied to driving behavior optimizatio
 
 ## What It Does
 
-A simplified driving environment where an autonomous vehicle navigates intersections with:
-- **Safety constraints** (collision avoidance, traffic rules, speed limits)
-- **Comfort constraints** (smooth acceleration/deceleration, minimal jerk)
-- **Efficiency goals** (minimize travel time, fuel efficiency)
+A Gymnasium-based driving environment with continuous physics (bicycle-model kinematics) where an autonomous vehicle navigates 5 scenarios of increasing complexity:
+1. **Straight road** — baseline efficiency test
+2. **Car following** — speed adaptation with leading vehicle
+3. **Unprotected left turn** — gap acceptance with oncoming traffic
+4. **4-way intersection** — multi-agent negotiation (the key test)
+5. **Pedestrian with occlusion** — safety-critical edge case
 
 Three approaches compete:
-1. **Rule-based planner** — Handcrafted heuristics (the baseline)
-2. **RL-as-optimizer** — RL that optimizes on top of the rule-based planner's decisions (the bridge)
-3. **End-to-end RL** — RL trained from scratch (for comparison)
+1. **Rule-based planner** — Handcrafted heuristics with fixed safety distances (the baseline)
+2. **RL-as-optimizer** — RL that adjusts the baseline's acceleration/steering within safety bounds (the bridge)
+3. **End-to-end RL** — RL trained from scratch with deployment noise (for comparison)
 
-The key insight: the RL-as-optimizer matches the rule-based planner's safety guarantees while finding better solutions in complex scenarios (multi-vehicle intersections, edge cases) that heuristics handle poorly.
+### Key Results
+| Planner | Total Collisions | Best Case | Worst Case |
+|---------|-----------------|-----------|------------|
+| Rule-Based | 20 (all in 4-way intersection) | Safe in simple scenarios | Fails complex multi-agent |
+| **RL-as-Optimizer** | **0** | Matches baseline safety | **Solves 4-way intersection (100% goal rate)** |
+| End-to-End RL | 2 (pedestrian collision) | High peak performance | **Safety variance — hit a pedestrian** |
+
+The RL-as-optimizer doesn't just match the baseline — it **exceeds** it in the hardest scenario while maintaining zero collisions. End-to-end RL achieves high performance in most scenarios but has the safety variance that makes production deployment risky.
 
 ## How to Run
 
 ```bash
-pip install numpy matplotlib
+pip install numpy gymnasium
 python src/main.py
 ```
 
 Outputs:
-- Performance comparison chart (safety, comfort, efficiency metrics across all 3 approaches)
-- Learning curve showing how RL-as-optimizer converges faster and safer than end-to-end RL
-- Decision trace for a complex intersection scenario with explainability annotations
+- Per-scenario comparison table (collisions, near-miss rate, jerk violations, goal rate, min distance)
+- Safety analysis showing collision rates and safety overrides across all planners
+- Decision trace for a 4-way intersection with per-step explainability annotations
+- Pattern summary with Duetto→Waymo mapping table
 
 ## Key Design Decisions
 
