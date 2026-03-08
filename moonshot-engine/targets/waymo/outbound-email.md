@@ -1,22 +1,22 @@
 # Outbound Package: PM, Planner and Driving Behaviors at Waymo
-**Generated:** 2026-03-07
+**Generated:** 2026-03-08
 **Target contact:** Vishay Nihalani, Director of Product Management, Waymo
 
 ---
 
 ## Primary Email
 
-**Subject:** RL-as-optimizer pattern for driving behaviors — built a prototype
+**Subject:** The school bus recall and the blackout are the same problem
 
 Hi Vishay,
 
-I've been thinking about the challenge of deploying RL in Waymo's planner stack — specifically, how you safely evolve driving behaviors without regressing on safety guarantees.
+The December school bus recall (threshold too confident) and the December blackout stalls (threshold not confident enough) are mirror images of the same calibration failure — when should the planner act autonomously vs. defer to Fleet Response?
 
-At Duetto, I shipped an industry-first RL engine that replaced batch linear programming with real-time inference for pricing across 7K+ properties. The breakthrough wasn't deploying RL end-to-end — it was using RL as an optimizer over the existing system, proving parity first, then unlocking capabilities the old approach couldn't support. Same safety-critical constraint: a bad pricing decision costs revenue; a bad driving decision costs lives.
+I've worked on this exact problem. At Duetto, I shipped a production RL engine making billions of daily pricing decisions. Our biggest challenge wasn't the model — it was calibrating when the system should decide on its own vs. defer to humans. We moved decision acceptance from 20% to 60%+ through context-dependent thresholds, not model improvements.
 
-I put together a working prototype that applies this RL-as-optimizer pattern to driving behaviors — three planners compete across five scenarios, and the optimizer consistently matches baseline safety while finding better comfort and efficiency solutions. Happy to share the repo or walk through the approach.
+I built a prototype modeling the confidence calibration problem across Waymo's actual 2025 failure modes. Context-adaptive thresholds pass both the school bus test and the blackout test — the aggressive and static approaches each fail one. Happy to share.
 
-Would love 20 minutes to discuss how this pattern maps to your team's work.
+20 minutes?
 
 Sujoy Guha
 linkedin.com/in/sujguha
@@ -26,7 +26,7 @@ linkedin.com/in/sujguha
 ## LinkedIn Connection Request
 (300 char max)
 
-Vishay — I've been exploring the RL-as-optimizer pattern for safe deployment in real-time decision systems (shipped production RL at Duetto for pricing). Built a prototype applying it to driving behaviors. Would love to connect and share.
+Vishay — I've been studying Waymo's confidence calibration problem (school bus recall vs blackout stalls = same threshold failure). Shipped production RL with similar trust calibration challenges at Duetto. Built a prototype. Would love to connect.
 
 ---
 
@@ -34,36 +34,45 @@ Vishay — I've been exploring the RL-as-optimizer pattern for safe deployment i
 
 Hi Vishay,
 
-Saw your team is hiring for PM, Planner and Driving Behaviors. I shipped an industry-first RL engine at Duetto — real-time inference replacing batch LP, billions of daily decisions. The deployment pattern I developed (RL as optimizer over existing planner, prove parity before expanding) maps directly to safe behavior evolution.
+I noticed your team is hiring for PM, Planner and Driving Behaviors. The role's core challenge — scaling the Waymo Driver across contexts — is fundamentally a confidence calibration problem. Different scenarios need different deference thresholds: school zones ≠ dead traffic lights ≠ construction zones.
 
-Built a prototype demonstrating the pattern. Happy to share — would love 20 minutes.
+I've solved this in production. At Duetto, pricing acceptance went from 20% to 60%+ through context-dependent thresholds and explainability — the same pattern Waymo's Drivership framework is reaching toward.
+
+Built a prototype modeling the calibration across your actual 2025 incident scenarios. Would love 20 minutes.
 
 Sujoy
 
 ---
 
-## Follow-up Email (send 1 week later if no response)
+## Follow-up Email (1 week later)
 
-**Subject:** Re: RL-as-optimizer pattern for driving behaviors — built a prototype
+**Subject:** Re: The school bus recall and the blackout are the same problem
 
 Hi Vishay,
 
-Quick follow-up — I also put together an architecture doc showing how the RL-as-optimizer pattern scales from prototype to production, including the safety gate layer that makes formal verification tractable.
+One more thought: the Drivership framework Waymo published in February defines good driving as alignment between "exhibited driving behavior and the expectations of society" — distinguishing empirical, normative, and furtherance expectations.
 
-The core insight from my Duetto experience: the hardest part of production RL isn't the model — it's building trust in autonomous decisions. We moved pricing acceptance from 20% to 60%+ by solving explainability first. Same challenge for autonomous driving trust with riders and regulators.
+At Duetto, we faced the same framing problem for RL pricing. Our breakthrough wasn't a better model — it was an ICP pivot: we stopped optimizing for Revenue Managers (who feared AI replacement) and started optimizing for General Managers (who wanted profit growth). Acceptance went from 20% to 60%+ overnight.
 
-Happy to share both the prototype and the architecture thinking.
+For Waymo, I'd argue the analogous pivot is framing Drivership not as a safety engineering metric but as a rider trust surface — different riders and regulators have different expectation profiles, and the planner's confidence calibration should reflect that.
+
+Happy to dig into this over coffee if you're open to it.
 
 Sujoy
 
 ---
 
-## Warm Intro Request (if mutual connection available)
-
-**To:** [mutual connection name]
-
-Hey [name] — I see you're connected to Vishay Nihalani at Waymo. I'm exploring a PM role on his Planner/Driving Behaviors team and would love an intro if you're comfortable. I built a prototype demonstrating how RL can safely optimize driving behaviors (based on my experience shipping production RL at Duetto). Here's a blurb you can forward:
+## Warm Intro Request
 
 **Forwardable blurb:**
 
-"Hey Vishay — wanted to connect you with Sujoy Guha, a Senior AI/ML PM at Duetto who shipped production RL engines for real-time pricing (billions of daily decisions, 10% RevPAR lift). He built a prototype demonstrating an RL-as-optimizer pattern for driving behaviors and would love 20 minutes to walk through the approach. His LinkedIn: linkedin.com/in/sujguha"
+"Hey Vishay — wanted to connect you with Sujoy Guha, a Senior AI/ML PM at Duetto. He shipped a production RL engine making billions of daily decisions and has been studying Waymo's confidence calibration challenge (the connection between the school bus recall and the blackout stalls). Built a working prototype modeling the problem. Would be worth 20 minutes. LinkedIn: linkedin.com/in/sujguha"
+
+---
+
+## Outbound Strategy Notes
+
+**Sending timing:** Tuesday-Thursday, 8-10am PT
+**Attachment:** Do NOT attach artifact on first email. The subject line + prototype mention creates curiosity. Share only if they reply.
+**If no response after follow-up:** Try reaching out to Saswat Panigrahi (CPO) or Nick Rose (PM, Expansion) as alternative entry points.
+**LinkedIn profile alignment:** Before sending, update LinkedIn headline to emphasize "RL in production" and "trust calibration" — they will check.
