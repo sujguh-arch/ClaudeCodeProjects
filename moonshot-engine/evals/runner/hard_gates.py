@@ -762,7 +762,9 @@ def outbound_hg08_cta_presence(outbound_path: str) -> GateResult:
                  "interested?", "want to dig in",
                  "your take", "your perspective", "your thoughts",
                  "on the right track", "thinking about this right",
-                 "curious", "worth a chat", "sometime?"]
+                 "curious", "worth a chat", "sometime?",
+                 "love to know", "love to hear", "makes sense",
+                 "resonates", "how your team thinks"]
     bad_ctas = ["let me know", "i'd love to discuss", "would love the opportunity",
                 "at your earliest", "would be grateful", "i'd appreciate"]
 

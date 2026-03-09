@@ -254,7 +254,7 @@ Minimum passing: 3.5 average, no individual score below 2.
 | C2 | **Recency** | References something from the last 3 months | Last 6 months | Old news or no timely reference |
 | C3 | **Insight, not information** | Contains a connection or observation ("these two failures are the same problem") not just a fact | Has a point of view but it's somewhat obvious | Just states a fact |
 | C4 | **About THEM** | Hook is about the recipient's specific problem, product, or team | About the company generally | About the sender |
-| C5 | **Pattern interrupt** | First sentence breaks the "cold email" pattern — the reader thinks "this isn't a job seeker email" | Slightly unusual | Standard template pattern |
+| C5 | **Business framing / value signal** | The email shows the sender thinks like someone who could work on this team. Frames problem at business/product level (scaling, growth, trust), not just technical. Reader thinks "this person would be useful here." | Some business context but surface-level | Pure technical observation with no business framing, or no fit signal at all |
 
 ### Dimension D: Failure Mode Detection (Weight: 3x)
 
@@ -355,6 +355,31 @@ Minimum passing: 3.5 average, no individual score below 2.
 
 ### PASS Example (Waymo)
 
+**Subject:** waymo's planner problem changes at 20 cities
+
+Vishay, I keep thinking about this: the school bus recall and the blackout stalls look like opposite failures, but they might be the same scaling problem. At 4 cities you tune thresholds by hand. At 20 with different driving norms, that breaks.
+
+I work on RL in a different industry and hit the same trust calibration problem. What worked wasn't better models, it was context-dependent thresholds per environment. I put together a rough model testing that against Waymo's 2025 incidents.
+
+Would love your take on whether this framing makes sense. Coffee?
+
+Sujoy
+linkedin.com/in/sujguha
+
+**Why this passes:**
+- ~93 words, 7 sentences, but reads fast
+- **Business framing**: frames calibration as a scaling problem (4→20 cities), not just a safety problem. Shows PM-level thinking.
+- **One specific background detail**: "I work on RL in a different industry and hit the same trust calibration problem" — honest about domain gap, signals relevant experience
+- **Subject line is genuinely interesting**: a PM director scaling to 20 cities would stop and think about this
+- Humble: "whether this framing makes sense" — asking for validation, not pitching
+- Context bridge: "I keep thinking about this" establishes motivation (HG-13)
+- Artifact is incidental: "rough model" in back half, <20 words (HG-14)
+- Zero em-dashes, zero salesy patterns, zero AI tells
+- CTA is human: "Coffee?"
+- The email gives Vishay a reason to respond: a smart reframing of his team's problem + someone with relevant RL experience who's already thinking about it
+
+### FAIL Example v3 (previous "humble" version — passes gates but no substance)
+
 **Subject:** question about waymo's calibration problem
 
 Vishay, I've been thinking about why the school bus recall and the December blackout stalls look like opposite failures but might actually be the same one. Different contexts need different confidence thresholds, and a single dial can't do both.
@@ -363,23 +388,15 @@ I put together a model testing that idea against Waymo's 2025 incidents. Would g
 
 Coffee sometime?
 
-Sujoy Guha
-linkedin.com/in/sujguha
+**Why this fails (even though it passed gates):**
+- No business framing — treats calibration as a technical observation, not a scaling/product problem
+- Zero signal about WHY Sujoy would be useful to this team
+- No background detail — reader has no idea who this person is or why they care
+- Subject line is bland and generic — "question about" is a nothing opener
+- "I put together a model" gives no descriptiveness — model of what? Testing what?
+- Passes all gates but would not get a reply — there's no reason for Vishay to engage
 
-**Why this passes:**
-- 4 sentences, ~65 words
-- Humble and curious, not presumptuous
-- Clear what the ask is ("your take on whether I'm thinking about this right")
-- Zero em-dashes, zero semicolons, zero AI tells
-- Lowercase subject line (casual, not corporate)
-- Zero mention of Duetto, titles, or credentials
-- "I put together a model" is humble, not "I modeled this across your actual failure modes"
-- CTA is human ("Coffee sometime?" not "20 minutes?")
-- Context bridge: "I've been thinking about" establishes motivation without credentials (HG-13)
-- Artifact is incidental, in back half, <20 words (HG-14)
-- Reads like a person who's been thinking, not a person who's pitching
-
-### FAIL Example v2 (previous "fixed" version — still fails)
+### FAIL Example v2 (salesy + presumptuous version)
 
 **Subject:** The school bus recall and the blackout are the same problem
 
@@ -392,12 +409,11 @@ I modeled this across your actual 2025 failure modes. Context-adaptive threshold
 **Why this fails:**
 - Em-dashes are AI tells in a 4-sentence email
 - "Mirror-image threshold failures" — no human writes like this in an email
-- "I modeled this across your actual" — presumptuous (you don't know their actual anything)
-- "Happy to share" — salesy pitch energy
+- "I modeled this across your actual" — presumptuous
+- "Happy to share" — salesy
 - "20 minutes?" — template cold email CTA
-- "The root cause is the same: context-blind calibration" — too declarative, too certain
+- No business framing, no fit signal, no background context
 - Not humble or curious — reads like someone presenting findings, not asking a question
-- No clear ask — what does Sujoy want from Vishay? Just "20 minutes" of what?
 
 ### FAIL Example v1 (original — catastrophic)
 

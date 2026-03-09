@@ -6,15 +6,15 @@
 
 ## Primary Email
 
-**Subject:** question about waymo's calibration problem
+**Subject:** waymo's planner problem changes at 20 cities
 
-Vishay, I've been thinking about why the school bus recall and the December blackout stalls look like opposite failures but might actually be the same one. Different contexts need different confidence thresholds, and a single dial can't do both.
+Vishay, I keep thinking about this: the school bus recall and the blackout stalls look like opposite failures, but they might be the same scaling problem. At 4 cities you tune thresholds by hand. At 20 with different driving norms, that breaks.
 
-I put together a model testing that idea against Waymo's 2025 incidents. Would genuinely love your take on whether I'm thinking about this right.
+I work on RL in a different industry and hit the same trust calibration problem. What worked wasn't better models, it was context-dependent thresholds per environment. I put together a rough model testing that against Waymo's 2025 incidents.
 
-Coffee sometime?
+Would love your take on whether this framing makes sense. Coffee?
 
-Sujoy Guha
+Sujoy
 linkedin.com/in/sujguha
 
 ---
@@ -22,15 +22,15 @@ linkedin.com/in/sujguha
 ## LinkedIn Connection Request
 (300 char max)
 
-Vishay, been studying why the school bus recall and blackout stalls might be the same calibration failure. Put together a model testing context-specific thresholds. Would love your perspective.
+Vishay, your planner team's calibration problem looks different at 20 cities than at 4. I work on RL with the same trust calibration challenge in a different domain. Put together a model. Would love your perspective.
 
 ---
 
 ## LinkedIn InMail
 
-Vishay, I keep coming back to the same question about Waymo's planner: why does it fail in opposite directions depending on context? Seems like a single confidence threshold can't handle school zones and dead traffic lights the same way.
+Vishay, I've been thinking about the school bus recall and the blackout stalls as a scaling problem, not a safety problem. At 4 cities you tune by hand. At 20 with different driving norms and rider expectations, that breaks.
 
-I put together a model exploring this. Would love to know if I'm on the right track.
+I work on RL in a different industry and hit the same wall. Put together a rough model. Would love to know if this framing resonates with how your team thinks about it.
 
 Sujoy
 
@@ -38,11 +38,11 @@ Sujoy
 
 ## Follow-up Email (1 week later)
 
-**Subject:** Re: question about waymo's calibration problem
+**Subject:** Re: waymo's planner problem changes at 20 cities
 
-Vishay, one more thought. Waymo's Drivership framework implies confidence calibration should vary by who's in the car, not just what's outside it. Rider expectations and regulator expectations are different surfaces.
+Vishay, one more thought. Waymo's Drivership framework frames driving quality as alignment with societal expectations. That means calibration isn't just per-city, it's per-rider and per-regulator. Different surfaces entirely.
 
-I extended the model for this. Curious if that maps to how your team thinks about it?
+I extended the model to account for that. Curious if that maps to how your team is thinking about expansion.
 
 Sujoy
 
@@ -52,7 +52,7 @@ Sujoy
 
 **Forwardable blurb:**
 
-"Vishay, my friend Sujoy Guha has been digging into Waymo's confidence calibration problem. He thinks the school bus recall and blackout stalls are the same root-cause failure and built a model exploring context-adaptive thresholds. Worth a quick chat. linkedin.com/in/sujguha"
+"Vishay, my friend Sujoy works on RL systems in a different industry and has been digging into Waymo's planner calibration problem. He thinks the school bus and blackout incidents are really a scaling problem and built a model testing context-dependent thresholds. Worth a quick chat. linkedin.com/in/sujguha"
 
 ---
 

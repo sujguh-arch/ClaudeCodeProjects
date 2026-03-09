@@ -364,7 +364,7 @@ Criteria:
 - C2: Recency — References something from last 3 months (5) vs. no timely reference (1)
 - C3: Insight over information — Contains an observation/connection, not just a fact (5) vs. just a fact without framing (1)
 - C4: Recipient relevance — Connects to something the specific recipient cares about (5) vs. about the company generally (1)
-- C5: Pattern interrupt — Something in first 2 sentences breaks "cold email" pattern (5) vs. standard template (1)
+- C5: Business framing / value signal — The email shows the sender thinks like someone who could work on this team. Frames the problem at the business/product level (scaling, growth, unit economics, user trust) not just the technical level. Reader thinks "this person would be useful here." (5) vs. pure technical observation with no business context, or no signal at all that sender could help (1)
 
 {context_block}""",
         criteria=[
@@ -372,7 +372,7 @@ Criteria:
             {"id": "C2", "name": "Recency"},
             {"id": "C3", "name": "Insight over information"},
             {"id": "C4", "name": "Recipient relevance"},
-            {"id": "C5", "name": "Pattern interrupt"},
+            {"id": "C5", "name": "Business framing / value signal"},
         ]
     ))
 
