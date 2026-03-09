@@ -666,10 +666,14 @@ def outbound_hg06_ai_slop(outbound_path: str) -> GateResult:
         body_text = ' '.join(body_lines)
         email_sents = re.split(r'(?<=[.!?])\s+', body_text)
         email_sents = [s for s in email_sents if len(s.strip()) > 10]
-        if len(email_sents) >= 3:
+        if len(email_sents) >= 4:
             lengths = [len(s.split()) for s in email_sents]
             avg = sum(lengths) / len(lengths)
-            if all(abs(l - avg) <= 5 for l in lengths):
+            max_len = max(lengths)
+            min_len = min(lengths)
+            # Flag only if range is very narrow (all within tight band)
+            # Real human writing has at least one very short or very long sentence
+            if (max_len - min_len) <= 8 and all(abs(l - avg) <= 4 for l in lengths):
                 flags.append("uniform sentence lengths (metronomic)")
 
     # Exactly 5 paragraphs — use double-newline split on body only
