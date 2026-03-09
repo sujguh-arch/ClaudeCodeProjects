@@ -251,9 +251,9 @@ Scoring calibration:
 - 2: Below average — you'd skim and delete
 - 1: Failing — you'd delete after the first sentence
 
-The #1 signal you're looking for: Does this email sound like a person who has already been thinking about your problem, or like someone who wants a job?
+The #1 signal you're looking for: Does this email sound like a person who has already been thinking about your problem, or like someone who wants a job? Does it sound like a real person wrote it, or like AI generated it?
 
-CRITICAL PHILOSOPHY: The email is about THEIR problem, not about the sender. 3-4 sentences. The artifact is the proof — credentials are never explained in the email. If the email talks more about the sender than about the recipient's company/problem, it fails hard.
+CRITICAL PHILOSOPHY: The email is about THEIR problem, not about the sender. Humble, curious, clear about the ask. The voice is "underling PM with a lot of potential" -- shows depth through the quality of the question, not through credentials. Self-deprecating, hedging naturally, casual. Contains sentence fragments, contractions, casual word choices. Reads like it was dashed off at 11pm by someone who couldn't stop thinking about something. 2026 elite standard: Clay-caliber. If the email has em-dashes, zero contractions, uniform sentence length, or zero hedging/uncertainty, it's AI.
 
 Output format — respond with ONLY valid JSON:
 {
@@ -305,7 +305,7 @@ def outbound_judge_prompts(
         system_prompt=OUTBOUND_SYSTEM_PROMPT,
         user_prompt_template=f"""Score this outbound package on Tone & Voice.
 
-The target tone is: peer-to-peer + show don't tell. Like texting a friend at another company about a problem you both find interesting. NOT applying for a job. The email is about THEIR problem. The artifact does the talking — credentials are never stated.
+The target tone is: peer-to-peer with humility. Like an underling PM with a lot of potential reaching out to someone senior whose work they genuinely admire. Specific about own work, humble about position, genuinely curious about theirs. Self-deprecating ("probably overthinking it"), hedging naturally ("not sure if"), casual ("kind of", "super different", "totally get it"). Reads like a real person who was genuinely thinking about something and decided to reach out.
 
 Criteria:
 - A1: Peer-to-peer — Like texting a friend at another company about a problem you both find interesting (5) vs. reads like a cover letter or cold email template (1)
@@ -435,14 +435,14 @@ Criteria:
         system_prompt=OUTBOUND_SYSTEM_PROMPT,
         user_prompt_template=f"""Score this outbound package on Authenticity & Anti-Slop.
 
-The AI slop detector for outbound. Cold emails are the #1 place where AI-generated content is immediately obvious. A busy hiring manager can spot LLM output in under 3 seconds. Look for: uniform sentence structure, corporate vocabulary, over-polished formatting, and most importantly — does this feel like a real person dashed off an email, or like a system generated it?
+The AI slop detector for outbound. 2026 standard: a busy hiring manager can spot LLM output in under 3 seconds. The bar is Clay-caliber -- research-first, trigger-based, 50-125 words. Look for: uniform sentence structure, corporate vocabulary, over-polished formatting, zero hedging/uncertainty, zero contractions, zero fragments. Most importantly: does this feel like a real person wrote it at 11pm because they couldn't stop thinking about something, or like a system generated it?
 
 Criteria:
-- F1: Sentence variety — Mix of short punchy and longer flowing sentences, some fragments, natural writing (5) vs. uniform structure (1)
-- F2: Vocabulary naturalness — Normal email words, no "leverage/synergy/utilize/holistic". Words you'd use in a text message. (5) vs. LinkedIn post generator (1)
-- F3: Human texture — Contains at least one element that a template engine would never produce: a slightly informal word choice ("noodling on", "keeps bugging me"), natural uncertainty about own thinking, a sentence that feels dashed-off rather than crafted. (5) vs. every word feels chosen by committee (1)
-- F4: Imperfect formatting — Not too polished, no bullet lists in email body, no em-dashes (AI tell), feels like it was written in 2 minutes. (5) vs. template engine output (1)
-- F5: Context without credentials — Reader understands WHY the sender is thinking about this problem without being told their resume. Motivation is clear ("I work on similar problems", "I've been following") without credential parade. (5) vs. either no context (stranger analyzing your failures) or too much context (credential dump) (1)
+- F1: Sentence variety + fragments — Mix of short punchy (3-7 word) and longer flowing (15-25 word) sentences. At least one deliberate fragment ("Probably overthinking it." / "The speed compliance tension."). High burstiness. (5) vs. uniform metronomic structure, all sentences same length (1)
+- F2: Vocabulary naturalness — Words you'd use in a text message: "kind of", "super", "stuff", "run into", "figure out". Contractions everywhere (I'm, I'd, don't, that's). No "leverage/synergy/utilize/holistic/navigate/landscape". (5) vs. formal vocabulary throughout, LinkedIn post generator (1)
+- F3: Human texture — Contains things a template engine would never produce: self-deprecation ("probably overthinking it"), natural uncertainty ("not sure if"), casual hedging ("I know"), genuine personality. The writer's specific voice comes through -- not just "a person" but THIS person. (5) vs. every word feels chosen by committee, zero personality (1)
+- F4: Imperfect by design — Feels like it was written in one sitting by someone who was excited. No bullet points, no numbered lists, no em-dashes, no parallel structure. Tone shifts naturally from slightly specific opening to casual close. Register isn't uniform. (5) vs. perfect structure, template engine output (1)
+- F5: Context without credentials — Self-positions as "underling PM with potential": specific about own work ("RL for pricing"), humble about position ("different domain, I know"), genuinely curious about theirs. Reader understands WHY sender cares without seeing their resume. Gives the recipient an explicit out ("totally get it if not"). (5) vs. either no context (stranger analyzing your failures) or too much (credential dump) (1)
 
 {context_block}""",
         criteria=[

@@ -2,11 +2,15 @@
 
 **Purpose:** State-of-the-art eval framework for Stage 04 (Outbound Composer) outputs. Evaluates email, LinkedIn, follow-up, and warm intro messages. Programmatic hard gates + LLM-as-judge scoring.
 
-**Philosophy:** The email is about THEIR problem, not about you. 3-4 sentences. Humble, curious, clear about what you're asking for. You're a person who's been genuinely thinking about their problem and wants to know if you're on the right track — not a salesperson pitching a deliverable.
+**Philosophy:** The email is about THEIR problem, not about you. Humble, curious, clear about what you're asking for. You're a PM who's been genuinely thinking about their problem and wants to know if you're on the right track. Not a salesperson pitching a deliverable. Not a polished pitch. A person thinking out loud.
 
-**The bar:** Would you actually send this? If it reads like something an AI career coach would generate, it fails. If it sounds salesy, presumptuous, or over-confident, it fails. If it has em-dashes, semicolons, or "mirror-image" compound structures, it's AI. The right email sounds like you'd dash it off in 2 minutes — no polish, no pitch, just genuine curiosity and a clear ask.
+**The bar:** Would you actually send this from your phone at 11pm? If it reads like something an AI career coach would generate, it fails. If it sounds salesy, presumptuous, or over-confident, it fails. If it has em-dashes, semicolons, or compound phrasing, it's AI. The right email sounds like you dashed it off in 2 minutes because you were genuinely excited about something and couldn't help yourself.
 
-**Tone north star:** "Hey, I've been thinking about your problem and have a question" — NOT "I built a thing, want to see it?"
+**Tone north star:** "Hey, I keep coming back to this thing you said and I have a question" -- NOT "I built a thing, want to see it?"
+
+**The voice:** An underling PM with a lot of potential. Specific about own work, humble about position, genuinely curious about theirs. Shows depth through the quality of the question, not through credentials. Self-deprecating ("probably overthinking it"), hedging naturally ("not sure if"), casual ("kind of", "super different", "totally get it"). Reads like a real person who was genuinely thinking about something and decided to reach out.
+
+**2026 elite outbound standard:** Clay-caliber. Research-first, trigger-based, 50-125 words. Every sentence earns its spot. The email reads like it was written in one sitting by someone who was genuinely thinking, not carefully constructed by committee.
 
 ---
 
@@ -87,7 +91,11 @@ Replace company name + recipient name + company-specific references with a compe
 - **PASS:** All checks pass
 - **FAIL:** Any check fails
 
-### HG-06: AI Slop Detection — Outbound Specific
+### HG-06: AI Slop Detection -- Outbound Specific
+
+**AI poison words (zero tolerance in outbound):**
+- "delve", "navigate", "landscape", "leverage", "harness", "illuminate", "facilitate", "bolster", "underscore", "pivotal", "transformative", "realm", "tapestry", "beacon", "ecosystem", "paradigm"
+- "actionable insights", "innovative solutions", "drive efficiency", "solid foundation", "results-driven"
 
 **Hedging language (zero tolerance):**
 - "It's worth noting..."
@@ -99,22 +107,34 @@ Replace company name + recipient name + company-specific references with a compe
 - "It should be noted..."
 
 **Structural tells:**
-- ANY em-dashes in primary email (em-dashes are natural in long-form artifacts; in a 4-sentence email they're an instant AI tell)
+- ANY em-dashes in primary email (in a 4-sentence email they're an instant AI tell)
 - More than 1 em-dash in any other variant
 - Uses semicolons in casual email context
-- Every sentence is within +/-5 words of the same length
+- Every sentence is within +/-4 words of the same length (range <=8)
 - Email has exactly 5 paragraphs
+- Rule-of-three pattern ("adjective, adjective, and adjective")
+- Present participial trailing clause (main clause + ", enabling..." / ", allowing..." / ", making it...")
+- Perfectly parallel structure across consecutive sentences
 
 **Salesy / presumptuous patterns (zero tolerance):**
 - "Happy to share" / "Happy to walk you through" / "Happy to discuss"
-- "Your actual [X]" / "Your real [X]" (presumptuous — you don't know their actual anything)
-- "The fix" / "The solution" (too certain — you're asking, not telling)
+- "Your actual [X]" / "Your real [X]" (presumptuous)
+- "The fix" / "The solution" (too certain)
 - "I modeled this across your actual" (presumptuous framing)
+- "Incredibly excited" / "Absolutely love" (excessive positivity)
 
 **Over-explanation tells (catches the real failure mode):**
 - Any paragraph longer than 3 sentences
-- Bridge section that explains HOW something was done (should only hint WHAT was done)
-- "Our biggest challenge was..." / "The key insight was..." / "What we found was..." (telling, not showing)
+- Bridge section that explains HOW something was done (should only hint WHAT)
+- "Our biggest challenge was..." / "The key insight was..." / "What we found was..."
+
+**Human texture REQUIRED signals (>=2 must be present):**
+- Sentence fragment (e.g., "Probably overthinking it." / "Super interesting stuff.")
+- Hedging/uncertainty marker ("not sure if", "might be way off", "probably", "kind of", "I think")
+- Casual word choice ("super", "stuff", "cool", "kind of", "run into", "figure out", "a lot")
+- Contraction usage (I'd, don't, can't, wouldn't, I'm, I've, that's, it's)
+- Self-deprecation or self-interruption ("probably overthinking it", "I know", "totally get it if not")
+- CTA with an explicit out for the recipient ("totally get it if not", "no worries if not")
 
 **Check:** Regex + structural analysis.
 - **PASS:** 0 flags across all categories
@@ -171,24 +191,28 @@ The email must be about THEIR problem, not about Sujoy.
 - **FAIL:** >=2 sub-checks flagged
 
 ### HG-12: Writing Style Match
-Sujoy's style: direct, compressed, concrete-first, peer-to-peer.
+Sujoy's style: direct, compressed, concrete-first, peer-to-peer with humility. Reads like a PM who texts the way they write emails.
 
-**Style markers (want PRESENT >=3 of 7):**
+**Style markers (want PRESENT >=3 of 8):**
 - Leads with observation/insight about THEIR problem, not self-introduction
-- Short sentences for impact, longer only for the one key observation
-- Humility/curiosity signal ("your take", "am I thinking about this right", "curious if")
+- Sentence length variety (mix of <=8 word punches and >=20 word flowing)
+- Humility/curiosity signal ("your take", "am I thinking about this right", "curious if", "probably overthinking")
 - Lowercase subject line (casual, not corporate)
-- Ends with a terse CTA (<=5 words)
-- Total email is 3-5 sentences
+- Ends with a terse CTA (<=5 words) with an out ("totally get it if not")
+- At least one sentence fragment (not a complete sentence)
+- Natural contractions throughout (I'm, I'd, don't, that's, can't)
 - Active voice throughout
 
-**Anti-style markers (want ABSENT — zero tolerance):**
+**Anti-style markers (want ABSENT -- zero tolerance):**
 - Any sentence starting with "I am a..."
 - Any sentence longer than 35 words
 - Passive voice in the CTA
 - More than one paragraph about sender's experience
 - Any sentence beginning "I've worked on..." / "I've solved..." / "I shipped..." / "In my role..."
 - Em-dashes in email body (AI tell in short-form context)
+- Uniform register (same formality level throughout -- real emails shift tone)
+- Zero contractions in a 5+ sentence email (too formal)
+- "Dear [Name]" opening
 
 - **PASS:** >=3 style markers, 0 anti-style markers
 - **FAIL:** <2 style markers OR any anti-style marker
@@ -280,11 +304,11 @@ Minimum passing: 3.5 average, no individual score below 2.
 
 | # | Criterion | 5 (Exceptional) | 3 (Acceptable) | 1 (Failing) |
 |---|-----------|-----------------|-----------------|-------------|
-| F1 | **Sentence variety** | Mix of short punchy and longer flowing. Some fragments. Reads like natural writing. | Mostly varied | Uniform metronomic structure |
-| F2 | **Vocabulary naturalness** | Words you'd use in a text message. No "leverage", "synergy", "utilize" | Mostly natural | LinkedIn post generator |
-| F3 | **Human texture** | Contains something a template engine would never produce: informal word choice ("noodling on", "keeps bugging me"), natural uncertainty about own thinking, a sentence that feels dashed-off. | Some natural language | Every word feels chosen by committee |
-| F4 | **Imperfect by design** | Feels dashed off but is actually crafted. No bullet points, no numbered lists, no em-dashes. Written in 2 minutes. | Slightly over-formatted | Template engine output |
-| F5 | **Context without credentials** | Reader understands WHY sender is thinking about this problem without seeing their resume. Motivation clear, credentials absent. | Some context but slightly credential-adjacent | Either no context (stranger analyzing your failures) or too much (credential dump) |
+| F1 | **Sentence variety + fragments** | Mix of short punchy (3-7 words) and longer flowing (15-25 words). At least one deliberate fragment. Burstiness is high. | Mostly varied but no fragments | Uniform metronomic structure, all sentences same length |
+| F2 | **Vocabulary naturalness** | Words you'd use in a text message: "kind of", "super", "stuff", "run into", "figure out". Contractions everywhere. No "leverage", "synergy", "utilize" | Mostly natural, some contractions | LinkedIn post generator, formal vocabulary throughout |
+| F3 | **Human texture** | Contains things a template engine would never produce: self-deprecation ("probably overthinking it"), natural uncertainty ("not sure if"), casual hedging ("I know"), a sentence that feels genuinely dashed-off. The writer's personality comes through. | Some natural language but could be anyone | Every word feels chosen by committee, zero personality |
+| F4 | **Imperfect by design** | Feels like it was written in one sitting by someone who was excited. No bullet points, no numbered lists, no em-dashes, no parallel structure. Tone shifts naturally from slightly formal to casual. | Slightly over-formatted but mostly natural | Template engine output with perfect structure |
+| F5 | **Context without credentials** | Reader understands WHY sender is thinking about this problem without seeing their resume. Self-positions as "underling PM with potential" -- specific about own work, humble about position ("different domain, I know"), genuinely curious about theirs. | Some context but slightly credential-adjacent | Either no context (stranger analyzing your failures) or too much (credential dump) |
 
 ---
 
@@ -355,28 +379,33 @@ Minimum passing: 3.5 average, no individual score below 2.
 
 ### PASS Example (Waymo)
 
-**Subject:** waymo's planner problem changes at 20 cities
+**Subject:** the speed compliance thing from ride ai
 
-Vishay, I keep thinking about this: the school bus recall and the blackout stalls look like opposite failures, but they might be the same scaling problem. At 4 cities you tune thresholds by hand. At 20 with different driving norms, that breaks.
+Vishay, I keep coming back to something you said on the Ride AI podcast. The speed compliance tension. Riders want it to feel human but the planner has to be conservative, and that changes completely city to city.
 
-I work on RL in a different industry and hit the same trust calibration problem. What worked wasn't better models, it was context-dependent thresholds per environment. I put together a rough model testing that against Waymo's 2025 incidents.
+I'm a PM working on RL for pricing (different domain, I know) but I run into the same calibration problem. How do you set thresholds that "feel right" when right keeps shifting? Been sketching a rough model. Probably overthinking it.
 
-Would love your take on whether this framing makes sense. Coffee?
+Would love your take if you ever have 15 min. Totally get it if not.
 
 Sujoy
 linkedin.com/in/sujguha
 
-**Why this passes:**
-- ~93 words, 7 sentences, but reads fast
-- **Business framing**: frames calibration as a scaling problem (4→20 cities), not just a safety problem. Shows PM-level thinking.
-- **One specific background detail**: "I work on RL in a different industry and hit the same trust calibration problem" — honest about domain gap, signals relevant experience
-- **Subject line is genuinely interesting**: a PM director scaling to 20 cities would stop and think about this
-- Humble: "whether this framing makes sense" — asking for validation, not pitching
-- Context bridge: "I keep thinking about this" establishes motivation (HG-13)
-- Artifact is incidental: "rough model" in back half, <20 words (HG-14)
-- Zero em-dashes, zero salesy patterns, zero AI tells
-- CTA is human: "Coffee?"
-- The email gives Vishay a reason to respond: a smart reframing of his team's problem + someone with relevant RL experience who's already thinking about it
+**Why this passes (2026 elite standard):**
+- ~89 words, 9 sentences with high burstiness (3w to 19w range)
+- **Sentence fragments**: "The speed compliance tension." (4w) and "Probably overthinking it." (3w) -- things a template engine would never produce
+- **Self-deprecation**: "Probably overthinking it" / "different domain, I know" / "Totally get it if not" -- trust signals, not weakness
+- **Hedging/uncertainty**: "I know", "probably", natural doubt about own thinking
+- **Casual word choices**: "keep coming back to", "run into", "totally get it"
+- **Contractions**: "I'm", "I know", natural and consistent
+- **CTA with an out**: "Totally get it if not" -- giving them an easy no paradoxically increases yes
+- **Peer-to-peer with humility**: "I'm a PM working on RL for pricing" -- positions lower than "I work on RL in production", shows deference
+- **Anchored on recipient's own words**: Ride AI podcast, speed compliance -- references something Vishay actually said
+- **Business framing**: "changes completely city to city" frames as a scaling/product problem
+- **Genuine question**: "How do you set thresholds that 'feel right' when right keeps shifting?" -- real intellectual curiosity, not rhetorical
+- **Artifact is incidental**: "rough model" in back half, 5 words
+- Zero em-dashes, zero semicolons, zero AI poison words, zero salesy patterns
+- **Register shift**: opens with specific reference (slightly formal), warms up through the middle, closes casual
+- **Reads like it was written at 11pm by someone who couldn't stop thinking about this**
 
 ### FAIL Example v3 (previous "humble" version — passes gates but no substance)
 

@@ -6,13 +6,15 @@
 
 ## Primary Email
 
-**Subject:** the speed compliance tension and scaling to 20 cities
+**Subject:** the speed compliance thing from ride ai
 
-Vishay, I caught your Ride AI episode and the speed compliance point stuck with me. Riders want the car to drive like a human, but the planner has to be conservative. That tension gets way harder at scale because "driving like a human" means something different in Austin than SF.
+Vishay, I keep coming back to something you said on the Ride AI podcast. The speed compliance tension. Riders want it to feel human but the planner has to be conservative, and that changes completely city to city.
 
-I work on RL in a different industry and deal with the same calibration tension. Been noodling on how context-dependent thresholds might handle it and put together a rough model. Curious if that framing maps to how your team thinks about this.
+I'm a PM working on RL for pricing (different domain, I know) but I run into the same calibration problem. How do you set thresholds that "feel right" when right keeps shifting?
 
-Coffee?
+Been sketching a rough model. Probably overthinking it.
+
+Would love your take if you ever have 15 min. Totally get it if not.
 
 Sujoy
 linkedin.com/in/sujguha
@@ -22,15 +24,15 @@ linkedin.com/in/sujguha
 ## LinkedIn Connection Request
 (300 char max)
 
-Vishay, caught your Ride AI episode. The speed compliance tension you described seems like it gets way harder at 20 cities. I work on RL with a similar calibration problem in a different industry. Would love your perspective.
+Vishay, keep coming back to the speed compliance tension from your Ride AI ep. I work on RL for pricing (different world, same calibration problem). Would love your take on how that scales to 20 cities.
 
 ---
 
 ## LinkedIn InMail
 
-Vishay, I listened to your Ride AI conversation and keep coming back to the speed compliance tension. Riders want the car to feel human, regulators want it conservative, and each new city redefines what both of those mean.
+Vishay, something you said on Ride AI keeps bugging me. The speed compliance tension changes completely city to city, and I keep wondering how your team thinks about that at scale.
 
-I work on RL in a different industry and hit the same wall. Put together a rough model exploring context-dependent thresholds. Curious if I'm thinking about this right.
+I'm a PM doing RL for pricing and honestly run into the same wall. Sketched a rough model. Curious if I'm even thinking about it right.
 
 Sujoy
 
@@ -38,11 +40,11 @@ Sujoy
 
 ## Follow-up Email (1 week later)
 
-**Subject:** Re: the speed compliance tension and scaling to 20 cities
+**Subject:** Re: the speed compliance thing from ride ai
 
-Vishay, one more thought. Waymo's Drivership framework implies "good driving" changes depending on who's in the car, not just what's outside it. Rider expectations and regulator expectations are different surfaces entirely.
+Vishay, one more thought on this. Waymo's Drivership framework basically means "good driving" depends on who's in the car, not just what's on the road. That's a completely different optimization surface.
 
-I extended the model to account for that. Curious if that maps to how your team thinks about expansion.
+Curious if that's how your team frames expansion planning.
 
 Sujoy
 
@@ -52,7 +54,7 @@ Sujoy
 
 **Forwardable blurb:**
 
-"Vishay, my friend Sujoy works on RL systems in a different industry and has been thinking about Waymo's planner calibration challenge. He heard you on the Ride AI podcast and has a question about how the speed compliance tension scales to new cities. Built a rough model. Worth a quick chat. linkedin.com/in/sujguha"
+"Vishay, my friend Sujoy is a PM working on RL for pricing and keeps thinking about Waymo's planner calibration problem. He heard you on Ride AI and has a specific question about how speed compliance scales to new cities. Worth 15 min. linkedin.com/in/sujguha"
 
 ---
 
@@ -61,4 +63,4 @@ Sujoy
 **Sending timing:** Tuesday-Thursday, 8-10am PT
 **Attachment:** Do NOT attach artifact on first email. The curiosity should come from the framing, not the deliverable. Share only if they reply.
 **If no response after follow-up:** Try reaching out to Saswat Panigrahi (CPO) or Nick Rose (PM, Expansion) as alternative entry points.
-**LinkedIn profile alignment:** Before sending, update LinkedIn headline to emphasize "RL in production" and "trust calibration" — they will check.
+**LinkedIn profile alignment:** Before sending, update LinkedIn headline to emphasize "RL in production" and "trust calibration."

@@ -611,6 +611,18 @@ def outbound_hg06_ai_slop(outbound_path: str) -> GateResult:
 
     flags = []
 
+    # === AI poison words (zero tolerance in outbound) ===
+    poison_words = [
+        "delve", "navigate", "landscape", "leverage", "harness", "illuminate",
+        "facilitate", "bolster", "underscore", "pivotal", "transformative",
+        "realm", "tapestry", "beacon", "ecosystem", "paradigm",
+        "actionable insights", "innovative solutions", "drive efficiency",
+        "solid foundation", "results-driven",
+    ]
+    poison_hits = [w for w in poison_words if w in text]
+    if poison_hits:
+        flags.append(f"AI poison words: {poison_hits}")
+
     # === Hedging language (zero tolerance) ===
     hedges = [
         "it's worth noting", "there are several reasons",
@@ -688,6 +700,27 @@ def outbound_hg06_ai_slop(outbound_path: str) -> GateResult:
         if len(paras) == 5:
             flags.append("exactly 5 paragraphs")
 
+    # === Rule-of-three and participial trailing clauses ===
+    # Rule of three: "adjective, adjective, and adjective" -- AI overuses this
+    if re.search(r'\b\w+,\s+\w+,\s+and\s+\w+\b', raw_text):
+        # Check if it's in an outbound variant (not strategy notes)
+        for key in ["Primary Email", "LinkedIn InMail", "Follow-up Email"]:
+            if key in sections and re.search(r'\b\w+,\s+\w+,\s+and\s+\w+\b', sections[key]):
+                flags.append("rule-of-three pattern in email")
+                break
+
+    # Participial trailing clause: ", enabling..." / ", allowing..." / ", making it..."
+    participial = re.findall(r',\s+(?:enabling|allowing|making|ensuring|driving|creating|providing)\s', text)
+    if participial:
+        flags.append(f"participial trailing clause ({len(participial)}x)")
+
+    # Excessive positivity
+    excessive_pos = ["incredibly excited", "absolutely love", "truly inspiring",
+                     "deeply impressed", "genuinely thrilled"]
+    pos_hits = [p for p in excessive_pos if p in text]
+    if pos_hits:
+        flags.append(f"excessive positivity: {pos_hits}")
+
     # === Over-explanation tells (catches the real failure mode) ===
     if "Primary Email" in sections:
         email_body = sections["Primary Email"]
@@ -719,14 +752,72 @@ def outbound_hg06_ai_slop(outbound_path: str) -> GateResult:
             if phrase in text:
                 flags.append(f"over-explains: '{phrase}'")
 
+    # === Human texture signals (MUST be present -- >=2 required) ===
+    human_signals = 0
+    human_details = []
+
+    # 1. Sentence fragment (non-complete sentence, <6 words, no verb structure)
+    if "Primary Email" in sections:
+        email_body = sections["Primary Email"]
+        body_lines = [l for l in email_body.split('\n')
+                     if not l.startswith('**Subject:') and l.strip()
+                     and l.strip() != 'Sujoy' and 'linkedin.com' not in l.lower()
+                     and l.strip() != '---']
+        body_text = ' '.join(body_lines)
+        frags = re.split(r'(?<=[.!?])\s+', body_text)
+        frags = [s.strip() for s in frags if s.strip()]
+        for frag in frags:
+            words = frag.split()
+            if len(words) <= 6 and not any(frag.lower().startswith(v) for v in
+                    ['i am', 'i have', 'i was', 'it is', 'it was', 'they are', 'we are']):
+                human_signals += 1
+                human_details.append(f"fragment: '{frag}'")
+                break  # Count once
+
+    # 2. Hedging/uncertainty marker
+    hedge_markers = ["not sure if", "might be way off", "probably", "kind of",
+                     "i think", "i know", "maybe", "might be"]
+    if any(h in text for h in hedge_markers):
+        human_signals += 1
+        human_details.append("hedging/uncertainty")
+
+    # 3. Casual word choice
+    casual_words = ["super", "stuff", "cool", "kind of", "run into", "figure out",
+                    "a lot", "totally", "honestly", "basically", "bugging me",
+                    "noodling", "sketching", "dashed off"]
+    if any(c in text for c in casual_words):
+        human_signals += 1
+        human_details.append("casual vocabulary")
+
+    # 4. Contraction usage
+    contractions = ["i'm", "i'd", "don't", "can't", "wouldn't", "i've", "that's",
+                   "it's", "doesn't", "isn't", "won't", "couldn't", "they're"]
+    contraction_count = sum(1 for c in contractions if c in text)
+    if contraction_count >= 2:
+        human_signals += 1
+        human_details.append(f"contractions ({contraction_count})")
+
+    # 5. Self-deprecation / explicit out
+    self_dep = ["probably overthinking", "i know", "totally get it if not",
+                "no worries if not", "might be naive", "way off",
+                "fine if not", "get it if not"]
+    if any(s in text for s in self_dep):
+        human_signals += 1
+        human_details.append("self-deprecation/out")
+
+    if human_signals < 2:
+        flags.append(f"insufficient human texture ({human_signals}/2 required): {human_details}")
+
     passed = len(flags) == 0
     detail = f"{len(flags)} flags"
     if flags:
         detail += f": {'; '.join(flags)}"
     else:
-        detail += " — clean"
+        detail += f" -- clean ({human_signals} human signals: {', '.join(human_details)})"
 
-    return GateResult("HG-06", "AI Slop Detection", passed, detail, {"flags": flags})
+    return GateResult("HG-06", "AI Slop Detection", passed, detail,
+                     {"flags": flags, "human_signals": human_signals,
+                      "human_details": human_details})
 
 
 def outbound_hg07_variant_completeness(outbound_path: str) -> GateResult:
@@ -1237,6 +1328,22 @@ def writing_style_check(text: str, short_form: bool = False) -> GateResult:
                 style_markers += 1
                 marker_details.append("lowercase subject (casual)")
 
+        # Positive: Sentence fragment present
+        for s in sentences:
+            words = s.split()
+            if len(words) <= 6:
+                style_markers += 1
+                marker_details.append("sentence fragment")
+                break
+
+        # Positive: Contractions (natural casual writing)
+        contraction_list = ["i'm", "i'd", "don't", "can't", "wouldn't", "i've",
+                           "that's", "it's", "doesn't", "isn't"]
+        contraction_count = sum(1 for c in contraction_list if c in text_lower)
+        if contraction_count >= 2:
+            style_markers += 1
+            marker_details.append(f"natural contractions ({contraction_count})")
+
         # Check for "I am a..." opener
         if re.search(r'\bi am a\b', text_lower):
             anti_markers += 1
@@ -1262,6 +1369,18 @@ def writing_style_check(text: str, short_form: bool = False) -> GateResult:
                 anti_markers += 1
                 anti_details.append(f"sentence starts with '{opener}'")
                 break  # Only flag once
+
+        # "Dear [Name]" opening
+        if re.search(r'\bdear\s+[A-Z]', text):
+            anti_markers += 1
+            anti_details.append("'Dear [Name]' opening")
+
+        # Zero contractions in 5+ sentence email (too formal)
+        contraction_list2 = ["i'm", "i'd", "don't", "can't", "wouldn't", "i've",
+                            "that's", "it's", "doesn't", "isn't"]
+        if len(sentences) >= 5 and not any(c in text_lower for c in contraction_list2):
+            anti_markers += 1
+            anti_details.append("zero contractions in 5+ sentence email")
 
         # More than one paragraph about sender's experience
         sections = extract_sections(text)
