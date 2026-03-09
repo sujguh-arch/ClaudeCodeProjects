@@ -874,6 +874,130 @@ def outbound_hg10_focus_balance(outbound_path: str) -> GateResult:
                       "total": len(sentences), "them_pct": round(them_pct, 2)})
 
 
+def outbound_hg13_context_bridge(outbound_path: str) -> GateResult:
+    """HG-13: Email must establish WHY the sender is thinking about this problem.
+
+    Not credentials — motivation. A stranger analyzing your company's failures
+    without context is alarming. Needs a 1-clause signal like 'I work on similar
+    problems' or 'I've been following'.
+    """
+    raw_text = load_file(outbound_path)
+    sections = extract_sections(raw_text)
+    email = sections.get("Primary Email", "")
+
+    if not email:
+        return GateResult("HG-13", "Context Bridge", False, "no email found", {})
+
+    body_lines = [l for l in email.split('\n')
+                 if not l.startswith('**Subject:') and l.strip()
+                 and l.strip() != 'Sujoy Guha' and 'linkedin.com' not in l.lower()]
+    body = ' '.join(body_lines).strip().lower()
+
+    # Good context bridges — explain WHY without being credential-y
+    motivation_signals = [
+        "i've been thinking", "i've been following", "i keep coming back",
+        "i work on similar", "i work on related", "in a different domain",
+        "in a different industry", "from a different angle",
+        "keeps bugging me", "been noodling on", "been studying",
+        "caught my attention", "got me thinking",
+        "i've been looking at", "i've been curious about",
+        "a question about", "a question i keep",
+    ]
+
+    has_bridge = any(m in body for m in motivation_signals)
+
+    # Also check: does the first sentence jump straight into their problem
+    # without ANY preamble? (cold open problem)
+    sentences = re.split(r'(?<=[.!?])\s+', body)
+    sentences = [s.strip() for s in sentences if len(s.strip()) > 5]
+
+    first_sent_cold = False
+    if sentences:
+        first = sentences[0]
+        # If first sentence contains no "I" or personal motivation, it's a cold open
+        has_personal = any(w in first for w in ['i\'ve', 'i\'m', 'i ', 'my ', 'i keep'])
+        if not has_personal:
+            first_sent_cold = True
+
+    passed = has_bridge
+    detail = ""
+    if has_bridge:
+        detail = "motivation signal found"
+    else:
+        detail = "no context bridge — reader has no idea why sender cares about this"
+    if first_sent_cold and not has_bridge:
+        detail += " | cold open: first sentence jumps into their problem without preamble"
+
+    return GateResult("HG-13", "Context Bridge", passed, detail,
+                     {"has_bridge": has_bridge, "first_sent_cold": first_sent_cold})
+
+
+def outbound_hg14_artifact_weight(outbound_path: str) -> GateResult:
+    """HG-14: Artifact mention should be incidental, not the centerpiece.
+
+    Checks: artifact mention appears in back half of email, takes <20 words,
+    and doesn't dominate the email structure.
+    """
+    raw_text = load_file(outbound_path)
+    sections = extract_sections(raw_text)
+    email = sections.get("Primary Email", "")
+
+    if not email:
+        return GateResult("HG-14", "Artifact Weight", False, "no email found", {})
+
+    body_lines = [l for l in email.split('\n')
+                 if not l.startswith('**Subject:') and l.strip()
+                 and l.strip() != 'Sujoy Guha' and 'linkedin.com' not in l.lower()]
+    body = ' '.join(body_lines).strip()
+
+    sentences = re.split(r'(?<=[.!?])\s+', body)
+    sentences = [s.strip() for s in sentences if len(s.strip()) > 5]
+
+    if not sentences:
+        return GateResult("HG-14", "Artifact Weight", False, "no sentences found", {})
+
+    # Find artifact-mentioning sentences
+    artifact_keywords = ['model', 'prototype', 'built', 'put together', 'modeled',
+                        'wrote up', 'sketched out', 'noodling', 'rough model']
+    artifact_sentences = []
+    artifact_positions = []
+    for i, sent in enumerate(sentences):
+        if any(kw in sent.lower() for kw in artifact_keywords):
+            artifact_sentences.append(sent)
+            artifact_positions.append(i)
+
+    violations = []
+
+    if artifact_sentences:
+        # Check: artifact mention should be in back half
+        midpoint = len(sentences) / 2
+        early_mentions = [p for p in artifact_positions if p < midpoint - 0.5]
+        if early_mentions and len(sentences) > 3:
+            violations.append(f"artifact mentioned in sentence {early_mentions[0]+1} of {len(sentences)} (should be back half)")
+
+        # Check: artifact sentence should be brief (<20 words)
+        for sent in artifact_sentences:
+            wc = len(sent.split())
+            if wc > 20:
+                violations.append(f"artifact sentence is {wc}w (should be <20)")
+
+        # Check: artifact shouldn't dominate — more artifact sentences than problem sentences
+        artifact_ratio = len(artifact_sentences) / len(sentences)
+        if artifact_ratio > 0.4:
+            violations.append(f"artifact in {len(artifact_sentences)}/{len(sentences)} sentences ({artifact_ratio:.0%}) — too dominant")
+
+    passed = len(violations) == 0
+    detail = f"{len(artifact_sentences)} artifact mention(s)"
+    if violations:
+        detail += f" | {'; '.join(violations)}"
+    else:
+        detail += " — weight is balanced"
+
+    return GateResult("HG-14", "Artifact Weight", passed, detail,
+                     {"artifact_sentences": len(artifact_sentences),
+                      "positions": artifact_positions, "violations": violations})
+
+
 # ─────────────────────────────────────────────
 # AI DETECTION (GPTZero-style) + WRITING STYLE
 # ─────────────────────────────────────────────
@@ -1219,4 +1343,6 @@ def run_outbound_gates(outbound_path: str, fact_set_path: str) -> list[GateResul
         outbound_hg10_focus_balance(outbound_path),
         ai_detection_check(variant_text, short_form=True),
         writing_style_check(variant_text, short_form=True),
+        outbound_hg13_context_bridge(outbound_path),
+        outbound_hg14_artifact_weight(outbound_path),
     ]

@@ -435,22 +435,22 @@ Criteria:
         system_prompt=OUTBOUND_SYSTEM_PROMPT,
         user_prompt_template=f"""Score this outbound package on Authenticity & Anti-Slop.
 
-The AI slop detector for outbound. Cold emails are the #1 place where AI-generated content is immediately obvious. A busy hiring manager can spot LLM output in under 3 seconds. Look for: uniform sentence structure, corporate vocabulary, over-polished formatting, vague claims, hidden gaps.
+The AI slop detector for outbound. Cold emails are the #1 place where AI-generated content is immediately obvious. A busy hiring manager can spot LLM output in under 3 seconds. Look for: uniform sentence structure, corporate vocabulary, over-polished formatting, and most importantly — does this feel like a real person dashed off an email, or like a system generated it?
 
 Criteria:
 - F1: Sentence variety — Mix of short punchy and longer flowing sentences, some fragments, natural writing (5) vs. uniform structure (1)
-- F2: Vocabulary naturalness — Normal email words, no "leverage/synergy/utilize/holistic" (5) vs. LinkedIn post generator (1)
-- F3: Specific over general — Every claim is specific ("20% to 60%+") not vague ("significantly improved") (5) vs. vague throughout (1)
-- F4: Imperfect formatting — Not too polished, no bullet lists in email body, feels crafted but dashed-off (5) vs. template engine output (1)
-- F5: Honest gaps — Acknowledges or doesn't hide domain gap, frames as asset or addresses directly (5) vs. claims domain expertise that doesn't exist (1)
+- F2: Vocabulary naturalness — Normal email words, no "leverage/synergy/utilize/holistic". Words you'd use in a text message. (5) vs. LinkedIn post generator (1)
+- F3: Human texture — Contains at least one element that a template engine would never produce: a slightly informal word choice ("noodling on", "keeps bugging me"), natural uncertainty about own thinking, a sentence that feels dashed-off rather than crafted. (5) vs. every word feels chosen by committee (1)
+- F4: Imperfect formatting — Not too polished, no bullet lists in email body, no em-dashes (AI tell), feels like it was written in 2 minutes. (5) vs. template engine output (1)
+- F5: Context without credentials — Reader understands WHY the sender is thinking about this problem without being told their resume. Motivation is clear ("I work on similar problems", "I've been following") without credential parade. (5) vs. either no context (stranger analyzing your failures) or too much context (credential dump) (1)
 
 {context_block}""",
         criteria=[
             {"id": "F1", "name": "Sentence variety"},
             {"id": "F2", "name": "Vocabulary naturalness"},
-            {"id": "F3", "name": "Specific over general"},
+            {"id": "F3", "name": "Human texture"},
             {"id": "F4", "name": "Imperfect formatting"},
-            {"id": "F5", "name": "Honest gaps"},
+            {"id": "F5", "name": "Context without credentials"},
         ]
     ))
 

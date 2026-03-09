@@ -193,6 +193,33 @@ Sujoy's style: direct, compressed, concrete-first, peer-to-peer.
 - **PASS:** >=3 style markers, 0 anti-style markers
 - **FAIL:** <2 style markers OR any anti-style marker
 
+### HG-13: Context Bridge
+The email must establish WHY the sender is thinking about this problem. Not credentials — motivation. A stranger analyzing your company's failures without context is alarming, not intriguing.
+
+**Good context bridges (1 clause is enough):**
+- "I've been thinking about..." / "I've been following..."
+- "I work on similar problems in a different domain"
+- "This keeps bugging me" / "I keep coming back to..."
+- "Caught my attention" / "Got me thinking"
+
+**Bad (no bridge):**
+- Jumping straight into "the December recall and the blackout are mirror-image threshold failures" — who are you and why do you know this?
+
+**Check:** Scan for motivation-signal phrases in email body.
+- **PASS:** At least one motivation signal present
+- **FAIL:** No context for why sender cares about this problem
+
+### HG-14: Artifact Weight Balance
+The artifact mention should be incidental — mentioned in passing, not centered. The email is about the question/observation, and the artifact is a bonus.
+
+**Check:** Find artifact-mentioning sentences, check position and word count.
+- Artifact mention should appear in the back half of the email
+- Artifact sentence should be <20 words
+- Artifact shouldn't appear in >40% of sentences
+
+- **PASS:** All sub-checks pass
+- **FAIL:** Artifact mentioned too early, too verbosely, or too dominantly
+
 ---
 
 ## Part 2: Subjective Criteria (LLM-as-Judge — Scored 1-5)
@@ -255,9 +282,9 @@ Minimum passing: 3.5 average, no individual score below 2.
 |---|-----------|-----------------|-----------------|-------------|
 | F1 | **Sentence variety** | Mix of short punchy and longer flowing. Some fragments. Reads like natural writing. | Mostly varied | Uniform metronomic structure |
 | F2 | **Vocabulary naturalness** | Words you'd use in a text message. No "leverage", "synergy", "utilize" | Mostly natural | LinkedIn post generator |
-| F3 | **Zero vague claims** | Every claim is specific or doesn't appear at all. No "significantly improved" | 1 vague claim | Vague throughout |
-| F4 | **Imperfect by design** | Feels dashed off but is actually crafted. No bullet points, no numbered lists in email. | Slightly over-formatted | Template engine output |
-| F5 | **Doesn't hide the gap** | Doesn't claim domain expertise that doesn't exist. The artifact reframes the gap as fresh perspective. | Doesn't mention gap but doesn't overclaim | Claims AV/robotics experience |
+| F3 | **Human texture** | Contains something a template engine would never produce: informal word choice ("noodling on", "keeps bugging me"), natural uncertainty about own thinking, a sentence that feels dashed-off. | Some natural language | Every word feels chosen by committee |
+| F4 | **Imperfect by design** | Feels dashed off but is actually crafted. No bullet points, no numbered lists, no em-dashes. Written in 2 minutes. | Slightly over-formatted | Template engine output |
+| F5 | **Context without credentials** | Reader understands WHY sender is thinking about this problem without seeing their resume. Motivation clear, credentials absent. | Some context but slightly credential-adjacent | Either no context (stranger analyzing your failures) or too much (credential dump) |
 
 ---
 
@@ -299,7 +326,7 @@ Minimum passing: 3.5 average, no individual score below 2.
 ## Part 4: Composite Scoring
 
 ### Hard Gates
-- All 12 gates must PASS
+- All 14 gates must PASS (HG-01 through HG-14)
 - Any FAIL -> outbound is blocked
 
 ### Subjective Score
@@ -348,6 +375,8 @@ linkedin.com/in/sujguha
 - Zero mention of Duetto, titles, or credentials
 - "I put together a model" is humble, not "I modeled this across your actual failure modes"
 - CTA is human ("Coffee sometime?" not "20 minutes?")
+- Context bridge: "I've been thinking about" establishes motivation without credentials (HG-13)
+- Artifact is incidental, in back half, <20 words (HG-14)
 - Reads like a person who's been thinking, not a person who's pitching
 
 ### FAIL Example v2 (previous "fixed" version — still fails)
