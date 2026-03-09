@@ -253,7 +253,7 @@ Scoring calibration:
 
 The #1 signal you're looking for: Does this email sound like a person who has already been thinking about your problem, or like someone who wants a job?
 
-IMPORTANT: Tone must be peer-to-peer. Show don't tell. The artifact does the talking.
+CRITICAL PHILOSOPHY: The email is about THEIR problem, not about the sender. 3-4 sentences. The artifact is the proof — credentials are never explained in the email. If the email talks more about the sender than about the recipient's company/problem, it fails hard.
 
 Output format — respond with ONLY valid JSON:
 {
@@ -305,22 +305,22 @@ def outbound_judge_prompts(
         system_prompt=OUTBOUND_SYSTEM_PROMPT,
         user_prompt_template=f"""Score this outbound package on Tone & Voice.
 
-The target tone is: peer-to-peer + show don't tell. Like messaging a respected colleague at another company. NOT applying for a job. NOT selling. The artifact leads, credentials follow (if at all).
+The target tone is: peer-to-peer + show don't tell. Like texting a friend at another company about a problem you both find interesting. NOT applying for a job. The email is about THEIR problem. The artifact does the talking — credentials are never stated.
 
 Criteria:
-- A1: Peer-to-peer energy — Reads like messaging a colleague, not "applying" (5) vs. reads like a cover letter (1)
-- A2: Show don't tell — Credentials implied by work described, never stated directly (5) vs. opens with credentials (1)
-- A3: Confidence without arrogance — Certain about the insight, humble about fit (5) vs. desperate or cocky (1)
-- A4: Curiosity signal — Genuine question or observation showing the sender thinks about the problem, not just the role (5) vs. purely transactional (1)
-- A5: Human cadence — Sentence length varies naturally, some short, some longer, not metronomic (5) vs. uniform structure (1)
+- A1: Peer-to-peer — Like texting a friend at another company about a problem you both find interesting (5) vs. reads like a cover letter or cold email template (1)
+- A2: Their problem, not my resume — 90%+ of the email is about the company's challenge. Sender barely appears. The artifact does the talking. (5) vs. pivots to "here's what I did" and stays there (1)
+- A3: Confidence without claiming — Shows understanding of the problem so clearly that competence is obvious without stating it (5) vs. lists achievements or claims "I've solved this" (1)
+- A4: Curiosity > credentials — The email asks a question or makes an observation showing genuine intellectual interest in the problem (5) vs. purely transactional (1)
+- A5: Brevity as signal — Says everything in 3-4 sentences. The restraint itself signals confidence — doesn't need to sell. (5) vs. 7+ sentences, feels like it needs to convince (1)
 
 {context_block}""",
         criteria=[
-            {"id": "A1", "name": "Peer-to-peer energy"},
-            {"id": "A2", "name": "Show don't tell"},
-            {"id": "A3", "name": "Confidence without arrogance"},
-            {"id": "A4", "name": "Curiosity signal"},
-            {"id": "A5", "name": "Human cadence"},
+            {"id": "A1", "name": "Peer-to-peer"},
+            {"id": "A2", "name": "Their problem, not my resume"},
+            {"id": "A3", "name": "Confidence without claiming"},
+            {"id": "A4", "name": "Curiosity > credentials"},
+            {"id": "A5", "name": "Brevity as signal"},
         ]
     ))
 
@@ -376,21 +376,21 @@ Criteria:
         ]
     ))
 
-    # Dimension D: Failure Mode Detection (2x weight)
+    # Dimension D: Failure Mode Detection (3x weight — critical)
     prompts.append(JudgePrompt(
         dimension="D: Failure Mode Detection",
-        weight=2.0,
+        weight=3.0,
         system_prompt=OUTBOUND_SYSTEM_PROMPT,
         user_prompt_template=f"""Score this outbound package on Failure Mode Detection.
 
-Test for the four failure modes that kill outbound messages. Each criterion tests one specific failure mode. Be ruthless — if ANY of these fail, the outbound won't get replies.
+This is the most important dimension. Test for the five failure modes that kill outbound messages. Each criterion tests one specific failure mode. Be ruthless — if ANY of these fail, the outbound won't get replies.
 
 Criteria:
-- D1: Generic test — Every sentence contains company/person/role-specific information (5=none generic) vs. most sentences work for any AI company (1)
-- D2: Eagerness test — Confident and direct, states what was done, asks for a specific thing (5=no eagerness) vs. lists achievements, begs for time (1)
-- D3: Shoehorn test — Artifact mention feels like natural conclusion of email's argument (5=flows naturally) vs. "oh and I also built a thing" (1)
-- D4: Tone test — Sounds like the candidate writing to a peer they respect (5=authentic voice) vs. sounds like ChatGPT, a recruiter, or a desperate applicant (1)
-- D5: Mobile scan test — In 10 seconds of scanning on a phone, key point and CTA are clear (5=scannable) vs. dense paragraphs requiring careful reading (1)
+- D1: Generic test — Every sentence contains company/person-specific content. Swap names and it breaks. (5=none generic) vs. most sentences are interchangeable (1)
+- D2: Eagerness test — Zero selling. States an observation, shares a thing, asks one question. Done. (5=no eagerness) vs. lists achievements, explains background, begs for time (1)
+- D3: Shoehorn test — Artifact mention is the inevitable conclusion of the argument. Couldn't NOT mention it. (5=flows naturally) vs. feels jammed in (1)
+- D4: Tone test — Sounds like a real person who happens to have built something interesting. No "applying" energy. (5=authentic) vs. sounds like ChatGPT, a recruiter, or a desperate job seeker (1)
+- D5: Focus test — The email never pivots to "here's my background." The recipient's problem is the subject start to finish. (5=never pivots) vs. extended section about background or achievements (1)
 
 {context_block}""",
         criteria=[
@@ -398,7 +398,7 @@ Criteria:
             {"id": "D2", "name": "Eagerness test"},
             {"id": "D3", "name": "Shoehorn test"},
             {"id": "D4", "name": "Tone test"},
-            {"id": "D5", "name": "Mobile scan test"},
+            {"id": "D5", "name": "Focus test"},
         ]
     ))
 

@@ -263,8 +263,8 @@ def aggregate_scores(scores_file: str, stage: str) -> dict:
         weights = {"A": 3.0, "B": 2.0, "C": 2.0, "D": 1.5, "E": 2.0, "F": 2.0}
         max_weighted = 62.5 * 5  # 312.5
     else:  # outbound
-        weights = {"A": 3.0, "B": 2.5, "C": 2.0, "D": 2.0, "E": 1.5, "F": 2.0}
-        max_weighted = 65.0 * 5  # 325.0
+        weights = {"A": 3.0, "B": 2.5, "C": 2.0, "D": 3.0, "E": 1.5, "F": 2.0}
+        max_weighted = 70.0 * 5  # 350.0
 
     total_weighted = 0
     min_score = 5

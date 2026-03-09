@@ -2,7 +2,9 @@
 
 **Purpose:** State-of-the-art eval framework for Stage 04 (Outbound Composer) outputs. Evaluates email, LinkedIn, follow-up, and warm intro messages. Programmatic hard gates + LLM-as-judge scoring.
 
-**Philosophy:** The outbound is the delivery vehicle for the artifact. Tone is peer-to-peer + show don't tell. The artifact does the talking — the message is the invitation to look. Every failure mode matters equally: generic, too eager, shoehorned artifact, wrong tone.
+**Philosophy:** The email is about THEIR problem, not about you. 3-4 sentences. The artifact is the proof — you never explain your credentials in the email. The connection between your experience and their challenge is implicit (lives in the artifact), not explicit (spelled out in the email). If the email talks more about Sujoy than about the recipient's company, it fails.
+
+**The bar:** Would you actually send this? If it reads like something an AI career coach would generate, it fails. If it reads like something you'd text a friend who works there, it's closer.
 
 ---
 
@@ -13,18 +15,17 @@ All must pass before subjective scoring begins.
 ### HG-01: Word Count Limits
 | Variant | Max Words | Check |
 |---------|-----------|-------|
-| Primary email body | 200 | `wc -w` on body (excluding subject/signature) |
-| LinkedIn connection request | 300 chars | `wc -c` |
-| LinkedIn InMail | 150 words | `wc -w` |
-| Follow-up email | 100 words | `wc -w` |
+| Primary email body | 100 | wc -w on body (excluding subject/signature) |
+| LinkedIn connection request | 300 chars | wc -c |
+| LinkedIn InMail | 80 words | wc -w |
+| Follow-up email | 60 words | wc -w |
 
 - **PASS:** All variants within limits
 - **FAIL:** Any variant exceeds limit
 
 ### HG-02: Anti-Pattern Scan
-Scan all variants for banned phrases:
 
-**Banned phrases (exact or close match):**
+**Tier 1 — Instant kill (exact or close match):**
 - "I'm passionate about..."
 - "With X years of experience..."
 - "I believe I'd be a great fit..."
@@ -35,62 +36,79 @@ Scan all variants for banned phrases:
 - "I love what you're building..."
 - "Don't want to take too much of your time..."
 - "I hope this email finds you well..."
-- "Just following up..." (in follow-up only)
+- "Just following up..."
 - "Bumping this to the top..."
 - "I'm reaching out because..."
 - "As a [title] with [N] years..."
 - "I'd love the opportunity to..."
 
-**Check:** Case-insensitive regex match across all variants.
-- **PASS:** Zero banned phrases found
-- **FAIL:** Any banned phrase found (even one)
+**Tier 2 — Credential parade (also instant kill):**
+- "I've worked on this exact problem"
+- "I've solved this before"
+- "I have experience in..."
+- "My background in..."
+- "In my current role at..."
+- Any sentence matching "At [Company], I [verb]ed..." pattern
+- Mentioning a previous employer by name in the email body (the artifact handles this)
+- Listing a job title ("Senior Manager", "Product Manager", etc.)
+- Mentioning a degree or school name
+
+**Tier 3 — Focus violation (also instant kill):**
+- More sentences about Sujoy than about the recipient's company/problem
+- Any paragraph that is entirely about Sujoy's experience
+- More than ONE metric from fact-set.md (zero is ideal; one max)
+
+**Check:** Case-insensitive regex + structural analysis.
+- **PASS:** Zero violations across all three tiers
+- **FAIL:** Any violation
 
 ### HG-03: Fact-Set Traceability
-Every metric or quantitative claim must trace to `references/fact-set.md`.
+If any metric appears, it must trace to fact-set.md. But ideally, zero metrics in the email — let the artifact carry the numbers.
 
-**Check:** Extract numbers/percentages from all variants → verify each in fact-set.md.
-- **PASS:** 100% traceable
-- **FAIL:** Any invented metric
+**Check:** Extract numbers/percentages -> verify in fact-set.md.
+- **PASS:** <=1 metric present AND it traces to fact-set.md
+- **FAIL:** >1 metric OR any untraced metric
 
 ### HG-04: Specificity Swap Test
 Replace company name + recipient name + company-specific references with a competitor.
 
-**Check:** Substitute company → competitor, product references → competitor products. LLM rates whether swapped version still makes sense.
-- **PASS:** Swapped version is clearly broken (references wrong incidents, wrong products, wrong people)
-- **FAIL:** Swapped version reads fine (too generic)
+**Check:** Substitute company -> competitor, product references -> competitor products. LLM rates coherence.
+- **PASS:** Swapped version is clearly broken
+- **FAIL:** Swapped version reads fine
 
 ### HG-05: Subject Line Check
 - Under 60 characters
 - Does NOT contain: "Application for", "Interested in", "Job", "Resume", "Opportunity"
-- References the artifact or a specific company challenge
+- References a specific company challenge or artifact insight (not a generic topic)
 
-**Check:** Character count + keyword blacklist + LLM judges artifact/challenge reference.
-- **PASS:** All three checks pass
+**Check:** Character count + keyword blacklist + LLM judges specificity.
+- **PASS:** All checks pass
 - **FAIL:** Any check fails
 
 ### HG-06: AI Slop Detection — Outbound Specific
 
-**Hedging language (flag if any in outbound — zero tolerance for short-form):**
+**Hedging language (zero tolerance):**
 - "It's worth noting..."
 - "There are several reasons..."
 - "Fundamentally..."
 - "At its core..."
 - "In today's landscape..."
 - "Moving forward..."
+- "It should be noted..."
 
 **Structural tells:**
-- Email has exactly 5 paragraphs with exactly the same sentence count
-- Every sentence is the same length (±5 words)
 - Uses semicolons in casual email context
-- Uses em-dashes more than once
+- More than 4 em-dashes in a single email variant
+- Every sentence is within +/-5 words of the same length
+- Email has exactly 5 paragraphs
 
-**Credential parade detection:**
-- First paragraph mentions a degree, title, or company name (other than recipient's company)
-- Lists more than 1 metric in the bridge section
-- Any sentence of the form "At [Company], I [verb]ed [thing]" appearing more than once
+**Over-explanation tells (catches the real failure mode):**
+- Any paragraph longer than 3 sentences
+- Bridge section that explains HOW something was done (should only hint WHAT was done)
+- "Our biggest challenge was..." / "The key insight was..." / "What we found was..." (telling, not showing)
 
 **Check:** Regex + structural analysis.
-- **PASS:** 0 hedging, 0 structural tells, 0 credential parade flags
+- **PASS:** 0 flags across all categories
 - **FAIL:** Any flag triggered
 
 ### HG-07: Variant Completeness
@@ -106,60 +124,61 @@ All required variants must be present:
 - **FAIL:** Any variant missing
 
 ### HG-08: CTA Presence
-Every variant must have a clear call-to-action.
+Every variant must have a clear, specific, light call-to-action.
 
-**Check:** LLM identifies the CTA in each variant. CTA must be specific (not "let me know").
-- **PASS:** All variants have specific CTAs
-- **FAIL:** Missing or vague CTA in any variant
+**Good CTAs:** "20 minutes?", "Want to see it?", "Worth a look?", "Coffee?"
+**Bad CTAs:** "Let me know", "I'd love to discuss", "Would love the opportunity to chat"
+
+**Check:** LLM identifies CTA per variant. Must be <=5 words and specific.
+- **PASS:** All variants have short, specific CTAs
+- **FAIL:** Missing, vague, or wordy CTA
 
 ### HG-09: Recipient Specificity
-Primary email must reference the recipient by name and reference something specific about them (role, team, recent talk, post, background).
+Primary email must reference the recipient by name and connect to something specific about their role/team/work.
 
-**Check:** Recipient name present + LLM judges whether recipient-specific content exists.
-- **PASS:** Name + at least one specific recipient reference
-- **FAIL:** Generic "Dear Hiring Manager" or no recipient personalization
+- **PASS:** Name + at least one specific reference
+- **FAIL:** Generic or no personalization
 
-### HG-10: AI Detection Resistance
-All outbound prose must be undetectable as AI-generated. Short-form text (emails, LinkedIn) is the highest-risk surface for AI detection because hiring managers pattern-match on it daily.
+### HG-10: Focus Balance Test
+The email must be about THEIR problem, not about Sujoy.
 
-**Burstiness check:** Sentence length variation.
-- Measure: Stdev of sentence lengths per variant
-- Flag: If stdev < 3.0 for any variant (short-form is naturally burstier than long-form)
+**Check:** LLM classifies each sentence as "about them" vs. "about me" vs. "neutral/artifact".
+- **PASS:** >=60% of sentences are "about them" or "artifact". <=1 sentence is "about me".
+- **FAIL:** >1 sentence classified as "about me" OR <50% "about them"
+
+### HG-11: AI Detection Resistance
+
+**Burstiness check:** Stdev of sentence lengths per variant.
+- Flag: If stdev < 3.0
 
 **Opener variety:** First words of sentences.
-- Measure: Diversity of sentence openers across all variants
-- Flag: If >25% of sentences start with the same word
+- Flag: If >25% start with the same word
 
-**Transition predictability:** AI emails use the same connective tissue.
-- Measure: Count generic transitions ("Additionally", "Furthermore", "Moreover", "In addition")
-- Flag: If any appear (zero tolerance in short-form outbound)
-
-**Register consistency:** The email should sound like the same person throughout, not shift from casual to formal.
-- Measure: LLM judges register consistency across paragraphs
-- Flag: If register shifts noticeably between sections
+**Transition predictability:** Generic transitions.
+- Flag: If "Additionally", "Furthermore", "Moreover", "In addition" appear (zero tolerance)
 
 **Check:** Combined analysis.
-- **PASS:** ≤1 sub-check flagged
-- **FAIL:** ≥2 sub-checks flagged
+- **PASS:** <=1 sub-check flagged
+- **FAIL:** >=2 sub-checks flagged
 
-### HG-11: Writing Style Match
-Outbound must sound like Sujoy, not like a template. His style is direct, compressed, concrete-first, peer-to-peer.
+### HG-12: Writing Style Match
+Sujoy's style: direct, compressed, concrete-first, peer-to-peer.
 
-**Style markers for outbound (want PRESENT ≥3 of 5):**
-- Leads with observation/insight, not self-introduction
-- Uses specific numbers over adjectives ("20% to 60%+" not "dramatically improved")
-- Short sentences for impact, longer for explanation
+**Style markers (want PRESENT >=3 of 5):**
+- Leads with observation/insight about THEIR problem, not self-introduction
+- Short sentences for impact, longer only for the one key observation
 - Em-dash for asides (natural in his voice)
-- Ends with a specific, light CTA (not formal)
+- Ends with a terse CTA (<=5 words)
+- Total email is 3-5 sentences
 
 **Anti-style markers (want ABSENT — zero tolerance):**
-- Any sentence that starts with "I am a..."
-- Any sentence longer than 40 words in the email body
-- Passive voice in the CTA ("would be appreciated" vs. "20 minutes?")
-- Generic openers ("I came across", "I noticed your company")
+- Any sentence starting with "I am a..."
+- Any sentence longer than 35 words
+- Passive voice in the CTA
+- More than one paragraph about sender's experience
+- Any sentence beginning "I've worked on..." / "I've solved..." / "I shipped..." / "In my role..."
 
-**Check:** Regex + sentence analysis.
-- **PASS:** ≥3 style markers, 0 anti-style markers
+- **PASS:** >=3 style markers, 0 anti-style markers
 - **FAIL:** <2 style markers OR any anti-style marker
 
 ---
@@ -169,102 +188,98 @@ Outbound must sound like Sujoy, not like a template. His style is direct, compre
 Minimum passing: 3.5 average, no individual score below 2.
 
 ### Dimension A: Tone & Voice (Weight: 3x)
-*Highest weight because tone is the #1 differentiator between outbound that gets replies and outbound that gets deleted.*
 
 | # | Criterion | 5 (Exceptional) | 3 (Acceptable) | 1 (Failing) |
 |---|-----------|-----------------|-----------------|-------------|
-| A1 | **Peer-to-peer energy** | Reads like messaging a respected colleague at another company, not "applying" | Mostly conversational but occasionally formal | Reads like a cover letter |
-| A2 | **Show don't tell** | Credentials are implied by the work described; never stated directly | One mention of a credential, but artifact leads | Opens with credentials |
-| A3 | **Confidence without arrogance** | Certain about the insight, humble about fit — "I've seen this before, here's what I found" | Mostly confident, one moment of either underselling or overselling | Either desperate ("I'd be grateful for any time") or cocky ("You need me") |
-| A4 | **Curiosity signal** | Genuine question or observation that shows the sender is thinking about the problem, not just the role | Some interest in the problem evident | Purely transactional — "I want this job" |
-| A5 | **Human cadence** | Sentence length varies naturally. Some short. Some longer with a real thought. Not metronomic. | Mostly natural but a few robotic sentences | Every sentence is the same length and structure |
+| A1 | **Peer-to-peer** | Like texting a friend at another company about a problem you both find interesting | Conversational but still feels like "outreach" | Reads like a cover letter or cold email template |
+| A2 | **Their problem, not my resume** | 90%+ of the email is about the company's challenge. Sujoy barely appears. The artifact does the talking. | Mostly about them but one sentence over-explains Sujoy's background | Pivots to "here's what I did" and stays there |
+| A3 | **Confidence without claiming** | Shows understanding of the problem so clearly that competence is obvious without stating it | States one credential but doesn't dwell | Lists achievements or claims "I've solved this" |
+| A4 | **Curiosity > credentials** | The email asks a question or makes an observation that shows genuine intellectual interest in the problem | Some interest in the problem evident | Purely transactional — wants a job, not a conversation |
+| A5 | **Brevity as signal** | Says everything in 3-4 sentences. The restraint itself signals confidence — doesn't need to sell. | 5-6 sentences, slightly over-explains | 7+ sentences, feels like it needs to convince |
 
 ### Dimension B: Artifact Integration (Weight: 2.5x)
 
 | # | Criterion | 5 (Exceptional) | 3 (Acceptable) | 1 (Failing) |
 |---|-----------|-----------------|-----------------|-------------|
-| B1 | **Natural mention** | Artifact comes up as evidence for a point being made, not as "BTW I built something" | Artifact mentioned with clear purpose but transition is slightly abrupt | "Please see attached" or artifact feels forced into the email |
-| B2 | **Curiosity generation** | Reader would want to look at the artifact even if they weren't hiring — it sounds genuinely interesting | Reader would look if they were already interested in the candidate | Artifact mention is skippable |
-| B3 | **Thesis preview** | Email hints at the artifact's key insight without giving it all away — creates a reason to open it | Describes what the artifact is but not why it's interesting | Either spoils the artifact or says nothing about it |
-| B4 | **Access strategy** | Clear, low-friction way to access the artifact (link vs. "happy to share" vs. attachment) with appropriate gating | Access mentioned but somewhat vague | No mention of how to see the artifact |
-| B5 | **Artifact-email coherence** | The email's hook and the artifact's thesis are the same story told at different zoom levels | Related but the connection requires inference | Email and artifact feel like separate projects |
+| B1 | **Artifact as punchline** | The email's argument leads naturally to the artifact as its logical conclusion — "I modeled this" | Artifact mentioned with purpose but transition is slightly mechanical | "BTW I built something" or "please see attached" |
+| B2 | **Curiosity without spoiling** | Artifact mention makes the reader want to see it without explaining what's in it | Describes the artifact but gives too much away | Either spoils the key insight or says nothing interesting |
+| B3 | **Implicit proof** | The artifact's existence proves competence — no need to explain credentials separately | Artifact partially replaces credential-stating | Artifact and credentials both stated redundantly |
+| B4 | **Low-friction access** | "Happy to share" or link — doesn't attach, creates pull not push | Access method clear but slightly formal | No mention of how to see it |
+| B5 | **One story, two zoom levels** | Email hook and artifact thesis are the same insight at different depths | Related but connection requires inference | Email and artifact feel like separate projects |
 
 ### Dimension C: Hook Quality (Weight: 2x)
 
 | # | Criterion | 5 (Exceptional) | 3 (Acceptable) | 1 (Failing) |
 |---|-----------|-----------------|-----------------|-------------|
-| C1 | **First-line hook** | Opening sentence makes the reader stop scrolling — it's either surprising, specific, or raises a question | Opening is relevant but doesn't stop the scroll | Opening is "I'm writing to express my interest..." |
-| C2 | **Recency** | Hook references something from the last 3 months (news, product launch, incident, blog post) | References something from last 6 months | No timely reference, or references old news |
-| C3 | **Insight over information** | Hook contains an observation or connection, not just a fact ("These two failures are the same problem" vs "I saw you had two incidents") | Hook has a point of view but it's somewhat obvious | Hook is just a fact without framing |
-| C4 | **Recipient relevance** | Hook connects to something the specific recipient cares about (their team, their product area, their public statements) | Hook is relevant to the company but not the specific person | Hook is about the company generally |
-| C5 | **Pattern interrupt** | Something in the first 2 sentences breaks the "cold email" pattern — unexpected framing, provocative question, contrarian take | Slightly unusual approach | Follows the standard cold outreach template |
+| C1 | **Stop the scroll** | First sentence is surprising, specific, or raises a question the reader can't ignore | Relevant but doesn't surprise | "I'm writing to express my interest..." |
+| C2 | **Recency** | References something from the last 3 months | Last 6 months | Old news or no timely reference |
+| C3 | **Insight, not information** | Contains a connection or observation ("these two failures are the same problem") not just a fact | Has a point of view but it's somewhat obvious | Just states a fact |
+| C4 | **About THEM** | Hook is about the recipient's specific problem, product, or team | About the company generally | About the sender |
+| C5 | **Pattern interrupt** | First sentence breaks the "cold email" pattern — the reader thinks "this isn't a job seeker email" | Slightly unusual | Standard template pattern |
 
-### Dimension D: Failure Mode Detection (Weight: 2x)
-*Each criterion tests one of the four failure modes the user identified.*
+### Dimension D: Failure Mode Detection (Weight: 3x)
 
 | # | Criterion | 5 (No failure) | 3 (Borderline) | 1 (Clear failure) |
 |---|-----------|-----------------|-----------------|-------------|
-| D1 | **Generic test** | Every sentence contains information specific to this company, person, or role | 1-2 sentences could apply to any company | Most sentences work for any AI company |
-| D2 | **Eagerness test** | Confident and direct — states what was done, asks for a specific thing | Mostly controlled but one moment of overselling | Lists achievements, begs for time, or uses exclamation marks |
-| D3 | **Shoehorn test** | Artifact mention feels like the natural conclusion of the email's argument | Artifact mention is relevant but transition is mechanical | Artifact feels jammed in — "Oh and I also built a thing" |
-| D4 | **Tone test** | Sounds like Sujoy writing to a peer he respects | Mostly right but one sentence sounds off | Sounds like ChatGPT, a recruiter, or a desperate applicant |
-| D5 | **Mobile scan test** | In 10 seconds of scanning on a phone, the key point and CTA are clear | Most of it is scannable | Dense paragraphs that require careful reading |
+| D1 | **Generic test** | Every sentence contains company/person-specific content. Swap names and it breaks. | 1 sentence could apply to any company | Most sentences are interchangeable |
+| D2 | **Eagerness test** | Zero selling. States an observation, shares a thing, asks one question. Done. | Mostly restrained but one moment of overselling | Lists achievements, explains background, or begs for time |
+| D3 | **Shoehorn test** | Artifact mention is the inevitable conclusion of the argument. Couldn't NOT mention it. | Relevant but transition is noticeable | Feels jammed in |
+| D4 | **Tone test** | Sounds like a real person who happens to have built something interesting. No "applying" energy. | Mostly right but one sentence sounds like an applicant | Sounds like ChatGPT, a recruiter, or a desperate job seeker |
+| D5 | **Focus test** | The email never pivots to "here's my background." The recipient's problem is the subject start to finish. | Brief pivot to experience (one sentence) that returns to their problem | Extended section about background or achievements |
 
 ### Dimension E: Multi-Channel Strategy (Weight: 1.5x)
 
 | # | Criterion | 5 (Exceptional) | 3 (Acceptable) | 1 (Failing) |
 |---|-----------|-----------------|-----------------|-------------|
-| E1 | **Channel differentiation** | Each variant (email, LinkedIn, InMail) leads with a different angle or facet | Slightly different framing per channel | Same message copy-pasted across channels |
-| E2 | **Follow-up value ladder** | Follow-up adds genuinely new value — new insight, new data point, new connection to recent news | Adds some value but mostly rehashes | "Just checking in" or "bumping this" |
-| E3 | **Sequence logic** | Clear rationale for which channel first, second, third + timing | Sequence exists but timing is vague | No multi-touch strategy |
-| E4 | **Warm intro quality** | Forwardable blurb is genuinely forwardable — the connector doesn't need to rewrite it | Blurb exists but needs editing | No warm intro template or it's too long to forward |
-| E5 | **Connection request economy** | LinkedIn request is under 300 chars AND contains a specific hook AND has a CTA | Under limit with some specificity | Generic "I'd love to connect" |
+| E1 | **Channel differentiation** | Each variant leads with a completely different angle or facet | Slightly different framing | Same message shortened |
+| E2 | **Follow-up adds value** | New insight, new data point, new angle. Reader learns something new. | Some new value | "Just checking in" |
+| E3 | **Sequence logic** | Clear rationale for channel order + timing | Sequence exists | No multi-touch thinking |
+| E4 | **Warm intro quality** | Forwardable blurb needs zero editing by the connector | Needs minor edits | Too long or needs rewriting |
+| E5 | **Connection request economy** | Under 300 chars, specific hook, CTA. Zero wasted words. | Specific but slightly long | Generic "love to connect" |
 
 ### Dimension F: Authenticity & Anti-Slop (Weight: 2x)
 
 | # | Criterion | 5 (Exceptional) | 3 (Acceptable) | 1 (Failing) |
 |---|-----------|-----------------|-----------------|-------------|
-| F1 | **Sentence variety** | Mix of short punchy sentences and longer flowing ones. Some fragments. Feels like natural writing. | Mostly varied but a few metronomic stretches | Uniform sentence structure throughout |
-| F2 | **Vocabulary naturalness** | Uses normal words a person would use in email. No "leverage", "synergy", "utilize", "holistic" | Mostly natural with 1-2 corporate words | Reads like a LinkedIn post generator |
-| F3 | **Specific over general** | Every claim is specific: "20% to 60%+" not "significantly improved" | Mostly specific with 1-2 general claims | Vague throughout ("extensive experience", "proven track record") |
-| F4 | **Imperfect formatting** | Not too polished — no perfect bullet points, no numbered lists in email body, feels dashed off (but is actually crafted) | Slightly over-formatted | Looks like it went through a template engine |
-| F5 | **Honest gaps** | Acknowledges or doesn't hide the domain gap — frames it as an asset ("fresh eyes") or addresses it directly | Doesn't mention the gap but doesn't overclaim either | Claims domain expertise that doesn't exist |
+| F1 | **Sentence variety** | Mix of short punchy and longer flowing. Some fragments. Reads like natural writing. | Mostly varied | Uniform metronomic structure |
+| F2 | **Vocabulary naturalness** | Words you'd use in a text message. No "leverage", "synergy", "utilize" | Mostly natural | LinkedIn post generator |
+| F3 | **Zero vague claims** | Every claim is specific or doesn't appear at all. No "significantly improved" | 1 vague claim | Vague throughout |
+| F4 | **Imperfect by design** | Feels dashed off but is actually crafted. No bullet points, no numbered lists in email. | Slightly over-formatted | Template engine output |
+| F5 | **Doesn't hide the gap** | Doesn't claim domain expertise that doesn't exist. The artifact reframes the gap as fresh perspective. | Doesn't mention gap but doesn't overclaim | Claims AV/robotics experience |
 
 ---
 
 ## Part 3: Per-Variant Checks
 
-Beyond the cross-cutting criteria above, each variant has specific checks:
-
 ### Primary Email
-- [ ] Subject line intriguing enough to open (not clickbait)
-- [ ] Body tells a mini-story: hook → bridge → artifact → ask
-- [ ] Exactly one metric from fact-set.md (not a list)
-- [ ] Signature: name + LinkedIn URL only (no title, no phone)
+- [ ] 3-5 sentences total (not counting subject/signature)
+- [ ] <=100 words
+- [ ] >=60% of sentences about their problem
+- [ ] <=1 sentence that references Sujoy's experience (hint, not explanation)
+- [ ] Zero metrics OR exactly one metric
+- [ ] No mention of job titles, company names (other than recipient's), degrees
+- [ ] Signature: name + LinkedIn URL only
 
-### LinkedIn Connection Request (≤300 chars)
-- [ ] Hooks immediately (no "I came across your profile")
-- [ ] Contains one specific reference (company challenge or artifact)
-- [ ] Has a CTA or implied next step
+### LinkedIn Connection Request (<=300 chars)
+- [ ] Hooks with their problem, not self-introduction
+- [ ] Zero credential mentions
+- [ ] CTA or implied next step
 - [ ] Does NOT start with "Hi [Name]" (wastes chars)
 
-### LinkedIn InMail
+### LinkedIn InMail (<=80 words)
 - [ ] Different angle from primary email
-- [ ] More casual tone than email
-- [ ] References a different facet of the artifact or a different earned secret
-- [ ] Shorter than email (100-150 words)
+- [ ] Different facet of the problem or different earned secret implication
+- [ ] Shorter and more casual than email
 
-### Follow-Up Email
-- [ ] References original email in 1 sentence max
-- [ ] Adds ONE new piece of value (new insight, updated artifact, relevant news, framework)
-- [ ] Under 100 words
-- [ ] Subject line is "Re: [original subject]"
-- [ ] Does NOT say "just following up" or "bumping this"
+### Follow-Up Email (<=60 words)
+- [ ] ONE new piece of value (new insight, relevant news, updated artifact)
+- [ ] References original in <=1 sentence
+- [ ] Subject: "Re: [original subject]"
+- [ ] Zero credential mentions
 
 ### Warm Intro Request
-- [ ] Explains to the connector why this is a good match (not just "can you intro me")
-- [ ] Forwardable blurb is ≤80 words
-- [ ] Blurb contains: who Sujoy is, what he built, why it's relevant, LinkedIn link
+- [ ] Forwardable blurb <=60 words
+- [ ] Blurb: who Sujoy is (one phrase), what he built (one phrase), why relevant (one phrase), LinkedIn
 - [ ] Connector can copy-paste without editing
 
 ---
@@ -272,82 +287,74 @@ Beyond the cross-cutting criteria above, each variant has specific checks:
 ## Part 4: Composite Scoring
 
 ### Hard Gates
-- All 9 gates must PASS
-- Any FAIL → outbound is blocked
+- All 12 gates must PASS
+- Any FAIL -> outbound is blocked
 
 ### Subjective Score
 - 30 criteria across 6 dimensions
 - Weighted scoring:
-  - Dimension A (Tone & Voice): 3x weight → 15 weighted slots
-  - Dimension B (Artifact Integration): 2.5x weight → 12.5 weighted slots
-  - Dimension C (Hook Quality): 2x weight → 10 weighted slots
-  - Dimension D (Failure Mode Detection): 2x weight → 10 weighted slots
-  - Dimension E (Multi-Channel): 1.5x weight → 7.5 weighted slots
-  - Dimension F (Authenticity & Anti-Slop): 2x weight → 10 weighted slots
-  - **Total weighted slots: 65**
-  - **Max weighted score: 325**
+  - Dimension A (Tone & Voice): 3x weight -> 15 weighted slots
+  - Dimension B (Artifact Integration): 2.5x weight -> 12.5 weighted slots
+  - Dimension C (Hook Quality): 2x weight -> 10 weighted slots
+  - Dimension D (Failure Mode Detection): 3x weight -> 15 weighted slots
+  - Dimension E (Multi-Channel): 1.5x weight -> 7.5 weighted slots
+  - Dimension F (Authenticity & Anti-Slop): 2x weight -> 10 weighted slots
+  - **Total weighted slots: 70**
+  - **Max weighted score: 350**
 
 ### Thresholds
 | Grade | Weighted Score | Requirements |
 |-------|---------------|--------------|
-| **Exceptional** | ≥286 (88%+) | All hard gates PASS, no individual criterion below 4 |
-| **Production-ready** | ≥228 (70%+) | All hard gates PASS, no individual criterion below 3 |
-| **Needs polish** | ≥182 (56%+) | All hard gates PASS, ≤3 criteria below 3 |
-| **Needs rework** | <182 | Hard gate failures OR >3 criteria below 3 |
+| **Exceptional** | >=308 (88%+) | All hard gates PASS, no individual criterion below 4 |
+| **Production-ready** | >=245 (70%+) | All hard gates PASS, no individual criterion below 3 |
+| **Needs polish** | >=196 (56%+) | All hard gates PASS, <=3 criteria below 3 |
+| **Needs rework** | <196 | Hard gate failures OR >3 criteria below 3 |
 
 ---
 
-## Part 5: Diagnostic Output Format
+## Part 5: Gold Standard Reference
 
-```
-═══════════════════════════════════════════
- OUTBOUND EVAL: {company} — {role}
-═══════════════════════════════════════════
+### PASS Example (Waymo)
 
-HARD GATES
-──────────
-  HG-01 Word Count Limits        ✅ PASS  (email: 187w, LI: 248c, InMail: 112w, FU: 89w)
-  HG-02 Anti-Pattern Scan        ✅ PASS  (0 banned phrases)
-  HG-03 Fact-Set Traceability    ✅ PASS  (3/3 metrics traced)
-  HG-04 Specificity Swap         ✅ PASS  (swap coherence: 0.12)
-  HG-05 Subject Line Check       ✅ PASS  (52 chars, no blacklist, references artifact)
-  HG-06 AI Slop Detection        ✅ PASS  (0 hedge, 0 structural, 0 credential)
-  HG-07 Variant Completeness     ✅ PASS  (5/5 variants)
-  HG-08 CTA Presence             ✅ PASS  (5/5 specific CTAs)
-  HG-09 Recipient Specificity    ✅ PASS  (Vishay Nihalani + Director PM reference)
+**Subject:** The school bus recall and the blackout are the same problem
 
-  Gate status: ALL PASS → proceeding to subjective scoring
+Vishay — the December recall and the December blackout are mirror-image threshold failures. One too confident, one not enough. The root cause is the same: context-blind calibration.
 
-SUBJECTIVE SCORES
-─────────────────
-  A: Tone & Voice            [4.5/5.0]  ████████████████████░░  (3x weight)
-  B: Artifact Integration    [4.3/5.0]  ██████████████████░░░░  (2.5x weight)
-  C: Hook Quality            [4.8/5.0]  █████████████████████░  (2x weight)
-  D: Failure Mode Detection  [4.2/5.0]  ██████████████████░░░░  (2x weight)
-  E: Multi-Channel Strategy  [4.0/5.0]  █████████████████░░░░░  (1.5x weight)
-  F: Authenticity            [4.4/5.0]  ███████████████████░░░  (2x weight)
+I modeled this across your actual 2025 failure modes. Context-adaptive thresholds fix both — static and aggressive each break one. Happy to share.
 
-  Weighted score: 284.1 / 325 (87.4%)
-  Grade: PRODUCTION-READY (borderline Exceptional)
+20 minutes?
 
-PER-VARIANT SCORES
-──────────────────
-  Primary Email        ✅ 14/14 checks pass
-  LinkedIn Request     ✅ 4/4 checks pass
-  LinkedIn InMail      ⚠️  3/4 (same angle as email — needs differentiation)
-  Follow-Up Email      ✅ 5/5 checks pass
-  Warm Intro Request   ✅ 4/4 checks pass
+Sujoy Guha
+linkedin.com/in/sujguha
 
-FLAGGED ITEMS
-─────────────
-  E1 Channel differentiation (3.5): InMail uses similar framing to email.
-     Consider leading with the Drivership framework angle instead.
-  D4 Tone test (3.5): Follow-up email second paragraph slightly over-explains
-     the Duetto context. Trim to one sentence.
+**Why this passes:**
+- 4 sentences, ~70 words
+- 100% about their problem
+- Zero mention of Duetto, titles, or credentials
+- Artifact mention is the natural punchline ("I modeled this")
+- "I modeled this" implies competence without explaining it
+- Terse CTA
 
-RECOMMENDATIONS
-───────────────
-  1. Differentiate InMail angle — lead with Drivership framework, not calibration
-  2. Trim follow-up bridge paragraph from 2 sentences to 1
-  3. Consider adding a provocative question to LinkedIn connection request
-```
+### FAIL Example (previous version)
+
+**Subject:** The school bus recall and the blackout are the same problem
+
+Hi Vishay,
+
+The December school bus recall (threshold too confident) and the December blackout stalls (threshold not confident enough) are mirror images of the same calibration failure — when should the planner act autonomously vs. defer to Fleet Response?
+
+I've worked on this exact problem. At Duetto, I shipped a production RL engine making billions of daily pricing decisions. Our biggest challenge wasn't the model — it was calibrating when the system should decide on its own vs. defer to humans. We moved decision acceptance from 20% to 60%+ through context-dependent thresholds, not model improvements.
+
+I built a prototype modeling the confidence calibration problem across Waymo's actual 2025 failure modes. Context-adaptive thresholds pass both the school bus test and the blackout test — the aggressive and static approaches each fail one. Happy to share.
+
+20 minutes?
+
+**Why this fails:**
+- 137 words (over 100 limit)
+- "I've worked on this exact problem" — overclaims
+- Entire second paragraph is about Sujoy, not Waymo
+- Mentions Duetto by name in the email
+- Lists multiple metrics (billions, 20%, 60%+)
+- "At Duetto, I shipped..." — classic credential parade
+- Explains HOW the problem was solved instead of letting the artifact do that
+- Shifts focus from their problem to sender's resume

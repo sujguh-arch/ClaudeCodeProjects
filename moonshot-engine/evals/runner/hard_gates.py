@@ -187,6 +187,7 @@ def artifact_hg03_earned_secret_presence(artifact_dir: str, secrets_path: str) -
 
 def artifact_hg04_code_executes(artifact_dir: str) -> GateResult:
     """HG-04: Code must execute without errors."""
+    artifact_dir = os.path.abspath(artifact_dir)
     main_py = os.path.join(artifact_dir, "src", "main.py")
     if not os.path.exists(main_py):
         return GateResult("HG-04", "Code Executes", True,
@@ -391,8 +392,8 @@ def outbound_hg01_word_counts(outbound_path: str) -> GateResult:
         body_text = '\n'.join(body_lines).strip()
         wc = word_count(body_text)
         checks["email"] = f"{wc}w"
-        if wc > 200:
-            violations.append(f"email: {wc}w (max 200)")
+        if wc > 100:
+            violations.append(f"email: {wc}w (max 100)")
 
     # LinkedIn connection request
     for key in sections:
@@ -407,8 +408,8 @@ def outbound_hg01_word_counts(outbound_path: str) -> GateResult:
         if "InMail" in key:
             wc = word_count(sections[key])
             checks["inmail"] = f"{wc}w"
-            if wc > 150:
-                violations.append(f"inmail: {wc}w (max 150)")
+            if wc > 80:
+                violations.append(f"inmail: {wc}w (max 80)")
 
     # Follow-up email
     for key in sections:
@@ -419,8 +420,8 @@ def outbound_hg01_word_counts(outbound_path: str) -> GateResult:
             body_text = '\n'.join(body_lines).strip()
             wc = word_count(body_text)
             checks["followup"] = f"{wc}w"
-            if wc > 100:
-                violations.append(f"follow-up: {wc}w (max 100)")
+            if wc > 60:
+                violations.append(f"follow-up: {wc}w (max 60)")
 
     passed = len(violations) == 0
     detail = ", ".join(f"{k}: {v}" for k, v in checks.items())
@@ -431,10 +432,14 @@ def outbound_hg01_word_counts(outbound_path: str) -> GateResult:
 
 
 def outbound_hg02_anti_patterns(outbound_path: str) -> GateResult:
-    """HG-02: Scan for banned phrases."""
-    text = load_file(outbound_path).lower()
+    """HG-02: Scan for banned phrases across 3 tiers."""
+    raw_text = load_file(outbound_path)
+    text = raw_text.lower()
 
-    banned = [
+    found = {"tier1": [], "tier2": [], "tier3": []}
+
+    # === Tier 1: Instant kill phrases ===
+    tier1_phrases = [
         "i'm passionate about",
         "with x years of experience",
         "i believe i'd be a great fit",
@@ -450,36 +455,100 @@ def outbound_hg02_anti_patterns(outbound_path: str) -> GateResult:
         "i'm reaching out because",
         "i'd love the opportunity",
     ]
-
-    # Also check for credential parade pattern: "As a [title] with [N] years"
-    credential_pattern = r"as a \w+ (?:manager|director|lead|engineer|pm) with \d+ years"
-
-    found = []
-    for phrase in banned:
+    for phrase in tier1_phrases:
         if phrase in text:
-            found.append(phrase)
+            found["tier1"].append(phrase)
 
-    if re.search(credential_pattern, text):
-        found.append("[credential parade pattern]")
+    # "As a [title] with [N] years"
+    if re.search(r"as a \w+ (?:manager|director|lead|engineer|pm) with \d+ years", text):
+        found["tier1"].append("[As a X with N years]")
 
-    passed = len(found) == 0
-    detail = f"{len(found)} banned phrases found"
-    if found:
-        detail += f": {found}"
+    # === Tier 2: Credential parade ===
+    tier2_phrases = [
+        "i've worked on this exact problem",
+        "i've solved this before",
+        "i have experience in",
+        "my background in",
+        "in my current role at",
+    ]
+    for phrase in tier2_phrases:
+        if phrase in text:
+            found["tier2"].append(phrase)
+
+    # "At [Company], I [verb]ed..." pattern
+    if re.search(r'at [A-Z][a-z]+(?:\s[A-Z][a-z]+)?,\s+I\s+\w+ed', raw_text):
+        found["tier2"].append("[At Company, I verbed...]")
+
+    # Mentioning previous employers by name in email body
+    sections = extract_sections(raw_text)
+    email_body = sections.get("Primary Email", "").lower()
+    previous_employers = ["duetto", "capital one", "wayfair", "j.p. morgan", "jpmc"]
+    for emp in previous_employers:
+        if emp in email_body:
+            found["tier2"].append(f"mentions employer '{emp}' in email")
+
+    # Listing job titles
+    titles = ["senior manager", "product manager", "technical product manager",
+              "ai pm", "technical pm", "engineering manager"]
+    for title in titles:
+        if title in email_body:
+            found["tier2"].append(f"lists title '{title}'")
+
+    # Mentioning degree/school
+    schools = ["berkeley", "stanford", "bachelor", "master", "phd", "mba", "data science degree"]
+    for school in schools:
+        if school in email_body:
+            found["tier2"].append(f"mentions credential '{school}'")
+
+    # === Tier 3: Focus violation ===
+    # More sentences about Sujoy than about recipient
+    if email_body:
+        email_sentences = re.split(r'(?<=[.!?])\s+', email_body)
+        email_sentences = [s.strip() for s in email_sentences if len(s.strip()) > 10]
+        about_me = 0
+        about_them = 0
+        me_markers = ['i shipped', 'i built', 'i led', 'my team', 'we achieved',
+                      'i solved', 'i worked', 'our biggest', 'my experience',
+                      'i have', 'i am a', 'in my role', 'i managed', 'i created']
+        for sent in email_sentences:
+            if any(m in sent for m in me_markers):
+                about_me += 1
+            # Any sentence with company/product/problem terms counts as about them
+        if about_me > 1:
+            found["tier3"].append(f"{about_me} sentences about Sujoy (max 1)")
+
+    # More than 1 metric from fact-set
+    if email_body:
+        email_metrics = extract_metrics(sections.get("Primary Email", ""))
+        if len(email_metrics) > 1:
+            found["tier3"].append(f"{len(email_metrics)} metrics in email (max 1)")
+
+    total_violations = len(found["tier1"]) + len(found["tier2"]) + len(found["tier3"])
+    passed = total_violations == 0
+    detail = f"T1:{len(found['tier1'])} T2:{len(found['tier2'])} T3:{len(found['tier3'])}"
+    all_found = found["tier1"] + found["tier2"] + found["tier3"]
+    if all_found:
+        detail += f" | {all_found}"
 
     return GateResult("HG-02", "Anti-Pattern Scan", passed, detail, {"found": found})
 
 
 def outbound_hg03_fact_set(outbound_path: str, fact_set_path: str) -> GateResult:
-    """HG-03: Metrics must trace to fact-set.md."""
+    """HG-03: Metrics must trace to fact-set.md. Max 1 metric in email body."""
     fact_set = load_file(fact_set_path)
-    text = load_file(outbound_path)
+    raw_text = load_file(outbound_path)
 
-    metrics = extract_metrics(text)
+    # Check email body specifically for metric count
+    sections = extract_sections(raw_text)
+    email_body = sections.get("Primary Email", "")
+    email_metrics = extract_metrics(email_body)
+
+    # Check all text for traceability
+    all_metrics = extract_metrics(raw_text)
     orphans = []
     traced = []
 
-    for m in metrics:
+    for m in all_metrics:
         search_term = m.rstrip('+').rstrip('%').rstrip('x').rstrip('X')
         if search_term in fact_set or m in fact_set:
             traced.append(m)
@@ -488,13 +557,19 @@ def outbound_hg03_fact_set(outbound_path: str, fact_set_path: str) -> GateResult
         else:
             orphans.append(m)
 
-    passed = len(orphans) == 0
-    detail = f"{len(traced)}/{len(metrics)} metrics traced"
+    # Fail if >1 metric in email body OR any untraced metric
+    too_many = len(email_metrics) > 1
+    passed = len(orphans) == 0 and not too_many
+    detail = f"{len(traced)}/{len(all_metrics)} metrics traced"
+    if email_metrics:
+        detail += f"; {len(email_metrics)} in email body (max 1)"
     if orphans:
         detail += f"; orphans: {orphans}"
+    if too_many:
+        detail += f" | FAIL: too many metrics in email ({email_metrics})"
 
     return GateResult("HG-03", "Fact-Set Traceability", passed, detail,
-                     {"traced": traced, "orphans": orphans})
+                     {"traced": traced, "orphans": orphans, "email_metrics": email_metrics})
 
 
 def outbound_hg05_subject_line(outbound_path: str) -> GateResult:
@@ -527,67 +602,105 @@ def outbound_hg05_subject_line(outbound_path: str) -> GateResult:
 
 
 def outbound_hg06_ai_slop(outbound_path: str) -> GateResult:
-    """HG-06: AI slop detection for outbound."""
-    text = load_file(outbound_path).lower()
+    """HG-06: AI slop detection for outbound — hedging, structural, over-explanation."""
+    raw_text = load_file(outbound_path)
+    text = raw_text.lower()
 
-    # Hedging (zero tolerance for short-form — these are dead giveaways in cold email)
+    flags = []
+
+    # === Hedging language (zero tolerance) ===
     hedges = [
         "it's worth noting", "there are several reasons",
         "at its core", "in today's landscape",
         "moving forward", "it should be noted",
     ]
     hedge_hits = [h for h in hedges if h in text]
+    if hedge_hits:
+        flags.append(f"hedges: {hedge_hits}")
 
-    # Credential parade: first paragraph mentions degree/title/company
-    sections = extract_sections(load_file(outbound_path))
-    credential_flags = []
-    if "Primary Email" in sections:
-        email = sections["Primary Email"]
-        # Get first paragraph (after subject)
-        paras = [p.strip() for p in email.split('\n\n') if p.strip()
-                and not p.strip().startswith('**Subject:')]
-        if paras:
-            first_para = paras[0].lower()
-            # Check for degree mentions
-            if any(d in first_para for d in ['bachelor', 'master', 'phd', 'mba',
-                                             'uc berkeley', 'stanford']):
-                credential_flags.append("degree in first paragraph")
-            # Check for title mentions (Sujoy's titles)
-            if any(t in first_para for t in ['senior manager', 'product manager',
-                                             'technical product manager']):
-                credential_flags.append("title in first paragraph")
+    # === Structural tells ===
+    sections = extract_sections(raw_text)
 
-    # Multiple metric listing
-    metric_in_bridge = 0
-    if "Primary Email" in sections:
-        email_lower = sections["Primary Email"].lower()
-        bridge_metrics = extract_metrics(sections["Primary Email"])
-        if len(bridge_metrics) > 2:
-            credential_flags.append(f"too many metrics ({len(bridge_metrics)})")
-
-    # Em-dash overuse — check per variant, not total (em-dashes are part of Sujoy's style)
-    structural_flags = []
+    # Em-dash overuse per variant
     if "Primary Email" in sections:
         email_dashes = sections["Primary Email"].count('—')
-        if email_dashes > 4:  # More than 4 in a single email variant is excessive
-            structural_flags.append(f"em-dash overuse in email ({email_dashes})")
+        if email_dashes > 4:
+            flags.append(f"em-dash overuse in email ({email_dashes})")
 
     # Semicolons in email
     if "Primary Email" in sections:
         semicolons = sections["Primary Email"].count(';')
         if semicolons > 0:
-            structural_flags.append(f"semicolons in email ({semicolons})")
+            flags.append(f"semicolons in email ({semicolons})")
 
-    passed = len(hedge_hits) == 0 and len(structural_flags) == 0 and len(credential_flags) == 0
-    detail = f"{len(hedge_hits)} hedges, {len(structural_flags)} structural, {len(credential_flags)} credential"
-    if hedge_hits:
-        detail += f" | hedges: {hedge_hits}"
-    if structural_flags:
-        detail += f" | structural: {structural_flags}"
-    if credential_flags:
-        detail += f" | credential: {credential_flags}"
+    # Uniform sentence lengths (metronomic) — only check email body sentences
+    if "Primary Email" in sections:
+        email_body = sections["Primary Email"]
+        # Extract just the body text (no subject, no signature, no link)
+        body_lines = [l for l in email_body.split('\n')
+                     if not l.startswith('**Subject:') and l.strip()
+                     and l.strip() != 'Sujoy Guha' and 'linkedin.com' not in l.lower()
+                     and l.strip() != '---']
+        body_text = ' '.join(body_lines)
+        email_sents = re.split(r'(?<=[.!?])\s+', body_text)
+        email_sents = [s for s in email_sents if len(s.strip()) > 10]
+        if len(email_sents) >= 3:
+            lengths = [len(s.split()) for s in email_sents]
+            avg = sum(lengths) / len(lengths)
+            if all(abs(l - avg) <= 5 for l in lengths):
+                flags.append("uniform sentence lengths (metronomic)")
 
-    return GateResult("HG-06", "AI Slop Detection", passed, detail, {})
+    # Exactly 5 paragraphs — use double-newline split on body only
+    if "Primary Email" in sections:
+        email_body = sections["Primary Email"]
+        body_lines = [l for l in email_body.split('\n')
+                     if not l.startswith('**Subject:') and l.strip()
+                     and l.strip() != 'Sujoy Guha' and 'linkedin.com' not in l.lower()
+                     and l.strip() != '---']
+        body_text = '\n'.join(body_lines)
+        paras = [p.strip() for p in body_text.split('\n\n') if p.strip()]
+        if len(paras) == 5:
+            flags.append("exactly 5 paragraphs")
+
+    # === Over-explanation tells (catches the real failure mode) ===
+    if "Primary Email" in sections:
+        email_body = sections["Primary Email"]
+        # Filter out subject line
+        body_lines = [l for l in email_body.split('\n')
+                     if not l.startswith('**Subject:') and l.strip()]
+        body_text = '\n'.join(body_lines)
+
+        # Any paragraph longer than 3 sentences
+        # Split by blank lines OR treat each line-group as a paragraph
+        body_paras = re.split(r'\n\s*\n', body_text)
+        if len(body_paras) <= 1:
+            # No double-newlines — treat each non-empty line as its own unit
+            body_paras = [l.strip() for l in body_text.split('\n') if l.strip()]
+        for para in body_paras:
+            para_sents = re.split(r'(?<=[.!?])\s+', para)
+            para_sents = [s for s in para_sents if len(s.strip()) > 5]
+            if len(para_sents) > 3:
+                flags.append(f"paragraph with {len(para_sents)} sentences (max 3)")
+                break
+
+        # Bridge that explains HOW (telling, not showing)
+        over_explain = [
+            "our biggest challenge was", "the key insight was",
+            "what we found was", "what we learned was",
+            "the approach we took", "the way we solved",
+        ]
+        for phrase in over_explain:
+            if phrase in text:
+                flags.append(f"over-explains: '{phrase}'")
+
+    passed = len(flags) == 0
+    detail = f"{len(flags)} flags"
+    if flags:
+        detail += f": {'; '.join(flags)}"
+    else:
+        detail += " — clean"
+
+    return GateResult("HG-06", "AI Slop Detection", passed, detail, {"flags": flags})
 
 
 def outbound_hg07_variant_completeness(outbound_path: str) -> GateResult:
@@ -616,6 +729,124 @@ def outbound_hg07_variant_completeness(outbound_path: str) -> GateResult:
 
     return GateResult("HG-07", "Variant Completeness", passed, detail,
                      {"found": found_count, "missing": missing})
+
+
+def outbound_hg08_cta_presence(outbound_path: str) -> GateResult:
+    """HG-08: Every variant must have a clear, short CTA."""
+    raw_text = load_file(outbound_path)
+    sections = extract_sections(raw_text)
+
+    good_ctas = ["minutes?", "want to see", "worth a look", "coffee?",
+                 "happy to share", "interested?", "want to dig in"]
+    bad_ctas = ["let me know", "i'd love to discuss", "would love the opportunity",
+                "at your earliest", "would be grateful", "i'd appreciate"]
+
+    missing_cta = []
+    bad_cta_found = []
+
+    for variant_name in ["Primary Email", "LinkedIn Connection Request",
+                         "LinkedIn InMail", "Follow-up Email", "Follow Up Email"]:
+        for key in sections:
+            if variant_name.lower() in key.lower():
+                variant_text = sections[key].lower()
+                has_good = any(c in variant_text for c in good_ctas)
+                has_question = '?' in sections[key]
+                has_bad = [c for c in bad_ctas if c in variant_text]
+                if has_bad:
+                    bad_cta_found.append(f"{key}: '{has_bad[0]}'")
+                if not has_good and not has_question:
+                    missing_cta.append(key)
+
+    passed = len(missing_cta) == 0 and len(bad_cta_found) == 0
+    detail = ""
+    if missing_cta:
+        detail += f"missing CTA: {missing_cta}"
+    if bad_cta_found:
+        detail += f" bad CTA: {bad_cta_found}"
+    if passed:
+        detail = "all variants have short CTAs"
+
+    return GateResult("HG-08", "CTA Presence", passed, detail,
+                     {"missing": missing_cta, "bad": bad_cta_found})
+
+
+def outbound_hg09_recipient_specificity(outbound_path: str) -> GateResult:
+    """HG-09: Primary email must reference recipient by name + specific detail."""
+    raw_text = load_file(outbound_path)
+    sections = extract_sections(raw_text)
+
+    email = sections.get("Primary Email", "")
+    if not email:
+        return GateResult("HG-09", "Recipient Specificity", False, "no email found", {})
+
+    # Check for a name (capitalized word not a common word, after subject line)
+    body_lines = [l for l in email.split('\n') if not l.startswith('**Subject:') and l.strip()]
+    body = '\n'.join(body_lines)
+
+    # Look for a name at start (e.g., "Vishay —" or "Hi Vishay,")
+    has_name = bool(re.search(r'^[A-Z][a-z]+\s*[—,\-]', body, re.MULTILINE))
+
+    passed = has_name
+    detail = "recipient named" if has_name else "no recipient name found"
+
+    return GateResult("HG-09", "Recipient Specificity", passed, detail,
+                     {"has_name": has_name})
+
+
+def outbound_hg10_focus_balance(outbound_path: str) -> GateResult:
+    """HG-10: >=60% sentences about them, <=1 sentence about me."""
+    raw_text = load_file(outbound_path)
+    sections = extract_sections(raw_text)
+    email = sections.get("Primary Email", "")
+
+    if not email:
+        return GateResult("HG-10", "Focus Balance", False, "no email found", {})
+
+    # Extract body sentences (skip subject, signature)
+    body_lines = [l for l in email.split('\n')
+                 if not l.startswith('**Subject:') and l.strip()
+                 and l.strip() != 'Sujoy Guha' and 'linkedin.com' not in l.lower()]
+    body = ' '.join(body_lines).strip()
+
+    sentences = re.split(r'(?<=[.!?])\s+', body)
+    sentences = [s.strip() for s in sentences if len(s.strip()) > 5]
+
+    if not sentences:
+        return GateResult("HG-10", "Focus Balance", False, "no sentences found", {})
+
+    about_me = 0
+    about_them = 0
+
+    me_markers = ['i shipped', 'i built', 'i led', 'my team', 'we achieved',
+                  'i solved', 'i worked', 'our biggest', 'my experience',
+                  'i have experience', 'i am a', 'in my role', 'i managed',
+                  'i created', 'at duetto', 'at capital one', 'at wayfair',
+                  'i\'ve worked on', 'i\'ve solved']
+    # "I modeled" is artifact reference, not credential — classify as neutral
+    artifact_markers = ['i modeled', 'i built a prototype', 'i put together',
+                        'happy to share', 'want to see']
+
+    for sent in sentences:
+        sent_lower = sent.lower()
+        is_artifact = any(m in sent_lower for m in artifact_markers)
+        is_me = any(m in sent_lower for m in me_markers) and not is_artifact
+        if is_me:
+            about_me += 1
+        elif not is_artifact:
+            about_them += 1
+
+    them_pct = about_them / len(sentences) if sentences else 0
+
+    passed = about_me <= 1 and them_pct >= 0.50
+    detail = f"{about_them}/{len(sentences)} about them ({them_pct:.0%}), {about_me} about me"
+    if about_me > 1:
+        detail += f" | FAIL: {about_me} sentences about me (max 1)"
+    if them_pct < 0.50:
+        detail += f" | FAIL: only {them_pct:.0%} about them (need >=50%)"
+
+    return GateResult("HG-10", "Focus Balance", passed, detail,
+                     {"about_them": about_them, "about_me": about_me,
+                      "total": len(sentences), "them_pct": round(them_pct, 2)})
 
 
 # ─────────────────────────────────────────────
@@ -697,8 +928,8 @@ def _sentence_opener_variety(sentences: list[str]) -> dict[str, float]:
 
 
 def ai_detection_check(text: str, short_form: bool = False) -> GateResult:
-    """HG-08/10: AI detection resistance check (GPTZero-style signals)."""
-    gate_id = "HG-10" if short_form else "HG-08"
+    """HG-08 (artifact) / HG-11 (outbound): AI detection resistance check."""
+    gate_id = "HG-11" if short_form else "HG-08"
     sentences = _split_sentences(text)
 
     flags = []
@@ -745,8 +976,8 @@ def ai_detection_check(text: str, short_form: bool = False) -> GateResult:
 
 
 def writing_style_check(text: str, short_form: bool = False) -> GateResult:
-    """HG-09/11: Writing style match for Sujoy's voice."""
-    gate_id = "HG-11" if short_form else "HG-09"
+    """HG-09 (artifact) / HG-12 (outbound): Writing style match for Sujoy's voice."""
+    gate_id = "HG-12" if short_form else "HG-09"
     sentences = _split_sentences(text)
     text_lower = text.lower()
 
@@ -831,18 +1062,18 @@ def writing_style_check(text: str, short_form: bool = False) -> GateResult:
         anti_markers += 1
         anti_details.append("blogger transitions")
 
-    # Short-form extras
+    # Short-form extras (outbound-specific per HG-12)
     if short_form:
         # Check for "I am a..." opener
         if re.search(r'\bi am a\b', text_lower):
             anti_markers += 1
             anti_details.append("'I am a...' opener")
 
-        # Check for sentences > 40 words in email body
-        long_sentences = [s for s in sentences if len(s.split()) > 40]
+        # Check for sentences > 35 words in email body
+        long_sentences = [s for s in sentences if len(s.split()) > 35]
         if long_sentences:
             anti_markers += 1
-            anti_details.append(f"{len(long_sentences)} sentences > 40 words")
+            anti_details.append(f"{len(long_sentences)} sentences > 35 words")
 
         # Passive CTA
         passive_ctas = ["would be appreciated", "would be grateful",
@@ -850,6 +1081,31 @@ def writing_style_check(text: str, short_form: bool = False) -> GateResult:
         if any(c in text_lower for c in passive_ctas):
             anti_markers += 1
             anti_details.append("passive CTA")
+
+        # Sentences starting with credential claims
+        credential_openers = ["i've worked on", "i've solved", "i shipped", "in my role"]
+        for opener in credential_openers:
+            if any(s.lower().startswith(opener) for s in sentences):
+                anti_markers += 1
+                anti_details.append(f"sentence starts with '{opener}'")
+                break  # Only flag once
+
+        # More than one paragraph about sender's experience
+        sections = extract_sections(text)
+        email = sections.get("primary email", sections.get("Primary Email", ""))
+        if email:
+            paras = [p.strip() for p in email.split('\n\n') if p.strip()
+                    and not p.strip().lower().startswith('**subject:')]
+            me_paras = 0
+            me_words = ['i shipped', 'i built', 'i led', 'at duetto', 'my team',
+                       'our biggest', 'i solved', 'i worked', 'my experience']
+            for para in paras:
+                para_lower = para.lower()
+                if sum(1 for m in me_words if m in para_lower) >= 2:
+                    me_paras += 1
+            if me_paras > 1:
+                anti_markers += 1
+                anti_details.append(f"{me_paras} paragraphs about sender's experience")
 
     # Scoring
     if short_form:
@@ -891,9 +1147,23 @@ def run_artifact_gates(artifact_dir: str, fact_set_path: str, secrets_path: str)
     ]
 
 
+def _extract_variant_text(outbound_path: str) -> str:
+    """Extract only the outbound variant text (no metadata, no strategy notes)."""
+    raw = load_file(outbound_path)
+    sections = extract_sections(raw)
+    # Only include actual outbound variants, not strategy notes or metadata
+    variant_keys = ["Primary Email", "LinkedIn Connection Request", "LinkedIn InMail",
+                    "Follow-up Email", "Follow Up Email", "Warm Intro Request", "Warm Intro"]
+    parts = []
+    for key in sections:
+        if any(v.lower() in key.lower() for v in variant_keys):
+            parts.append(sections[key])
+    return '\n\n'.join(parts)
+
+
 def run_outbound_gates(outbound_path: str, fact_set_path: str) -> list[GateResult]:
-    """Run all outbound hard gates."""
-    text = load_file(outbound_path)
+    """Run all outbound hard gates (HG-01 through HG-12)."""
+    variant_text = _extract_variant_text(outbound_path)
     return [
         outbound_hg01_word_counts(outbound_path),
         outbound_hg02_anti_patterns(outbound_path),
@@ -901,6 +1171,9 @@ def run_outbound_gates(outbound_path: str, fact_set_path: str) -> list[GateResul
         outbound_hg05_subject_line(outbound_path),
         outbound_hg06_ai_slop(outbound_path),
         outbound_hg07_variant_completeness(outbound_path),
-        ai_detection_check(text, short_form=True),
-        writing_style_check(text, short_form=True),
+        outbound_hg08_cta_presence(outbound_path),
+        outbound_hg09_recipient_specificity(outbound_path),
+        outbound_hg10_focus_balance(outbound_path),
+        ai_detection_check(variant_text, short_form=True),
+        writing_style_check(variant_text, short_form=True),
     ]

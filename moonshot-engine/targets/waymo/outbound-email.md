@@ -1,5 +1,5 @@
 # Outbound Package: PM, Planner and Driving Behaviors at Waymo
-**Generated:** 2026-03-08
+**Generated:** 2026-03-09
 **Target contact:** Vishay Nihalani, Director of Product Management, Waymo
 
 ---
@@ -8,13 +8,9 @@
 
 **Subject:** The school bus recall and the blackout are the same problem
 
-Hi Vishay,
+Vishay — the December recall and the December blackout are mirror-image threshold failures. One too confident, one not enough. The root cause is the same: context-blind calibration.
 
-The December school bus recall (threshold too confident) and the December blackout stalls (threshold not confident enough) are mirror images of the same calibration failure — when should the planner act autonomously vs. defer to Fleet Response?
-
-I've worked on this exact problem. At Duetto, I shipped a production RL engine making billions of daily pricing decisions. Our biggest challenge wasn't the model — it was calibrating when the system should decide on its own vs. defer to humans. We moved decision acceptance from 20% to 60%+ through context-dependent thresholds, not model improvements.
-
-I built a prototype modeling the confidence calibration problem across Waymo's actual 2025 failure modes. Context-adaptive thresholds pass both the school bus test and the blackout test — the aggressive and static approaches each fail one. Happy to share.
+I modeled this across your actual 2025 failure modes. Context-adaptive thresholds fix both — static and aggressive each break one. Happy to share.
 
 20 minutes?
 
@@ -26,19 +22,15 @@ linkedin.com/in/sujguha
 ## LinkedIn Connection Request
 (300 char max)
 
-Vishay — I've been studying Waymo's confidence calibration problem (school bus recall vs blackout stalls = same threshold failure). Shipped production RL with similar trust calibration challenges at Duetto. Built a prototype. Would love to connect.
+Vishay — the school bus recall and the blackout stalls are the same threshold failure, mirrored. I modeled the fix across Waymo's 2025 incidents. Worth a look?
 
 ---
 
 ## LinkedIn InMail
 
-Hi Vishay,
+Vishay — your planner team is solving a confidence calibration problem disguised as a safety problem. School zones, dead traffic lights, construction — each needs different deference thresholds, not one global dial.
 
-I noticed your team is hiring for PM, Planner and Driving Behaviors. The role's core challenge — scaling the Waymo Driver across contexts — is fundamentally a confidence calibration problem. Different scenarios need different deference thresholds: school zones ≠ dead traffic lights ≠ construction zones.
-
-I've solved this in production. At Duetto, pricing acceptance went from 20% to 60%+ through context-dependent thresholds and explainability — the same pattern Waymo's Drivership framework is reaching toward.
-
-Built a prototype modeling the calibration across your actual 2025 incident scenarios. Would love 20 minutes.
+I modeled this across your actual 2025 failure modes. Context-adaptive thresholds pass both tests. Want to see it?
 
 Sujoy
 
@@ -48,15 +40,9 @@ Sujoy
 
 **Subject:** Re: The school bus recall and the blackout are the same problem
 
-Hi Vishay,
+Vishay — Waymo's Drivership framework frames good driving as alignment with societal expectations. The implication: confidence calibration should vary by rider and regulator expectation profiles, not just scenario type.
 
-One more thought: the Drivership framework Waymo published in February defines good driving as alignment between "exhibited driving behavior and the expectations of society" — distinguishing empirical, normative, and furtherance expectations.
-
-At Duetto, we faced the same framing problem for RL pricing. Our breakthrough wasn't a better model — it was an ICP pivot: we stopped optimizing for Revenue Managers (who feared AI replacement) and started optimizing for General Managers (who wanted profit growth). Acceptance went from 20% to 60%+ overnight.
-
-For Waymo, I'd argue the analogous pivot is framing Drivership not as a safety engineering metric but as a rider trust surface — different riders and regulators have different expectation profiles, and the planner's confidence calibration should reflect that.
-
-Happy to dig into this over coffee if you're open to it.
+I extended the model to account for this. Worth a look?
 
 Sujoy
 
@@ -66,7 +52,7 @@ Sujoy
 
 **Forwardable blurb:**
 
-"Hey Vishay — wanted to connect you with Sujoy Guha, a Senior AI/ML PM at Duetto. He shipped a production RL engine making billions of daily decisions and has been studying Waymo's confidence calibration challenge (the connection between the school bus recall and the blackout stalls). Built a working prototype modeling the problem. Would be worth 20 minutes. LinkedIn: linkedin.com/in/sujguha"
+"Vishay — Sujoy Guha has been studying Waymo's confidence calibration challenge. He connected the school bus recall and blackout stalls as the same root-cause failure and built a working model of context-adaptive thresholds. Worth 20 minutes. linkedin.com/in/sujguha"
 
 ---
 
