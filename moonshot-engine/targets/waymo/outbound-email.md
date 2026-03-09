@@ -6,13 +6,13 @@
 
 ## Primary Email
 
-**Subject:** The school bus recall and the blackout are the same problem
+**Subject:** question about waymo's calibration problem
 
-Vishay — the December recall and the December blackout are mirror-image threshold failures. One too confident, one not enough. The root cause is the same: context-blind calibration.
+Vishay, I've been thinking about why the school bus recall and the December blackout stalls look like opposite failures but might actually be the same one. Different contexts need different confidence thresholds, and a single dial can't do both.
 
-I modeled this across your actual 2025 failure modes. Context-adaptive thresholds fix both — static and aggressive each break one. Happy to share.
+I put together a model testing that idea against Waymo's 2025 incidents. Would genuinely love your take on whether I'm thinking about this right.
 
-20 minutes?
+Coffee sometime?
 
 Sujoy Guha
 linkedin.com/in/sujguha
@@ -22,15 +22,15 @@ linkedin.com/in/sujguha
 ## LinkedIn Connection Request
 (300 char max)
 
-Vishay — the school bus recall and the blackout stalls are the same threshold failure, mirrored. I modeled the fix across Waymo's 2025 incidents. Worth a look?
+Vishay, been studying why the school bus recall and blackout stalls might be the same calibration failure. Put together a model testing context-specific thresholds. Would love your perspective.
 
 ---
 
 ## LinkedIn InMail
 
-Vishay — your planner team is solving a confidence calibration problem disguised as a safety problem. School zones, dead traffic lights, construction — each needs different deference thresholds, not one global dial.
+Vishay, I keep coming back to the same question about Waymo's planner: why does it fail in opposite directions depending on context? Seems like a single confidence threshold can't handle school zones and dead traffic lights the same way.
 
-I modeled this across your actual 2025 failure modes. Context-adaptive thresholds pass both tests. Want to see it?
+I put together a model exploring this. Would love to know if I'm on the right track.
 
 Sujoy
 
@@ -38,11 +38,11 @@ Sujoy
 
 ## Follow-up Email (1 week later)
 
-**Subject:** Re: The school bus recall and the blackout are the same problem
+**Subject:** Re: question about waymo's calibration problem
 
-Vishay — Waymo's Drivership framework frames good driving as alignment with societal expectations. The implication: confidence calibration should vary by rider and regulator expectation profiles, not just scenario type.
+Vishay, one more thought. Waymo's Drivership framework implies confidence calibration should vary by who's in the car, not just what's outside it. Rider expectations and regulator expectations are different surfaces.
 
-I extended the model to account for this. Worth a look?
+I extended the model for this. Curious if that maps to how your team thinks about it?
 
 Sujoy
 
@@ -52,13 +52,13 @@ Sujoy
 
 **Forwardable blurb:**
 
-"Vishay — Sujoy Guha has been studying Waymo's confidence calibration challenge. He connected the school bus recall and blackout stalls as the same root-cause failure and built a working model of context-adaptive thresholds. Worth 20 minutes. linkedin.com/in/sujguha"
+"Vishay, my friend Sujoy Guha has been digging into Waymo's confidence calibration problem. He thinks the school bus recall and blackout stalls are the same root-cause failure and built a model exploring context-adaptive thresholds. Worth a quick chat. linkedin.com/in/sujguha"
 
 ---
 
 ## Outbound Strategy Notes
 
 **Sending timing:** Tuesday-Thursday, 8-10am PT
-**Attachment:** Do NOT attach artifact on first email. The subject line + prototype mention creates curiosity. Share only if they reply.
+**Attachment:** Do NOT attach artifact on first email. The curiosity should come from the framing, not the deliverable. Share only if they reply.
 **If no response after follow-up:** Try reaching out to Saswat Panigrahi (CPO) or Nick Rose (PM, Expansion) as alternative entry points.
 **LinkedIn profile alignment:** Before sending, update LinkedIn headline to emphasize "RL in production" and "trust calibration" — they will check.

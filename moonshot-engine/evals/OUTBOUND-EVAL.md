@@ -2,9 +2,11 @@
 
 **Purpose:** State-of-the-art eval framework for Stage 04 (Outbound Composer) outputs. Evaluates email, LinkedIn, follow-up, and warm intro messages. Programmatic hard gates + LLM-as-judge scoring.
 
-**Philosophy:** The email is about THEIR problem, not about you. 3-4 sentences. The artifact is the proof — you never explain your credentials in the email. The connection between your experience and their challenge is implicit (lives in the artifact), not explicit (spelled out in the email). If the email talks more about Sujoy than about the recipient's company, it fails.
+**Philosophy:** The email is about THEIR problem, not about you. 3-4 sentences. Humble, curious, clear about what you're asking for. You're a person who's been genuinely thinking about their problem and wants to know if you're on the right track — not a salesperson pitching a deliverable.
 
-**The bar:** Would you actually send this? If it reads like something an AI career coach would generate, it fails. If it reads like something you'd text a friend who works there, it's closer.
+**The bar:** Would you actually send this? If it reads like something an AI career coach would generate, it fails. If it sounds salesy, presumptuous, or over-confident, it fails. If it has em-dashes, semicolons, or "mirror-image" compound structures, it's AI. The right email sounds like you'd dash it off in 2 minutes — no polish, no pitch, just genuine curiosity and a clear ask.
+
+**Tone north star:** "Hey, I've been thinking about your problem and have a question" — NOT "I built a thing, want to see it?"
 
 ---
 
@@ -97,10 +99,17 @@ Replace company name + recipient name + company-specific references with a compe
 - "It should be noted..."
 
 **Structural tells:**
+- ANY em-dashes in primary email (em-dashes are natural in long-form artifacts; in a 4-sentence email they're an instant AI tell)
+- More than 1 em-dash in any other variant
 - Uses semicolons in casual email context
-- More than 4 em-dashes in a single email variant
 - Every sentence is within +/-5 words of the same length
 - Email has exactly 5 paragraphs
+
+**Salesy / presumptuous patterns (zero tolerance):**
+- "Happy to share" / "Happy to walk you through" / "Happy to discuss"
+- "Your actual [X]" / "Your real [X]" (presumptuous — you don't know their actual anything)
+- "The fix" / "The solution" (too certain — you're asking, not telling)
+- "I modeled this across your actual" (presumptuous framing)
 
 **Over-explanation tells (catches the real failure mode):**
 - Any paragraph longer than 3 sentences
@@ -164,12 +173,14 @@ The email must be about THEIR problem, not about Sujoy.
 ### HG-12: Writing Style Match
 Sujoy's style: direct, compressed, concrete-first, peer-to-peer.
 
-**Style markers (want PRESENT >=3 of 5):**
+**Style markers (want PRESENT >=3 of 7):**
 - Leads with observation/insight about THEIR problem, not self-introduction
 - Short sentences for impact, longer only for the one key observation
-- Em-dash for asides (natural in his voice)
+- Humility/curiosity signal ("your take", "am I thinking about this right", "curious if")
+- Lowercase subject line (casual, not corporate)
 - Ends with a terse CTA (<=5 words)
 - Total email is 3-5 sentences
+- Active voice throughout
 
 **Anti-style markers (want ABSENT — zero tolerance):**
 - Any sentence starting with "I am a..."
@@ -177,6 +188,7 @@ Sujoy's style: direct, compressed, concrete-first, peer-to-peer.
 - Passive voice in the CTA
 - More than one paragraph about sender's experience
 - Any sentence beginning "I've worked on..." / "I've solved..." / "I shipped..." / "In my role..."
+- Em-dashes in email body (AI tell in short-form context)
 
 - **PASS:** >=3 style markers, 0 anti-style markers
 - **FAIL:** <2 style markers OR any anti-style marker
@@ -316,6 +328,30 @@ Minimum passing: 3.5 average, no individual score below 2.
 
 ### PASS Example (Waymo)
 
+**Subject:** question about waymo's calibration problem
+
+Vishay, I've been thinking about why the school bus recall and the December blackout stalls look like opposite failures but might actually be the same one. Different contexts need different confidence thresholds, and a single dial can't do both.
+
+I put together a model testing that idea against Waymo's 2025 incidents. Would genuinely love your take on whether I'm thinking about this right.
+
+Coffee sometime?
+
+Sujoy Guha
+linkedin.com/in/sujguha
+
+**Why this passes:**
+- 4 sentences, ~65 words
+- Humble and curious, not presumptuous
+- Clear what the ask is ("your take on whether I'm thinking about this right")
+- Zero em-dashes, zero semicolons, zero AI tells
+- Lowercase subject line (casual, not corporate)
+- Zero mention of Duetto, titles, or credentials
+- "I put together a model" is humble, not "I modeled this across your actual failure modes"
+- CTA is human ("Coffee sometime?" not "20 minutes?")
+- Reads like a person who's been thinking, not a person who's pitching
+
+### FAIL Example v2 (previous "fixed" version — still fails)
+
 **Subject:** The school bus recall and the blackout are the same problem
 
 Vishay — the December recall and the December blackout are mirror-image threshold failures. One too confident, one not enough. The root cause is the same: context-blind calibration.
@@ -324,18 +360,17 @@ I modeled this across your actual 2025 failure modes. Context-adaptive threshold
 
 20 minutes?
 
-Sujoy Guha
-linkedin.com/in/sujguha
+**Why this fails:**
+- Em-dashes are AI tells in a 4-sentence email
+- "Mirror-image threshold failures" — no human writes like this in an email
+- "I modeled this across your actual" — presumptuous (you don't know their actual anything)
+- "Happy to share" — salesy pitch energy
+- "20 minutes?" — template cold email CTA
+- "The root cause is the same: context-blind calibration" — too declarative, too certain
+- Not humble or curious — reads like someone presenting findings, not asking a question
+- No clear ask — what does Sujoy want from Vishay? Just "20 minutes" of what?
 
-**Why this passes:**
-- 4 sentences, ~70 words
-- 100% about their problem
-- Zero mention of Duetto, titles, or credentials
-- Artifact mention is the natural punchline ("I modeled this")
-- "I modeled this" implies competence without explaining it
-- Terse CTA
-
-### FAIL Example (previous version)
+### FAIL Example v1 (original — catastrophic)
 
 **Subject:** The school bus recall and the blackout are the same problem
 
@@ -356,5 +391,7 @@ I built a prototype modeling the confidence calibration problem across Waymo's a
 - Mentions Duetto by name in the email
 - Lists multiple metrics (billions, 20%, 60%+)
 - "At Duetto, I shipped..." — classic credential parade
+- Em-dashes throughout — obvious AI generation
+- "Happy to share" — salesy
 - Explains HOW the problem was solved instead of letting the artifact do that
 - Shifts focus from their problem to sender's resume

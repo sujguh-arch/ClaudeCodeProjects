@@ -463,13 +463,16 @@ def outbound_hg02_anti_patterns(outbound_path: str) -> GateResult:
     if re.search(r"as a \w+ (?:manager|director|lead|engineer|pm) with \d+ years", text):
         found["tier1"].append("[As a X with N years]")
 
-    # === Tier 2: Credential parade ===
+    # === Tier 2: Credential parade + presumptuous claims ===
     tier2_phrases = [
         "i've worked on this exact problem",
         "i've solved this before",
         "i have experience in",
         "my background in",
         "in my current role at",
+        "i modeled this across your actual",  # presumptuous
+        "i built the solution",
+        "i know how to fix",
     ]
     for phrase in tier2_phrases:
         if phrase in text:
@@ -621,17 +624,36 @@ def outbound_hg06_ai_slop(outbound_path: str) -> GateResult:
     # === Structural tells ===
     sections = extract_sections(raw_text)
 
-    # Em-dash overuse per variant
+    # Em-dash in outbound email = AI tell (natural in long-form artifacts, not in 4-sentence emails)
     if "Primary Email" in sections:
         email_dashes = sections["Primary Email"].count('—')
-        if email_dashes > 4:
-            flags.append(f"em-dash overuse in email ({email_dashes})")
+        if email_dashes > 0:
+            flags.append(f"em-dashes in email ({email_dashes}) — AI tell in short-form")
+
+    # Check em-dashes across other variants too (flag if >1 per variant)
+    for key in sections:
+        if key != "Primary Email" and any(v in key.lower() for v in
+                ["inmail", "connection", "follow-up", "follow up"]):
+            variant_dashes = sections[key].count('—')
+            if variant_dashes > 1:
+                flags.append(f"em-dashes in {key} ({variant_dashes})")
 
     # Semicolons in email
     if "Primary Email" in sections:
         semicolons = sections["Primary Email"].count(';')
         if semicolons > 0:
             flags.append(f"semicolons in email ({semicolons})")
+
+    # === Salesy / presumptuous patterns ===
+    salesy = [
+        "happy to share", "happy to walk you through", "happy to discuss",
+        "i'd be happy to", "would love to show you",
+        "your actual", "your real",  # presumptuous framing
+        "the fix", "the solution",  # too certain
+    ]
+    for phrase in salesy:
+        if phrase in text:
+            flags.append(f"salesy: '{phrase}'")
 
     # Uniform sentence lengths (metronomic) — only check email body sentences
     if "Primary Email" in sections:
@@ -737,7 +759,10 @@ def outbound_hg08_cta_presence(outbound_path: str) -> GateResult:
     sections = extract_sections(raw_text)
 
     good_ctas = ["minutes?", "want to see", "worth a look", "coffee?",
-                 "happy to share", "interested?", "want to dig in"]
+                 "interested?", "want to dig in",
+                 "your take", "your perspective", "your thoughts",
+                 "on the right track", "thinking about this right",
+                 "curious", "worth a chat", "sometime?"]
     bad_ctas = ["let me know", "i'd love to discuss", "would love the opportunity",
                 "at your earliest", "would be grateful", "i'd appreciate"]
 
@@ -997,8 +1022,8 @@ def writing_style_check(text: str, short_form: bool = False) -> GateResult:
             style_markers += 1
             marker_details.append("sentence length variety")
 
-    # 2. Em-dash usage
-    if '—' in text or ' — ' in text:
+    # 2. Em-dash usage (positive for artifacts, NOT for short-form outbound)
+    if not short_form and ('—' in text or ' — ' in text):
         style_markers += 1
         marker_details.append("em-dash usage")
 
@@ -1064,6 +1089,24 @@ def writing_style_check(text: str, short_form: bool = False) -> GateResult:
 
     # Short-form extras (outbound-specific per HG-12)
     if short_form:
+        # Positive: Humility / curiosity markers (want present in outbound)
+        humility_markers = ["your take", "your perspective", "am i thinking about this right",
+                           "i'm thinking about", "i've been thinking",
+                           "curious if", "wondering if", "does that map to",
+                           "on the right track", "would love your take"]
+        humility_count = sum(1 for h in humility_markers if h in text_lower)
+        if humility_count >= 1:
+            style_markers += 1
+            marker_details.append("humility/curiosity signal")
+
+        # Positive: Lowercase subject line (casual, not corporate)
+        subject_match = re.search(r'\*\*Subject:\*\*\s*(.+)', text)
+        if subject_match:
+            subject = subject_match.group(1).strip()
+            if subject == subject.lower() or subject[0].islower():
+                style_markers += 1
+                marker_details.append("lowercase subject (casual)")
+
         # Check for "I am a..." opener
         if re.search(r'\bi am a\b', text_lower):
             anti_markers += 1
