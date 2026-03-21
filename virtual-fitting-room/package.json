@@ -7,7 +7,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "vitest run",
+    "test": "vitest run --exclude 'src/__tests__/integration/**'",
+    "test:integration": "vitest run src/__tests__/integration/",
+    "test:all": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test"
   },

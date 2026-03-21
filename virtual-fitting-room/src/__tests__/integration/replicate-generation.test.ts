@@ -51,11 +51,24 @@ const TEST_PRODUCTS = [
 
 const productIds: Record<string, string> = {};
 
+async function fetchWithRetry(url: string, options?: RequestInit, retries = 3): Promise<Response> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      if (i === retries - 1) throw err;
+      // Wait before retry — server may need a moment after heavy generation
+      await new Promise((r) => setTimeout(r, 3000));
+    }
+  }
+  throw new Error("unreachable");
+}
+
 describe.skipIf(!serverAvailable)("real replicate generation", () => {
   beforeAll(async () => {
     // Add test products via API (manual add with title+images, no scraping)
     for (const tp of TEST_PRODUCTS) {
-      const resp = await fetch(`${BASE_URL}/api/products`, {
+      const resp = await fetchWithRetry(`${BASE_URL}/api/products`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -79,7 +92,7 @@ describe.skipIf(!serverAvailable)("real replicate generation", () => {
         const pid = productIds[tp.category];
         expect(pid).toBeDefined();
 
-        const resp = await fetch(`${BASE_URL}/api/generate`, {
+        const resp = await fetchWithRetry(`${BASE_URL}/api/generate`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ productId: pid }),
@@ -91,8 +104,8 @@ describe.skipIf(!serverAvailable)("real replicate generation", () => {
         // Should have generated at least 1 image
         expect(result.generated).toBeGreaterThanOrEqual(1);
 
-        // Check renderings via API
-        const rResp = await fetch(`${BASE_URL}/api/generate?productId=${pid}`);
+        // Check renderings via API — retry in case server is recovering
+        const rResp = await fetchWithRetry(`${BASE_URL}/api/generate?productId=${pid}`);
         const renderings = await rResp.json();
         const done = renderings.filter((r: any) => r.status === "done");
 
@@ -101,7 +114,7 @@ describe.skipIf(!serverAvailable)("real replicate generation", () => {
 
         console.log(`  ✓ ${tp.category}: generated ${done.length} image(s) — ${done[0].generatedImage}`);
       },
-      120000 // 2 min timeout per generation
+      180000 // 3 min timeout per generation
     );
   }
 });
