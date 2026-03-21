@@ -23,3 +23,6 @@ playwright-report/
 # misc
 .DS_Store
 *.tsbuildinfo
+audit-*.png
+ss-*.png
+audit-report.json
