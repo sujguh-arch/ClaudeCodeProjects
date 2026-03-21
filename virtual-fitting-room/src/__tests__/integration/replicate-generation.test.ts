@@ -8,6 +8,11 @@
  */
 import { describe, it, expect, beforeAll } from "vitest";
 
+// Check if server is reachable before running any tests
+const serverAvailable = await fetch("http://localhost:3000/api/products", {
+  signal: AbortSignal.timeout(1000),
+}).then(() => true).catch(() => false);
+
 const BASE_URL = "http://localhost:3000";
 
 // Real product images from known-working CDNs for each category
@@ -46,7 +51,7 @@ const TEST_PRODUCTS = [
 
 const productIds: Record<string, string> = {};
 
-describe("real replicate generation", () => {
+describe.skipIf(!serverAvailable)("real replicate generation", () => {
   beforeAll(async () => {
     // Add test products via API (manual add with title+images, no scraping)
     for (const tp of TEST_PRODUCTS) {
