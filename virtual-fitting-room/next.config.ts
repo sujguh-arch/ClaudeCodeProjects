@@ -19,7 +19,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.asos.com" },
       { protocol: "https", hostname: "**.zara.com" },
     ],
-    unoptimized: true,
+    // Enable Next.js image optimization for production
+    // unoptimized: true,
   },
 };
 

@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
-import MotionLightbox from "@/components/MotionLightbox";
+import dynamic from "next/dynamic";
+const MotionLightbox = dynamic(() => import("@/components/MotionLightbox"), {
+  ssr: false,
+});
 import { useToast } from "@/components/Toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
