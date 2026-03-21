@@ -13,11 +13,7 @@ out/
 .env.local
 .env.*.local
 
-# data (user-specific)
-data/
-
-# generated images
-public/generated/
+# generated images (keep data/ and public/generated/ for demo deployment)
 public/uploads/
 
 # test artifacts

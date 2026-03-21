@@ -349,7 +349,7 @@ export default function Home() {
       <motion.header
         ref={heroRef}
         style={{ y: heroY, opacity: heroOpacity }}
-        className="px-5 pt-8 pb-2 sm:pt-12 sm:pb-4 max-w-lg mx-auto"
+        className="px-5 pt-6 pb-4 sm:pt-8 sm:pb-6 max-w-xl mx-auto"
       >
         <form onSubmit={handleSubmit} className="relative">
           <motion.input
@@ -465,7 +465,7 @@ export default function Home() {
 
                     {/* Item count badge */}
                     <div
-                      className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded-full"
+                      className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap z-10"
                       style={{ background: "var(--accent)", color: "#0A0A09" }}
                     >
                       {itemCount} {itemCount === 1 ? "item" : "items"}
@@ -529,7 +529,7 @@ export default function Home() {
                 key={cat.key}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setCategory(cat.key)}
-                className="px-3.5 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap flex-shrink-0"
+                className="px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider whitespace-nowrap flex-shrink-0"
                 style={{
                   background: category === cat.key ? "var(--accent)" : "var(--bg-surface)",
                   color: category === cat.key ? "#0A0A09" : "var(--text-secondary)",
@@ -585,15 +585,15 @@ export default function Home() {
 
                         {/* Category badge */}
                         <div
-                          className="absolute top-2.5 left-2.5 text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider"
+                          className="absolute top-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide whitespace-nowrap z-10"
                           style={{ background: gen.length > 0 ? "var(--accent)" : "var(--bg-elevated)", color: gen.length > 0 ? "#0A0A09" : "var(--text-secondary)" }}
                         >
                           {gen.length > 0 ? "Your fit" : product.category}
                         </div>
 
                         {(gen.length > 1 || product.images.length > 1) && (
-                          <div className="absolute bottom-2.5 left-2.5 text-[10px] px-2 py-0.5 rounded-full font-medium"
-                            style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", color: "var(--text-primary)" }}>
+                          <div className="absolute bottom-2.5 right-2.5 text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap z-10"
+                            style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)", color: "var(--text-primary)" }}>
                             {gen.length > 0 ? gen.length : product.images.length} photos
                           </div>
                         )}
@@ -603,7 +603,7 @@ export default function Home() {
                           whileHover={{ opacity: 1, scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }}
-                          className="absolute bottom-2.5 right-2.5 w-7 h-7 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-70 transition-opacity"
+                          className="absolute bottom-2.5 left-2.5 w-7 h-7 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-70 transition-opacity z-20"
                           style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", color: "var(--text-secondary)", fontSize: "10px" }}
                         >
                           ✕

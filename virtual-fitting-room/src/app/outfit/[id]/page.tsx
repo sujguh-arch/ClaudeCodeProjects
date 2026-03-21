@@ -36,11 +36,11 @@ interface Outfit {
 }
 
 const SLOTS = [
-  { key: "dress", label: "Dress", icon: "👗", aspect: "aspect-[3/4]", span: "col-span-2" },
-  { key: "shoes", label: "Shoes", icon: "👠", aspect: "aspect-square", span: "" },
-  { key: "tights", label: "Tights", icon: "🦵", aspect: "aspect-square", span: "" },
-  { key: "bag", label: "Bag", icon: "👜", aspect: "aspect-square", span: "" },
-  { key: "accessories", label: "Accessories", icon: "💎", aspect: "aspect-square", span: "" },
+  { key: "dress", label: "Dress", icon: "👗", aspect: "aspect-[4/3] sm:aspect-auto", span: "col-span-2 sm:row-span-2" },
+  { key: "shoes", label: "Shoes", icon: "👠", aspect: "aspect-[4/5]", span: "" },
+  { key: "tights", label: "Tights", icon: "🦵", aspect: "aspect-[4/5]", span: "" },
+  { key: "bag", label: "Bag", icon: "👜", aspect: "aspect-[4/5]", span: "" },
+  { key: "accessories", label: "Accessories", icon: "💎", aspect: "aspect-[4/5]", span: "" },
 ] as const;
 
 export default function OutfitPage({ params }: { params: Promise<{ id: string }> }) {
@@ -217,7 +217,7 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
       </nav>
 
       {/* Outfit Name */}
-      <div className="px-5 pt-8 pb-2 max-w-2xl mx-auto">
+      <div className="px-5 pt-8 pb-2 max-w-4xl mx-auto">
         {editingName ? (
           <div className="flex items-center gap-2">
             <input
@@ -249,8 +249,8 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
       </div>
 
       {/* Outfit Grid */}
-      <div className="px-4 max-w-2xl mx-auto">
-        <div className="grid grid-cols-2 gap-2.5 mt-4">
+      <div className="px-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 mt-4">
           {SLOTS.map((slot) => {
             const product = getProductForSlot(slot.key);
             const gen = product ? getGenerated(product.id) : [];
@@ -373,7 +373,7 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
 
       {/* Shop All CTA */}
       {filledSlots.length > 0 && (
-        <div className="px-5 mt-8 max-w-2xl mx-auto">
+        <div className="px-5 mt-8 max-w-4xl mx-auto">
           <div
             className="rounded-[var(--radius-lg)] p-4"
             style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)" }}
