@@ -46,7 +46,7 @@ test.beforeAll(async () => {
   const all = JSON.parse(raw);
   // Filter out ephemeral test products created by other E2E specs
   products = all.filter((p: Product) =>
-    p.store !== "TestStore" && !p.url?.includes("test-store.com")
+    p.store !== "TestStore" && !p.url?.includes("test-store.com") && !p.url?.includes("test-shop-button")
   );
 });
 

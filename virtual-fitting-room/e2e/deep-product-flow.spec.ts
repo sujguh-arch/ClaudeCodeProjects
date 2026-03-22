@@ -100,15 +100,13 @@ test.describe("deep product flow", () => {
     await page.waitForTimeout(300);
 
     // Click the first matching product card
-    const card = page.getByRole("heading", { name: "Lightbox Test Dress" }).first();
+    const card = page.getByText("Lightbox Test Dress").first();
+    await card.waitFor({ state: "visible", timeout: 5000 });
     await card.click();
-    await page.waitForTimeout(500);
 
-    // Lightbox should be visible — look for the shop CTA or multiple instances of title
-    const lightboxIndicator = page.getByText(/shop this look/i).or(
-      page.getByRole("heading", { name: "Lightbox Test Dress" }).nth(1)
-    );
-    await expect(lightboxIndicator).toBeVisible();
+    // Wait for lightbox overlay to appear (dynamically imported)
+    const shopLink = page.getByText(/shop this look/i);
+    await expect(shopLink).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({ path: "test-results/deep-lightbox-open.png" });
 
@@ -302,15 +300,15 @@ test.describe("deep product flow", () => {
     await page.waitForTimeout(300);
 
     // Click the first matching card to open lightbox
-    await page.getByRole("heading", { name: "Shop Button Test Dress" }).first().click();
-    await page.waitForTimeout(500);
+    const card = page.getByText("Shop Button Test Dress").first();
+    await card.waitFor({ state: "visible", timeout: 5000 });
+    await card.click();
 
-    // Look for a shop/external link — intercept navigation
-    const shopLink = page.getByText(/shop this look/i).or(page.locator("a[target='_blank']").first());
-    if (await shopLink.isVisible()) {
-      const href = await shopLink.getAttribute("href");
-      expect.soft(href).toContain(product.url);
-    }
+    // Wait for lightbox to open with shop link
+    const shopLink = page.getByText(/shop this look/i);
+    await expect(shopLink).toBeVisible({ timeout: 5000 });
+    const href = await shopLink.getAttribute("href");
+    expect.soft(href).toContain(product.url);
 
     await page.screenshot({ path: "test-results/deep-shop-button.png" });
 
