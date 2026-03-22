@@ -9,10 +9,11 @@ export interface ScrapedProduct {
 }
 
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  shoes: ["shoe", "heel", "boot", "sandal", "sneaker", "pump", "loafer", "mule", "flat", "oxford"],
-  tights: ["tight", "hosiery", "stocking", "pantyhose", "legging"],
-  bag: ["bag", "clutch", "tote", "purse", "handbag", "satchel", "crossbody", "backpack"],
-  accessories: ["earring", "necklace", "bracelet", "ring", "jewelry", "jewellery", "watch", "sunglasses", "scarf", "belt", "hair clip"],
+  shoes: ["shoe", "shoes", "heel", "heels", "boot", "boots", "sandal", "sandals", "sneaker", "sneakers", "pump", "pumps", "loafer", "loafers", "mule", "mules", "flat", "flats", "oxford", "oxfords", "slingback", "espadrille", "wedge", "platform shoe", "stiletto", "kitten heel"],
+  tights: ["tight", "tights", "hosiery", "stocking", "stockings", "pantyhose", "legging", "leggings", "thigh-high", "knee-high sock"],
+  bag: ["bag", "bags", "clutch", "tote", "purse", "handbag", "satchel", "crossbody", "backpack", "shoulder bag", "mini bag", "bucket bag", "chain bag", "evening bag", "pouch"],
+  accessories: ["earring", "earrings", "necklace", "bracelet", "ring", "jewelry", "jewellery", "watch", "sunglasses", "scarf", "belt", "hair clip", "headband", "hat", "cap", "glove", "gloves", "brooch", "choker", "pendant", "cuff", "bangle", "anklet"],
+  dress: ["dress", "gown", "mini dress", "midi dress", "maxi dress", "bodycon", "slip dress", "wrap dress", "shirt dress", "cocktail dress"],
 };
 
 export function detectCategory(url: string, title: string): string {
@@ -20,7 +21,7 @@ export function detectCategory(url: string, title: string): string {
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
     if (keywords.some((kw) => text.includes(kw))) return category;
   }
-  return "dress";
+  return "other";
 }
 
 export function parseJsonLd(html: string): { title?: string; price?: number; images?: string[] } | null {

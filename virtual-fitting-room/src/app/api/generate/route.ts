@@ -25,11 +25,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
   }
 
-  // Generate ONLY the first image synchronously (fast ~25-30s response)
-  // Then kick off remaining images in background
   const firstImage = product.images[0];
   if (!firstImage) {
     return NextResponse.json({ error: "Product has no images" }, { status: 400 });
+  }
+
+  // Skip if already generated for this product+image combo
+  const existing = getRenderingsForProduct(productId);
+  const alreadyDone = existing.find(
+    (r) => r.originalImage === firstImage && r.status === "done"
+  );
+  if (alreadyDone) {
+    return NextResponse.json({
+      productId,
+      generated: 0,
+      skipped: 1,
+      results: [{ originalImage: firstImage, generatedImage: alreadyDone.generatedImage, status: "done" }],
+      remaining: 0,
+    });
   }
 
   const renderingId = randomUUID();
