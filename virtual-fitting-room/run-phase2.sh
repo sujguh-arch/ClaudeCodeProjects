@@ -41,6 +41,31 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 log "=== VFR Phase 2: Deep Tests + Extended Catalog + Video Demo ==="
 log "Max duration: ${MAX_DURATION}s ($(( MAX_DURATION / 60 )) minutes)"
 
+# Eval gate function — runs deterministic checks after every step
+run_eval_gate() {
+  local step_name="$1"
+  log "  [EVAL GATE] Running for: $step_name"
+  if [ -f eval-gate.sh ]; then
+    bash eval-gate.sh 2>&1 | tee -a "$LOG_FILE"
+    local exit_code=$?
+    if [ $exit_code -eq 0 ]; then
+      log "  [EVAL GATE] PASSED for: $step_name"
+    else
+      log "  [EVAL GATE] $exit_code FAILURES for: $step_name — running auto-fix..."
+      # Auto-fix: have Claude read the eval report and fix issues
+      timeout 300s claude \
+        --print \
+        --dangerously-skip-permissions \
+        --max-turns 15 \
+        "READ /tmp/eval-gate-report.txt. Fix ALL failures listed. Then re-run: bash eval-gate.sh. Do not stop until all checks pass or you have tried 3 times." \
+        2>&1 | tee -a "$LOG_FILE" || log "  [EVAL GATE] Auto-fix timed out"
+      commit_and_push "Eval gate fixes for: $step_name"
+    fi
+  else
+    log "  [EVAL GATE] eval-gate.sh not found, skipping"
+  fi
+}
+
 # ============================================================
 # STEP 1: Pull latest and sync
 # ============================================================
@@ -65,6 +90,7 @@ else
     2>&1 | tee -a "$LOG_FILE" || log "Deep test creation had issues"
 fi
 commit_and_push "Add comprehensive deep test suite"
+run_eval_gate "Deep Test Suite"
 
 # ============================================================
 # STEP 3: Extended Catalog - More Date Night Products
@@ -117,6 +143,7 @@ After adding all products:
 - Fix any failures' \
     2>&1 | tee -a "$LOG_FILE" || log "Extended catalog had issues"
   commit_and_push "Expand catalog with sexy date night collection"
+run_eval_gate "Date Night Collection"
 else
   log "Skipping extended catalog - not enough time"
 fi
@@ -146,6 +173,7 @@ Review ALL products in data/products.json:
 6. Write results to /tmp/oracle-catalog-review.txt' \
     2>&1 | tee -a "$LOG_FILE" || log "Oracle catalog review had issues"
   commit_and_push "Oracle catalog review - constraint enforcement"
+run_eval_gate "Oracle Catalog Review"
 else
   log "Skipping oracle catalog review - not enough time"
 fi
@@ -173,6 +201,7 @@ Verify every product URL works. Add new image domains to next.config.ts if neede
 npm run build && npm run test && npm run test:e2e after.' \
     2>&1 | tee -a "$LOG_FILE" || log "Additional products had issues"
   commit_and_push "Add products from additional stores"
+run_eval_gate "Additional Stores"
 fi
 
 # ============================================================
@@ -252,6 +281,7 @@ if [ "$REMAINING" -gt 300 ]; then
 This is the final check before the user sees the app.' \
     2>&1 | tee -a "$LOG_FILE" || log "Final polish had issues"
   commit_and_push "Final polish and cleanup"
+run_eval_gate "Final Polish"
 fi
 
 # ============================================================
