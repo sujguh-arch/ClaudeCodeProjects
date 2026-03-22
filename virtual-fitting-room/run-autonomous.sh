@@ -11,6 +11,16 @@ LOG_FILE="/tmp/vfr-rounds.log"
 
 cd "$VFR_DIR"
 
+# Fix GPG signing and git auth
+git -C "$REPO_ROOT" config commit.gpgsign false
+git -C "$REPO_ROOT" config tag.gpgsign false
+# Set GITHUB_TOKEN and GITHUB_SERVER_URL for credential helper
+export GITHUB_SERVER_URL="https://github.com"
+# If GITHUB_TOKEN isn't set, try to get it from gh CLI
+if [ -z "${GITHUB_TOKEN:-}" ]; then
+  export GITHUB_TOKEN=$(cat /home/node/.config/gh/hosts.yml 2>/dev/null | grep oauth_token | head -1 | awk '{print $2}' || true)
+fi
+
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"
 }
