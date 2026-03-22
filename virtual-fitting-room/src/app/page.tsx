@@ -357,10 +357,11 @@ export default function Home() {
             mirror
           </h1>
         </div>
-        <Link href="/settings">
+        <Link href="/settings" aria-label="Settings">
           <motion.button
             whileHover={{ scale: 1.05, rotate: 15 }}
             whileTap={{ scale: 0.95 }}
+            aria-label="Settings"
             className="w-9 h-9 flex items-center justify-center rounded-full"
             style={{ background: "var(--bg-elevated)", color: "var(--text-secondary)", transition: "var(--transition-fast)" }}
           >
@@ -572,12 +573,12 @@ export default function Home() {
                               </span>
                             </div>
                           ) : imgs.length === 1 ? (
-                            <Image src={imgs[0]} alt="" fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover card-image" loading="lazy" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
+                            <Image src={imgs[0]} alt={`${outfit.name} preview`} fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover card-image" loading="lazy" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
                           ) : (
                             <div className="grid grid-cols-2 grid-rows-2 absolute inset-0">
                               {imgs.slice(0, 4).map((img, i) => (
                                 <div key={i} className="relative overflow-hidden">
-                                  <Image src={img} alt="" fill sizes="(max-width: 640px) 25vw, 17vw" className="object-cover card-image" loading="lazy" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
+                                  <Image src={img} alt={`${outfit.name} item ${i + 1}`} fill sizes="(max-width: 640px) 25vw, 17vw" className="object-cover card-image" loading="lazy" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
                                 </div>
                               ))}
                             </div>
@@ -594,6 +595,7 @@ export default function Home() {
                           {/* Delete */}
                           <motion.button
                             whileTap={{ scale: 0.9 }}
+                            aria-label={`Delete outfit ${outfit.name}`}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDeleteOutfit(outfit.id);
@@ -724,6 +726,7 @@ export default function Home() {
                               )}
                               <motion.button
                                 whileTap={{ scale: 1.1 }}
+                                aria-label={isFav ? `Remove ${product.title} from favorites` : `Add ${product.title} to favorites`}
                                 onClick={(e) => { e.stopPropagation(); toggleFav(product.id); }}
                                 className="absolute top-2.5 right-2.5 w-9 h-9 flex items-center justify-center rounded-full min-w-[44px] min-h-[44px] z-10"
                                 style={{ background: "var(--overlay-light)", backdropFilter: "blur(8px)" }}
@@ -759,6 +762,7 @@ export default function Home() {
 
                               <motion.button
                                 whileTap={{ scale: 0.9 }}
+                                aria-label={`Remove ${product.title}`}
                                 onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }}
                                 className="absolute bottom-2.5 left-2.5 w-7 h-7 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-70 z-20"
                                 style={{ background: "var(--overlay-medium)", backdropFilter: "blur(4px)", color: "var(--text-secondary)", fontSize: "var(--text-xs)", transition: "var(--transition-fast)" }}
