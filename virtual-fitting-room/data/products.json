@@ -1,20 +1,5 @@
 [
   {
-    "id": "607aa5c5-c29a-4886-8c76-362c415a474c",
-    "url": "https://app.houseofcb.com/carlotta-black-corset-mini-dress",
-    "title": "Carlotta Black Corset Mini Dress",
-    "price": 279,
-    "store": "House of CB",
-    "category": "dress",
-    "lengthInches": null,
-    "images": [
-      "https://dsh6y5eym1jrl.cloudfront.net/_next/image?url=https%3A%2F%2Fd166chel5lrjm5.cloudfront.net%2Fimages%2Fdetailed%2F93%2Fcarlotta-4a1.jpg&w=3840&q=100",
-      "https://dsh6y5eym1jrl.cloudfront.net/_next/image?url=https%3A%2F%2Fd166chel5lrjm5.cloudfront.net%2Fimages%2Fdetailed%2F94%2Fhocb30465-hocbjpg.jpg&w=3840&q=100",
-      "https://dsh6y5eym1jrl.cloudfront.net/_next/image?url=https%3A%2F%2Fd166chel5lrjm5.cloudfront.net%2Fimages%2Fdetailed%2F94%2Fcarlotta-1.jpg&w=3840&q=100"
-    ],
-    "createdAt": "2026-03-21T08:45:00.602Z"
-  },
-  {
     "id": "b9a56118-b686-49db-8222-abeb41cae03c",
     "url": "https://us.peppermayo.com/products/cerina-high-neck-mini-dress-navy",
     "title": "Cerina High Neck Mini Dress - Navy",
@@ -31,25 +16,6 @@
       "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/CerinaHighNeckMiniDressNavy6Peppermayo.jpg?v=1764654211"
     ],
     "createdAt": "2026-03-21T08:45:00.931Z"
-  },
-  {
-    "id": "ab9bf65f-c9ac-4b21-a7ce-b69e0e730a30",
-    "url": "https://us.princesspolly.com/products/alfalfa-mini-dress-chocolate",
-    "title": "Alfalfa Corduroy Mini Dress Chocolate",
-    "price": 65,
-    "store": "Princess Polly Lower Impact",
-    "category": "dress",
-    "lengthInches": null,
-    "images": [
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/0-modelinfo-natalya-us2_0be7da9b-a189-44b6-a3e7-9cea70a5980a.jpg?v=1754457004",
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/1-modelinfo-Natalya-us2_d41e1957-5ea7-4da8-bece-c20cb21146ab.jpg?v=1754457003",
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/2-modelinfo-Natalya-us2_a4c79734-6b41-401d-aab7-e305483db277.jpg?v=1754457004",
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/3-modelinfo-Natalya-us2_0168ef77-4ecc-4d4a-9534-872eed1b0996.jpg?v=1754457004",
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/4-modelinfo-Natalya-us2_1fd22b83-9d1d-4f0a-9a38-c806a1fe458a.jpg?v=1754457004",
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/5-modelinfo-Natalya-us2_41cbd8bc-506a-48e5-9bbf-d6e3e2bb794a.jpg?v=1754457004",
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/6-modelinfo-Natalya-us2_0d9a67f7-b5ac-493d-aa6b-37a9a9769fa6.jpg?v=1754457004"
-    ],
-    "createdAt": "2026-03-21T08:49:34.757Z"
   },
   {
     "id": "8e3ecb79-dfec-40a8-87db-b13b782e6cb9",
