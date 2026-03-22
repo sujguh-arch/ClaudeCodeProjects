@@ -86,12 +86,43 @@ If issues remain after 2 attempts, document what could not be fixed in /tmp/eval
 }
 
 # ============================================================
-# STEP 1: Pull latest and sync
+# STEP 0: Pull latest and validate ALL Phase 1 work
 # ============================================================
-log "--- Step 1: Sync repo ---"
+log "--- Step 0: Sync + Validate Phase 1 Output ---"
 cd "$REPO_ROOT"
 git pull --rebase origin main || true
 cd "$VFR_DIR"
+
+# Run eval gate against everything Phase 1 produced
+# This catches any slop from rounds 1-4 BEFORE we build on top of it
+run_eval_gate "Phase 1 Baseline"
+
+# If Phase 1 had issues, the auto-fixer already ran.
+# Now read lessons learned so far and have Claude do a holistic review
+log "--- Step 0b: Holistic Phase 1 Review ---"
+timeout 300s claude \
+  --print \
+  --dangerously-skip-permissions \
+  --max-turns 15 \
+  "You are reviewing ALL work from Phase 1 (rounds 1-4) before Phase 2 begins.
+
+READ these files:
+1. /tmp/eval-gate-report.txt — eval results for Phase 1 output
+2. /tmp/eval-lessons.md — any lessons captured so far
+3. /tmp/eval-benchmarks.json — baseline metrics
+4. CLAUDE.md — project constraints
+5. data/products.json — the current catalog
+
+Your job:
+1. Are there any products that should NOT be in the catalog? (wrong color, style, price, broken URL) — REMOVE them
+2. Is the UI code clean? Read page.tsx — any dead code, unused variables, commented-out blocks? — CLEAN them
+3. Are there any accessibility issues? (missing alt text, poor contrast, tiny tap targets) — FIX them
+4. Is the data layer clean? Any orphaned renderings or outfits pointing to deleted products? — CLEAN them
+5. Write a summary of Phase 1 quality to /tmp/phase1-review.txt
+
+This sets the clean baseline for Phase 2. Be thorough but fast." \
+  2>&1 | tee -a "$LOG_FILE" || log "Phase 1 review had issues"
+commit_and_push "Phase 1 holistic review and cleanup"
 
 # ============================================================
 # STEP 2: Deep Test Suite Creation
