@@ -204,7 +204,7 @@ export default function MotionLightbox({
                 className="mb-3"
                 style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg, 20px)", color: "var(--text-primary)" }}
               >
-                ${price}
+                {price % 1 === 0 ? `$${price}` : `$${price.toFixed(2)}`}
               </p>
             )}
           </div>
@@ -333,7 +333,7 @@ export default function MotionLightbox({
               className="mb-5"
               style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg, 20px)", color: "var(--text-primary)" }}
             >
-              ${price}
+              {price % 1 === 0 ? `$${price}` : `$${price.toFixed(2)}`}
             </p>
           )}
 

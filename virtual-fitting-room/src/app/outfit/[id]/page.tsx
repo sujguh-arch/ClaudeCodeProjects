@@ -2,8 +2,16 @@
 
 import { useState, useEffect, useCallback, use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { useToast } from "@/components/Toast";
 import Link from "next/link";
+
+const BLUR_PLACEHOLDER =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iIzFFMUQxQSIvPjwvc3ZnPg==";
+
+function formatPrice(price: number): string {
+  return price % 1 === 0 ? `$${price}` : `$${price.toFixed(2)}`;
+}
 
 interface Product {
   id: string;
@@ -246,7 +254,7 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
         )}
         {totalPrice > 0 && (
           <p className="text-sm mt-1" style={{ color: "var(--accent)" }}>
-            Total: ${totalPrice.toFixed(0)}
+            Total: {formatPrice(totalPrice)}
           </p>
         )}
       </div>
@@ -278,11 +286,15 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
                   <div className="relative">
                     <div className={`relative ${slot.aspect} overflow-hidden`} style={{ background: "var(--bg-elevated)" }}>
                       {img && (
-                        <img
+                        <Image
                           src={img}
                           alt={product.title}
-                          className="absolute inset-0 w-full h-full object-cover"
+                          fill
+                          sizes="(max-width: 640px) 50vw, 25vw"
+                          className="object-cover"
                           loading="lazy"
+                          placeholder="blur"
+                          blurDataURL={BLUR_PLACEHOLDER}
                         />
                       )}
                       {/* Category label */}
@@ -338,9 +350,9 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
                       </h3>
                       <div className="flex items-center justify-between mt-1">
                         <span style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)" }}>{product.store}</span>
-                        {product.price && (
+                        {product.price != null && (
                           <span style={{ fontSize: "var(--text-base)", fontWeight: "var(--weight-bold)", color: "var(--text-primary)" }}>
-                            ${product.price}
+                            {formatPrice(product.price)}
                           </span>
                         )}
                       </div>
@@ -388,13 +400,27 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
                     href={product.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-between py-1.5 group"
+                    className="flex items-center justify-between py-2 px-3 rounded-[var(--radius-md)] group"
+                    style={{ background: "var(--bg-elevated)", transition: "var(--transition-fast)" }}
                   >
-                    <span style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
+                    <span className="line-clamp-1 flex-1 mr-3" style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
                       {product.title}
                     </span>
-                    <span className="group-hover:underline" style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", color: "var(--accent)" }}>
-                      {product.price ? `$${product.price}` : "View"} →
+                    <span
+                      className="inline-flex items-center gap-1 px-2.5 py-1 flex-shrink-0"
+                      style={{
+                        fontSize: "var(--text-caption)",
+                        fontWeight: "var(--weight-semibold)",
+                        color: "var(--bg-base)",
+                        background: "var(--accent)",
+                        borderRadius: "var(--radius-sm)",
+                        letterSpacing: "var(--tracking-wide)",
+                      }}
+                    >
+                      {product.price ? formatPrice(product.price) : "View"}
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M7 17L17 7M17 7H7M17 7v10" />
+                      </svg>
                     </span>
                   </a>
                 );
@@ -406,7 +432,7 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
                 style={{ borderTop: "1px solid var(--border-subtle)" }}
               >
                 <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>Total</span>
-                <span className="text-sm font-semibold" style={{ color: "var(--accent)" }}>${totalPrice.toFixed(0)}</span>
+                <span className="text-sm font-semibold" style={{ color: "var(--accent)" }}>{formatPrice(totalPrice)}</span>
               </div>
             )}
           </div>

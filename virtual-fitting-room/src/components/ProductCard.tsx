@@ -1,5 +1,14 @@
 "use client";
 
+import Image from "next/image";
+
+const BLUR_PLACEHOLDER =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iIzFFMUQxQSIvPjwvc3ZnPg==";
+
+function formatPrice(price: number): string {
+  return price % 1 === 0 ? `$${price}` : `$${price.toFixed(2)}`;
+}
+
 interface ProductCardProps {
   id: string;
   title: string;
@@ -37,11 +46,15 @@ export default function ProductCard({
         onClick={onClick}
       >
         {displayImage && (
-          <img
+          <Image
             src={displayImage}
             alt={title}
-            className="absolute inset-0 w-full h-full object-cover card-image"
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover card-image"
             loading="lazy"
+            placeholder="blur"
+            blurDataURL={BLUR_PLACEHOLDER}
           />
         )}
         {hasGenerated && (
@@ -118,9 +131,9 @@ export default function ProductCard({
           {title}
         </h3>
         <div className="flex items-center justify-between">
-          {price && (
+          {price != null && (
             <span style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-base, 15px)", color: "var(--text-primary)" }}>
-              ${price}
+              {formatPrice(price)}
             </span>
           )}
           {!hasGenerated && !isGenerating && (

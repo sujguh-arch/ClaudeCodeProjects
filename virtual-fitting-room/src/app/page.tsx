@@ -3,12 +3,20 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 const MotionLightbox = dynamic(() => import("@/components/MotionLightbox"), {
   ssr: false,
 });
 import { useToast } from "@/components/Toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+const BLUR_PLACEHOLDER =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iIzFFMUQxQSIvPjwvc3ZnPg==";
+
+function formatPrice(price: number): string {
+  return price % 1 === 0 ? `$${price}` : `$${price.toFixed(2)}`;
+}
 
 interface Product {
   id: string;
@@ -333,11 +341,13 @@ export default function Home() {
       >
         <div className="flex items-center gap-3">
           {refPhoto && (
-            <img
+            <Image
               src={refPhoto}
               alt=""
-              className="w-7 h-7 rounded-full object-cover"
-              style={{ border: "1px solid var(--accent-muted)" }}
+              width={28}
+              height={28}
+              className="rounded-full object-cover"
+              style={{ border: "1px solid var(--accent-muted)", width: 28, height: 28 }}
             />
           )}
           <h1
@@ -562,11 +572,13 @@ export default function Home() {
                               </span>
                             </div>
                           ) : imgs.length === 1 ? (
-                            <img src={imgs[0]} alt="" className="absolute inset-0 w-full h-full object-cover card-image" loading="lazy" />
+                            <Image src={imgs[0]} alt="" fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover card-image" loading="lazy" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
                           ) : (
                             <div className="grid grid-cols-2 grid-rows-2 absolute inset-0">
                               {imgs.slice(0, 4).map((img, i) => (
-                                <img key={i} src={img} alt="" className="w-full h-full object-cover card-image" loading="lazy" />
+                                <div key={i} className="relative overflow-hidden">
+                                  <Image src={img} alt="" fill sizes="(max-width: 640px) 25vw, 17vw" className="object-cover card-image" loading="lazy" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
+                                </div>
                               ))}
                             </div>
                           )}
@@ -599,7 +611,7 @@ export default function Home() {
                           </h3>
                           {price > 0 && (
                             <span style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-semibold)", color: "var(--accent)" }}>
-                              ${price.toFixed(0)}
+                              {formatPrice(price)}
                             </span>
                           )}
                         </div>
@@ -708,7 +720,7 @@ export default function Home() {
                           >
                             <div className="relative aspect-[2/3] overflow-hidden card-gradient" style={{ background: "var(--bg-elevated)" }}>
                               {img && (
-                                <img src={img} alt={product.title} className="absolute inset-0 w-full h-full object-cover card-image" loading="lazy" />
+                                <Image src={img} alt={product.title} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" className="object-cover card-image" loading="lazy" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
                               )}
                               <motion.button
                                 whileTap={{ scale: 1.1 }}
@@ -783,16 +795,33 @@ export default function Home() {
                                 {product.title}
                               </h3>
                               <div className="flex items-center justify-between">
-                                {product.price && (
+                                {product.price != null && (
                                   <span style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-base)", color: "var(--text-primary)" }}>
-                                    ${product.price}
+                                    {formatPrice(product.price)}
                                   </span>
                                 )}
                                 {gen.length > 0 && (
-                                  <a href={product.url} target="_blank" rel="noopener noreferrer"
+                                  <a
+                                    href={product.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     onClick={(e) => e.stopPropagation()}
-                                    style={{ fontSize: "var(--text-xs)", fontWeight: "var(--weight-medium)", color: "var(--accent)", letterSpacing: "var(--tracking-wide)" }}>
-                                    Shop &rarr;
+                                    className="inline-flex items-center gap-1 px-3 py-1"
+                                    style={{
+                                      fontSize: "var(--text-caption)",
+                                      fontWeight: "var(--weight-semibold)",
+                                      color: "var(--bg-base)",
+                                      background: "var(--accent)",
+                                      borderRadius: "var(--radius-md)",
+                                      letterSpacing: "var(--tracking-wider)",
+                                      textDecoration: "none",
+                                      transition: "var(--transition-fast)",
+                                    }}
+                                  >
+                                    Shop
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M7 17L17 7M17 7H7M17 7v10" />
+                                    </svg>
                                   </a>
                                 )}
                               </div>

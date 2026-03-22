@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { useToast } from "@/components/Toast";
 import { useAuth } from "@/components/AuthGate";
 import Link from "next/link";
@@ -110,11 +111,13 @@ export default function SettingsPage() {
           </h2>
           <div className="flex items-center gap-5">
             {refPhoto ? (
-              <img
+              <Image
                 src={refPhoto}
                 alt="Reference"
-                className="w-20 h-20 rounded-full object-cover flex-shrink-0"
-                style={{ border: "2px solid var(--accent-muted)" }}
+                width={80}
+                height={80}
+                className="rounded-full object-cover flex-shrink-0"
+                style={{ border: "2px solid var(--accent-muted)", width: 80, height: 80 }}
               />
             ) : (
               <div

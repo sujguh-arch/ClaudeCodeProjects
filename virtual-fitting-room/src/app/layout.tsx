@@ -27,8 +27,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://cdn.shopify.com" />
+        <link rel="preconnect" href="https://replicate.delivery" />
+        <link rel="dns-prefetch" href="https://cdn.shopify.com" />
+        <link rel="dns-prefetch" href="https://replicate.delivery" />
         <link
           href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap"
           rel="stylesheet"

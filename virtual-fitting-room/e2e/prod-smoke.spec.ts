@@ -2,6 +2,17 @@ import { test, expect } from "@playwright/test";
 
 const PROD_URL = process.env.PROD_URL || "https://virtual-fitting-room-five.vercel.app";
 
+// Bypass AuthGate by setting PIN in localStorage before each test
+test.beforeEach(async ({ page }) => {
+  await page.goto(PROD_URL);
+  await page.evaluate(() => {
+    localStorage.setItem("mirror_pin", "1234");
+    sessionStorage.setItem("mirror_session", "active");
+  });
+  await page.reload();
+  await page.waitForTimeout(500);
+});
+
 test.describe("production smoke tests", () => {
   test("home page loads with 200", async ({ page }) => {
     const response = await page.goto(PROD_URL);
@@ -23,12 +34,10 @@ test.describe("production smoke tests", () => {
   });
 
   test("outfits tab is visible", async ({ page }) => {
-    await page.goto(PROD_URL);
     await expect(page.getByText(/outfits/i).first()).toBeVisible();
   });
 
   test("closet tab is visible", async ({ page }) => {
-    await page.goto(PROD_URL);
     await expect(page.getByText(/closet/i).first()).toBeVisible();
   });
 
@@ -38,7 +47,6 @@ test.describe("production smoke tests", () => {
   });
 
   test("at least one image renders on home page", async ({ page }) => {
-    await page.goto(PROD_URL);
     await page.waitForLoadState("networkidle");
     const images = page.locator("img");
     const count = await images.count();
@@ -46,13 +54,6 @@ test.describe("production smoke tests", () => {
   });
 
   test("can navigate between tabs", async ({ page }) => {
-    await page.goto(PROD_URL);
-    // Auth gate may block — set pin
-    await page.evaluate(() => {
-      localStorage.setItem("mirror_pin", "1234");
-      sessionStorage.setItem("mirror_session", "active");
-    });
-    await page.reload();
     await page.waitForLoadState("networkidle");
 
     // Click closet tab
