@@ -267,7 +267,7 @@ log "  Home page: ${HOME_MS}ms (target: <3000ms)"
 log "--- 3c. Bundle Size ---"
 if [ -d ".next" ]; then
   # Check total JS size
-  BUNDLE_KB=$(find .next/static -name "*.js" -exec du -k {} + 2>/dev/null | awk '{sum+=$1}END{print sum}')
+  BUNDLE_KB=$(find .next/static -name "*.js" -exec du -k {} + 2>/dev/null | awk '{sum+=$1}END{print sum}' | tr -d ' \n')
   log "  Total JS bundle: ${BUNDLE_KB}KB"
   if [ "${BUNDLE_KB:-0}" -gt 500 ]; then
     warn "JS bundle large: ${BUNDLE_KB}KB (>500KB)"
@@ -279,7 +279,7 @@ fi
 # 3d. Anti-slop: check for common code quality issues
 log "--- 3d. Anti-Slop Check ---"
 # console.log left in production code
-CONSOLE_LOGS=$(grep -r "console\.log" src/ --include="*.ts" --include="*.tsx" -l 2>/dev/null | grep -v __tests__ | grep -v node_modules | wc -l)
+CONSOLE_LOGS=$(grep -r "console\.log" src/ --include="*.ts" --include="*.tsx" -l 2>/dev/null | grep -v __tests__ | grep -v node_modules | wc -l | tr -d ' ')
 if [ "$CONSOLE_LOGS" -gt 3 ]; then
   warn "Console.logs in $CONSOLE_LOGS source files (anti-slop: clean up)"
 else
@@ -313,9 +313,9 @@ log "--- 3f. Generation Pipeline Check ---"
 GEN_FILE="$VFR_DIR/src/lib/generate.ts"
 if [ -f "$GEN_FILE" ]; then
   # Check generate.ts has proper error handling
-  HAS_TRY=$(grep -c "try" "$GEN_FILE" 2>/dev/null || echo "0")
-  HAS_CATCH=$(grep -c "catch" "$GEN_FILE" 2>/dev/null || echo "0")
-  HAS_TIMEOUT=$(grep -c "timeout\|maxDuration\|AbortSignal" "$GEN_FILE" 2>/dev/null || echo "0")
+  HAS_TRY=$(grep -cE "try" "$GEN_FILE" 2>/dev/null) || HAS_TRY=0
+  HAS_CATCH=$(grep -cE "catch" "$GEN_FILE" 2>/dev/null) || HAS_CATCH=0
+  HAS_TIMEOUT=$(grep -cE "timeout|maxDuration|AbortSignal" "$GEN_FILE" 2>/dev/null) || HAS_TIMEOUT=0
   if [ "$HAS_TRY" -gt 0 ] && [ "$HAS_CATCH" -gt 0 ]; then
     pass "Generation has error handling (try/catch)"
   else
@@ -328,7 +328,7 @@ if [ -f "$GEN_FILE" ]; then
   fi
 
   # Check dedup logic exists
-  HAS_DEDUP=$(grep -c "dedup\|existing\|already\|duplicate\|find(" "$GEN_FILE" 2>/dev/null || echo "0")
+  HAS_DEDUP=$(grep -cE "dedup|existing|already|duplicate|find\(" "$GEN_FILE" 2>/dev/null) || HAS_DEDUP=0
   if [ "$HAS_DEDUP" -gt 0 ]; then
     pass "Generation has dedup logic"
   else
@@ -342,9 +342,9 @@ fi
 log "--- 3g. Scraper Robustness ---"
 SCRAPER_FILE="$VFR_DIR/src/lib/scraper.ts"
 if [ -f "$SCRAPER_FILE" ]; then
-  HAS_FALLBACK=$(grep -c "fallback\|catch\|try" "$SCRAPER_FILE" 2>/dev/null || echo "0")
-  HAS_USERAGENT=$(grep -ci "user-agent\|useragent" "$SCRAPER_FILE" 2>/dev/null || echo "0")
-  HAS_TIMEOUT=$(grep -c "timeout\|AbortSignal\|signal" "$SCRAPER_FILE" 2>/dev/null || echo "0")
+  HAS_FALLBACK=$(grep -cE "fallback|catch|try" "$SCRAPER_FILE" 2>/dev/null) || HAS_FALLBACK=0
+  HAS_USERAGENT=$(grep -ciE "user-agent|useragent" "$SCRAPER_FILE" 2>/dev/null) || HAS_USERAGENT=0
+  HAS_TIMEOUT=$(grep -cE "timeout|AbortSignal|signal" "$SCRAPER_FILE" 2>/dev/null) || HAS_TIMEOUT=0
   [ "$HAS_FALLBACK" -gt 2 ] && pass "Scraper has fallback chain" || warn "Scraper may lack fallback chain"
   [ "$HAS_USERAGENT" -gt 0 ] && pass "Scraper sets User-Agent" || warn "Scraper missing User-Agent (bot risk)"
   [ "$HAS_TIMEOUT" -gt 0 ] && pass "Scraper has timeout" || warn "Scraper may lack timeout"
