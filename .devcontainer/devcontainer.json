@@ -1,6 +1,11 @@
 {
   "name": "VFR Dev",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "features": {
+    "ghcr.io/devcontainers/features/sshd:1": {
+      "version": "latest"
+    }
+  },
   "hostRequirements": {
     "cpus": 4,
     "memory": "16gb",
