@@ -254,33 +254,34 @@ export default function Home() {
     >
       {/* Nav */}
       <motion.nav
-        className="sticky top-0 z-40 px-5 py-3 flex items-center justify-between transition-all duration-300"
+        className="sticky top-0 z-40 px-5 py-3 flex items-center justify-between"
         style={{
-          background: scrolled ? "rgba(17,17,16,0.75)" : "transparent",
-          backdropFilter: scrolled ? "blur(20px) saturate(180%)" : "none",
+          background: scrolled ? "var(--overlay-heavy)" : "transparent",
+          backdropFilter: scrolled ? "blur(12px)" : "none",
           borderBottom: scrolled ? "1px solid var(--border-subtle)" : "1px solid transparent",
+          transition: "var(--transition-normal)",
         }}
       >
         <div className="flex items-center gap-3">
           {refPhoto && (
-            <motion.img
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 500, damping: 25 }}
+            <img
               src={refPhoto}
               alt=""
               className="w-7 h-7 rounded-full object-cover"
-              style={{ border: "1.5px solid var(--accent-muted)" }}
+              style={{ border: "1px solid var(--accent-muted)" }}
             />
           )}
-          <h1 className="text-sm tracking-[0.25em] uppercase font-extralight" style={{ color: "var(--text-primary)" }}>
+          <h1
+            className="tracking-[0.15em] uppercase"
+            style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg)", color: "var(--text-primary)" }}
+          >
             mirror
           </h1>
         </div>
         <Link href="/settings">
           <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             className="w-9 h-9 flex items-center justify-center rounded-full"
             style={{ background: "var(--bg-elevated)", color: "var(--text-secondary)" }}
           >
@@ -300,42 +301,45 @@ export default function Home() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-            style={{ background: "var(--bg-overlay)", backdropFilter: "blur(12px)" }}
+            style={{ background: "var(--overlay-heavy)", backdropFilter: "blur(12px)" }}
           >
             <motion.div
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="w-full sm:max-w-md sm:rounded-[var(--radius-xl)] rounded-t-[28px] p-8 sm:p-10"
-              style={{ background: "var(--bg-surface)" }}
+              className="w-full sm:max-w-md p-8 sm:p-10"
+              style={{ background: "var(--bg-surface)", borderRadius: "var(--radius-sheet) var(--radius-sheet) 0 0", }}
             >
               <div className="w-10 h-1 rounded-full mx-auto mb-8 sm:hidden" style={{ background: "var(--border-default)" }} />
-              <h2 className="text-2xl font-extralight tracking-wide text-center mb-1" style={{ color: "var(--text-primary)" }}>
+              <h2
+                className="text-center mb-1"
+                style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-xl)", color: "var(--text-primary)" }}
+              >
                 mirror
               </h2>
-              <p className="text-sm text-center mb-8 font-light" style={{ color: "var(--text-tertiary)" }}>
+              <p className="text-center mb-8" style={{ fontSize: "var(--text-sm)", color: "var(--text-tertiary)" }}>
                 Upload a photo to see yourself in anything
               </p>
               <form onSubmit={handleOnboard}>
                 <motion.div
                   whileHover={{ borderColor: "var(--accent-muted)" }}
-                  className="rounded-[var(--radius-lg)] p-10 text-center mb-6 transition-colors cursor-pointer relative"
-                  style={{ border: "1.5px dashed var(--border-default)", background: "var(--bg-elevated)" }}
+                  className="p-10 text-center mb-6 cursor-pointer relative"
+                  style={{ borderRadius: "var(--radius-lg)", border: "1px dashed var(--border-default)", background: "var(--bg-elevated)", transition: "var(--transition-normal)" }}
                 >
                   <input type="file" name="referencePhoto" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required />
-                  <div className="text-3xl mb-3 opacity-60">+</div>
-                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Tap to upload your photo</p>
-                  <p className="text-xs mt-1" style={{ color: "var(--text-tertiary)" }}>A clear face photo works best</p>
+                  <div className="text-3xl mb-3 opacity-40">+</div>
+                  <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>Tap to upload your photo</p>
+                  <p className="mt-1" style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)" }}>A clear face photo works best</p>
                 </motion.div>
                 <input type="hidden" name="replicateToken" value="configured" />
                 <motion.button
-                  whileHover={{ scale: 1.02, boxShadow: "0 4px 20px rgba(201,169,110,0.3)" }}
+                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={uploading}
-                  className="w-full py-3.5 rounded-[var(--radius-md)] text-sm font-semibold tracking-wider uppercase transition-all disabled:opacity-40"
-                  style={{ background: "var(--accent)", color: "#0A0A09" }}
+                  className="w-full py-3.5 disabled:opacity-40"
+                  style={{ borderRadius: "var(--radius-md)", background: "var(--accent)", color: "var(--bg-base)", fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", letterSpacing: "0.05em", transition: "var(--transition-fast)" }}
                 >
                   {uploading ? "Setting up..." : "Get started"}
                 </motion.button>
@@ -349,31 +353,29 @@ export default function Home() {
       <motion.header
         ref={heroRef}
         style={{ y: heroY, opacity: heroOpacity }}
-        className="px-5 pt-6 pb-4 sm:pt-8 sm:pb-6 max-w-xl mx-auto"
+        className="px-5 pt-8 pb-6 sm:pt-10 sm:pb-8 max-w-xl mx-auto"
       >
         <form onSubmit={handleSubmit} className="relative">
-          <motion.input
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+          <input
             ref={inputRef}
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="Paste a product link..."
-            className="w-full rounded-[var(--radius-lg)] pl-5 pr-32 py-4 text-sm transition-all"
-            style={{ background: "var(--bg-surface)", border: "1px solid var(--border-default)", color: "var(--text-primary)" }}
+            className="w-full pl-5 pr-28 py-4"
+            style={{ borderRadius: "var(--radius-lg)", background: "var(--bg-surface)", border: "1px solid var(--border-default)", color: "var(--text-primary)", fontSize: "var(--text-sm)", transition: "var(--transition-normal)" }}
           />
           <motion.button
-            whileHover={{ scale: 1.05, boxShadow: "0 2px 12px rgba(201,169,110,0.3)" }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading || !url.trim()}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 px-5 py-2.5 rounded-[var(--radius-md)] text-xs font-semibold tracking-wider uppercase transition-all disabled:opacity-30"
-            style={{ background: loading ? "var(--accent-muted)" : "var(--accent)", color: "#0A0A09" }}
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 px-5 py-2.5 disabled:opacity-30"
+            style={{ borderRadius: "var(--radius-md)", background: loading ? "var(--accent-muted)" : "var(--accent)", color: "var(--bg-base)", fontSize: "var(--text-xs)", fontWeight: "var(--weight-medium)", letterSpacing: "0.05em", transition: "var(--transition-fast)" }}
           >
             {loading ? (
               <span className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full animate-spin" style={{ border: "2px solid rgba(10,10,9,0.2)", borderTopColor: "#0A0A09" }} />
+                <span className="w-3 h-3 rounded-full animate-spin" style={{ border: "2px solid rgba(10,10,9,0.2)", borderTopColor: "var(--bg-base)" }} />
                 Adding
               </span>
             ) : (
@@ -384,16 +386,21 @@ export default function Home() {
       </motion.header>
 
       {/* Tabs */}
-      <div className="px-5 max-w-5xl mx-auto mt-2 mb-4">
-        <div className="flex gap-1 p-1 rounded-[var(--radius-md)]" style={{ background: "var(--bg-surface)" }}>
+      <div className="px-5 max-w-5xl mx-auto mt-2 mb-6">
+        <div className="flex gap-1 p-1" style={{ background: "var(--bg-surface)", borderRadius: "var(--radius-md)" }}>
           {(["outfits", "closet"] as Tab[]).map((t) => (
             <motion.button
               key={t}
               onClick={() => setTab(t)}
-              className="flex-1 py-2 rounded-[var(--radius-sm)] text-xs font-semibold uppercase tracking-wider transition-all"
+              className="flex-1 py-2"
               style={{
+                borderRadius: "var(--radius-sm)",
                 background: tab === t ? "var(--bg-elevated)" : "transparent",
                 color: tab === t ? "var(--text-primary)" : "var(--text-tertiary)",
+                fontSize: "var(--text-xs)",
+                fontWeight: "var(--weight-medium)",
+                letterSpacing: "0.05em",
+                transition: "var(--transition-fast)",
               }}
               whileTap={{ scale: 0.98 }}
             >
@@ -411,19 +418,14 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              whileHover={{ y: -3, borderColor: "rgba(201,169,110,0.3)" }}
+              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleCreateOutfit}
-              className="rounded-[var(--radius-lg)] overflow-hidden cursor-pointer aspect-[3/4] flex flex-col items-center justify-center"
-              style={{ border: "1.5px dashed var(--border-default)", background: "var(--bg-surface)" }}
+              className="overflow-hidden cursor-pointer aspect-[2/3] flex flex-col items-center justify-center"
+              style={{ border: "1px dashed var(--border-default)", background: "var(--bg-surface)", borderRadius: "var(--radius-lg)", transition: "var(--transition-normal)" }}
             >
-              <motion.div
-                animate={{ y: [0, -5, 0] }}
-                transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-              >
-                <span className="text-3xl opacity-30">+</span>
-              </motion.div>
-              <span className="text-xs font-medium mt-2" style={{ color: "var(--text-secondary)" }}>
+              <span className="text-2xl opacity-30">+</span>
+              <span className="mt-2" style={{ fontSize: "var(--text-xs)", color: "var(--text-secondary)", fontWeight: "var(--weight-medium)" }}>
                 New Outfit
               </span>
             </motion.div>
@@ -442,16 +444,16 @@ export default function Home() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: (idx + 1) * 0.05 }}
-                  whileHover={{ y: -3 }}
-                  className="rounded-[var(--radius-lg)] overflow-hidden cursor-pointer card-glow group"
-                  style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)" }}
+                  whileHover={{ scale: 1.02 }}
+                  className="overflow-hidden cursor-pointer card-hover group"
+                  style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-lg)" }}
                   onClick={() => router.push(`/outfit/${outfit.id}`)}
                 >
                   {/* Preview grid */}
-                  <div className="aspect-[3/4] relative overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
+                  <div className="aspect-[2/3] relative overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
                     {imgs.length === 0 ? (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>No items yet</span>
+                        <span style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)" }}>No items yet</span>
                       </div>
                     ) : imgs.length === 1 ? (
                       <img src={imgs[0]} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
@@ -465,34 +467,32 @@ export default function Home() {
 
                     {/* Item count badge */}
                     <div
-                      className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap z-10"
-                      style={{ background: "var(--accent)", color: "#0A0A09" }}
+                      className="absolute top-2 left-2 px-2 py-0.5 whitespace-nowrap z-10"
+                      style={{ fontSize: "var(--text-xs)", fontWeight: "var(--weight-bold)", background: "var(--accent)", color: "var(--bg-base)", borderRadius: "var(--radius-sm)" }}
                     >
                       {itemCount} {itemCount === 1 ? "item" : "items"}
                     </div>
 
                     {/* Delete */}
                     <motion.button
-                      initial={{ opacity: 0 }}
-                      whileHover={{ opacity: 1, scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteOutfit(outfit.id);
                       }}
-                      className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-70 transition-opacity"
-                      style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", color: "var(--text-secondary)", fontSize: "10px" }}
+                      className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-70"
+                      style={{ background: "var(--overlay-medium)", backdropFilter: "blur(4px)", color: "var(--text-secondary)", fontSize: "var(--text-xs)", transition: "var(--transition-fast)" }}
                     >
                       ✕
                     </motion.button>
                   </div>
 
                   <div className="p-3">
-                    <h3 className="text-[11px] font-medium leading-snug line-clamp-1 mb-1" style={{ color: "var(--text-primary)" }}>
+                    <h3 className="line-clamp-1 mb-1" style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", color: "var(--text-primary)", lineHeight: "var(--leading-tight)" }}>
                       {outfit.name}
                     </h3>
                     {price > 0 && (
-                      <span className="text-xs font-semibold" style={{ color: "var(--accent)" }}>
+                      <span style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-bold)", color: "var(--accent)" }}>
                         ${price.toFixed(0)}
                       </span>
                     )}
@@ -508,10 +508,10 @@ export default function Home() {
               animate={{ opacity: 1 }}
               className="text-center py-16"
             >
-              <p className="text-sm font-light" style={{ color: "var(--text-tertiary)" }}>
+              <p style={{ fontSize: "var(--text-sm)", color: "var(--text-tertiary)" }}>
                 Create your first outfit
               </p>
-              <p className="text-xs font-light mt-1" style={{ color: "var(--text-tertiary)", opacity: 0.6 }}>
+              <p className="mt-1" style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)", opacity: 0.6 }}>
                 Mix dresses, shoes, tights, bags & accessories
               </p>
             </motion.div>
@@ -523,17 +523,22 @@ export default function Home() {
       {tab === "closet" && (
         <div className="px-4 sm:px-6 max-w-5xl mx-auto">
           {/* Category pills */}
-          <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 px-1 no-scrollbar">
+          <div className="flex gap-1.5 mb-5 overflow-x-auto pb-1 px-1 no-scrollbar">
             {CATEGORIES.map((cat) => (
               <motion.button
                 key={cat.key}
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setCategory(cat.key)}
-                className="px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider whitespace-nowrap flex-shrink-0"
+                className="px-4 py-2 whitespace-nowrap flex-shrink-0"
                 style={{
+                  borderRadius: "var(--radius-md)",
                   background: category === cat.key ? "var(--accent)" : "var(--bg-surface)",
-                  color: category === cat.key ? "#0A0A09" : "var(--text-secondary)",
+                  color: category === cat.key ? "var(--bg-base)" : "var(--text-secondary)",
                   border: `1px solid ${category === cat.key ? "var(--accent)" : "var(--border-subtle)"}`,
+                  fontSize: "var(--text-xs)",
+                  fontWeight: "var(--weight-medium)",
+                  letterSpacing: "0.02em",
+                  transition: "var(--transition-fast)",
                 }}
               >
                 {cat.label}
@@ -544,12 +549,12 @@ export default function Home() {
           {filteredProducts.length > 0 && (
             <>
               <div className="flex items-center justify-between mb-4 px-1">
-                <span className="text-[10px] uppercase tracking-[0.2em] font-semibold" style={{ color: "var(--text-tertiary)" }}>
+                <span style={{ fontSize: "var(--text-xs)", letterSpacing: "0.1em", fontWeight: "var(--weight-medium)", color: "var(--text-tertiary)" }}>
                   {filteredProducts.length} {filteredProducts.length === 1 ? "item" : "items"}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                 {filteredProducts.map((product, idx) => {
                   const gen = getGenerated(product.id);
                   const isGen = generating.has(product.id);
@@ -559,52 +564,56 @@ export default function Home() {
                   return (
                     <motion.div
                       key={product.id}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.05, type: "spring", stiffness: 300, damping: 25 }}
-                      whileHover={{ y: -3, transition: { duration: 0.2 } }}
-                      className="group rounded-[var(--radius-lg)] overflow-hidden cursor-pointer card-glow"
-                      style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)" }}
+                      transition={{ delay: idx * 0.04 }}
+                      className="group overflow-hidden cursor-pointer card-hover"
+                      style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-lg)" }}
                       onClick={() => openLightbox(product)}
                     >
-                      <div className="relative aspect-[3/4] overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
+                      <div className="relative aspect-[2/3] overflow-hidden" style={{ background: "var(--bg-elevated)" }}>
                         {img && (
-                          <img src={img} alt={product.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />
+                          <img src={img} alt={product.title} className="absolute inset-0 w-full h-full object-cover" style={{ transition: "transform var(--transition-slow)" }} loading="lazy" />
                         )}
                         <motion.button
-                          whileTap={{ scale: 1.4 }}
-                          transition={{ type: "spring", stiffness: 600, damping: 10 }}
+                          whileTap={{ scale: 1.1 }}
                           onClick={(e) => { e.stopPropagation(); toggleFav(product.id); }}
                           className="absolute top-2.5 right-2.5 w-9 h-9 flex items-center justify-center rounded-full min-w-[44px] min-h-[44px]"
-                          style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)" }}
+                          style={{ background: "var(--overlay-light)", backdropFilter: "blur(8px)" }}
                         >
-                          <motion.span animate={isFav ? { scale: [1, 1.3, 1] } : {}} transition={{ duration: 0.3 }} className="text-sm">
-                            {isFav ? "\u2764\ufe0f" : "\U0001f90d"}
-                          </motion.span>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill={isFav ? "var(--accent)" : "none"} stroke={isFav ? "var(--accent)" : "var(--text-primary)"} strokeWidth="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                          </svg>
                         </motion.button>
 
-                        {/* Category badge */}
+                        {/* Badge */}
                         <div
-                          className="absolute top-2.5 left-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide whitespace-nowrap z-10"
-                          style={{ background: gen.length > 0 ? "var(--accent)" : "var(--bg-elevated)", color: gen.length > 0 ? "#0A0A09" : "var(--text-secondary)" }}
+                          className="absolute top-2.5 left-2.5 px-2 py-0.5 whitespace-nowrap z-10"
+                          style={{
+                            fontSize: "var(--text-xs)",
+                            fontWeight: "var(--weight-bold)",
+                            borderRadius: "var(--radius-sm)",
+                            background: gen.length > 0 ? "var(--accent-subtle)" : "var(--overlay-light)",
+                            color: gen.length > 0 ? "var(--accent)" : "var(--text-primary)",
+                            border: gen.length > 0 ? "1px solid var(--accent-border)" : "none",
+                            backdropFilter: "blur(4px)",
+                          }}
                         >
                           {gen.length > 0 ? "Your fit" : product.category}
                         </div>
 
                         {(gen.length > 1 || product.images.length > 1) && (
-                          <div className="absolute bottom-2.5 right-2.5 text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap z-10"
-                            style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)", color: "var(--text-primary)" }}>
+                          <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 whitespace-nowrap z-10"
+                            style={{ fontSize: "var(--text-xs)", fontWeight: "var(--weight-medium)", background: "var(--overlay-medium)", backdropFilter: "blur(4px)", color: "var(--text-primary)", borderRadius: "var(--radius-sm)" }}>
                             {gen.length > 0 ? gen.length : product.images.length} photos
                           </div>
                         )}
 
                         <motion.button
-                          initial={{ opacity: 0 }}
-                          whileHover={{ opacity: 1, scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }}
-                          className="absolute bottom-2.5 left-2.5 w-7 h-7 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-70 transition-opacity z-20"
-                          style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", color: "var(--text-secondary)", fontSize: "10px" }}
+                          className="absolute bottom-2.5 left-2.5 w-7 h-7 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-70 z-20"
+                          style={{ background: "var(--overlay-medium)", backdropFilter: "blur(4px)", color: "var(--text-secondary)", fontSize: "var(--text-xs)", transition: "var(--transition-fast)" }}
                         >
                           ✕
                         </motion.button>
@@ -615,38 +624,38 @@ export default function Home() {
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
-                              className="absolute inset-0 flex flex-col items-center justify-center gap-3"
-                              style={{ background: "rgba(17,17,16,0.7)", backdropFilter: "blur(8px)" }}
+                              className="absolute inset-0 flex flex-col items-center justify-center gap-3 shimmer"
+                              style={{ background: "var(--overlay-heavy)", backdropFilter: "blur(8px)" }}
                             >
                               <motion.div
                                 animate={{ rotate: 360 }}
                                 transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                                className="w-6 h-6 rounded-full"
+                                className="w-5 h-5 rounded-full"
                                 style={{ border: "2px solid var(--accent-muted)", borderTopColor: "var(--accent)" }}
                               />
-                              <span className="text-[11px] font-light" style={{ color: "var(--text-secondary)" }}>Creating your look</span>
+                              <span style={{ fontSize: "var(--text-xs)", color: "var(--text-secondary)" }}>Creating your look...</span>
                             </motion.div>
                           )}
                         </AnimatePresence>
                       </div>
 
                       <div className="p-3">
-                        <h3 className="text-[11px] font-medium leading-snug line-clamp-2 mb-2" style={{ color: "var(--text-primary)" }}>
+                        <h3 className="line-clamp-2 mb-2" style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", lineHeight: "var(--leading-tight)", color: "var(--text-primary)" }}>
                           {product.title}
                         </h3>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             {product.price && (
-                              <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
+                              <span style={{ fontSize: "var(--text-base)", fontWeight: "var(--weight-bold)", color: "var(--text-primary)" }}>
                                 ${product.price}
                               </span>
                             )}
-                            <span className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>{product.store}</span>
+                            <span style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)" }}>{product.store}</span>
                           </div>
                           {gen.length > 0 && (
                             <a href={product.url} target="_blank" rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="text-[10px] font-semibold" style={{ color: "var(--accent)" }}>
+                              style={{ fontSize: "var(--text-xs)", fontWeight: "var(--weight-medium)", color: "var(--accent)" }}>
                               Shop &rarr;
                             </a>
                           )}
@@ -660,11 +669,11 @@ export default function Home() {
           )}
 
           {filteredProducts.length === 0 && !loading && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-20 px-6">
-              <p className="text-sm font-light mb-2" style={{ color: "var(--text-tertiary)" }}>
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="text-center py-20 px-6">
+              <p className="mb-2" style={{ fontSize: "var(--text-sm)", color: "var(--text-tertiary)" }}>
                 {category === "all" ? "Your closet is empty" : `No ${category} items yet`}
               </p>
-              <p className="text-xs font-light" style={{ color: "var(--text-tertiary)", opacity: 0.6 }}>
+              <p style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)", opacity: 0.6 }}>
                 Paste a product link above to add items
               </p>
             </motion.div>
