@@ -75,8 +75,10 @@ export default function MotionLightbox({
   }
 
   function handleSwipe(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
-    if (Math.abs(info.offset.x) > 50) {
-      if (info.offset.x > 0) goPrev();
+    const swipeThreshold = 40;
+    const velocityThreshold = 300;
+    if (Math.abs(info.offset.x) > swipeThreshold || Math.abs(info.velocity.x) > velocityThreshold) {
+      if (info.offset.x > 0 || info.velocity.x > velocityThreshold) goPrev();
       else goNext();
     }
   }
@@ -86,7 +88,7 @@ export default function MotionLightbox({
   }
 
   function handleSheetDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
-    if (info.offset.y > 150 || info.velocity.y > 500) {
+    if (info.offset.y > 100 || info.velocity.y > 400) {
       onClose();
     }
     setSheetY(0);
@@ -115,7 +117,7 @@ export default function MotionLightbox({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50"
-        style={{ background: "var(--overlay-heavy)" }}
+        style={{ background: "var(--overlay-heavy)", backdropFilter: "blur(4px)" }}
         onClick={(e) => e.target === e.currentTarget && onClose()}
       >
         <motion.div
@@ -188,19 +190,19 @@ export default function MotionLightbox({
 
           {/* Info */}
           <div className="px-5 pt-4 pb-2">
+            <p className="mb-1" style={{ fontSize: "var(--text-caption, 10px)", color: "var(--text-tertiary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              {store}
+            </p>
             <h2
-              className="text-sm font-medium mb-0.5"
-              style={{ color: "var(--text-primary)" }}
+              className="font-medium mb-1.5"
+              style={{ fontSize: "var(--text-sm, 13px)", color: "var(--text-primary)", lineHeight: "var(--leading-snug, 1.3)" }}
             >
               {title}
             </h2>
-            <p className="text-xs mb-1" style={{ color: "var(--text-tertiary)" }}>
-              {store}
-            </p>
             {price && (
               <p
-                className="text-lg font-semibold mb-3"
-                style={{ color: "var(--text-primary)" }}
+                className="mb-3"
+                style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg, 20px)", color: "var(--text-primary)" }}
               >
                 ${price}
               </p>
@@ -317,19 +319,19 @@ export default function MotionLightbox({
           transition={{ delay: 0.15 }}
           className="hidden md:flex flex-col w-60 py-6"
         >
+          <p className="mb-1" style={{ fontSize: "var(--text-caption, 10px)", color: "var(--text-tertiary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            {store}
+          </p>
           <h2
-            className="text-sm font-medium mb-1"
-            style={{ color: "var(--text-primary)" }}
+            className="font-medium mb-1.5"
+            style={{ fontSize: "var(--text-sm, 13px)", color: "var(--text-primary)", lineHeight: "var(--leading-snug, 1.3)" }}
           >
             {title}
           </h2>
-          <p className="text-xs mb-1" style={{ color: "var(--text-tertiary)" }}>
-            {store}
-          </p>
           {price && (
             <p
-              className="text-lg font-semibold mb-5"
-              style={{ color: "var(--text-primary)" }}
+              className="mb-5"
+              style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg, 20px)", color: "var(--text-primary)" }}
             >
               ${price}
             </p>

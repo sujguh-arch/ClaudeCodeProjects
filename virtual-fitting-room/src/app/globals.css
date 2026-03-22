@@ -12,13 +12,24 @@
   --text-xl: 28px;
   --text-2xl: 36px;
 
+  --text-caption: 10px;
+
   --weight-regular: 400;
   --weight-medium: 500;
+  --weight-semibold: 600;
   --weight-bold: 700;
 
   --leading-tight: 1.25;
+  --leading-snug: 1.3;
   --leading-normal: 1.36;
   --leading-relaxed: 1.5;
+
+  /* Letter-spacing scale */
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.03em;
+  --tracking-wider: 0.06em;
+  --tracking-widest: 0.12em;
 
   /* Surfaces — deeper, warmer darks */
   --bg-base: #0C0C0B;
@@ -29,6 +40,9 @@
   --overlay-light: rgba(0,0,0,0.4);
   --overlay-medium: rgba(0,0,0,0.6);
   --overlay-heavy: rgba(0,0,0,0.8);
+
+  /* Frosted glass surface */
+  --bg-frosted: rgba(22,22,20,0.85);
 
   /* Accent — warmer gold */
   --accent: #D4AF61;
@@ -107,7 +121,7 @@ body {
   animation: shimmer 1.8s ease-in-out infinite;
 }
 
-/* Card hover — subtle opacity shift */
+/* Card hover — subtle opacity shift + image zoom */
 .card-hover {
   transition: opacity var(--transition-normal), box-shadow var(--transition-normal);
   opacity: 0.94;
@@ -116,6 +130,55 @@ body {
   opacity: 1;
   box-shadow: var(--shadow-hover);
 }
+.card-hover:hover .card-image {
+  transform: scale(1.04);
+}
+.card-image {
+  transition: transform var(--transition-slow);
+}
+
+/* Skeleton loading card */
+.skeleton-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.skeleton-card .skeleton-image {
+  aspect-ratio: 2/3;
+  background: linear-gradient(90deg, var(--bg-elevated) 0%, #252420 40%, var(--bg-elevated) 80%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+.skeleton-card .skeleton-text {
+  height: 10px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--bg-elevated) 0%, #252420 40%, var(--bg-elevated) 80%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+.skeleton-card .skeleton-text-short {
+  width: 50%;
+}
+.skeleton-card .skeleton-text-long {
+  width: 80%;
+}
+
+/* Bottom gradient overlay on card images */
+.card-gradient::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to top, rgba(0,0,0,0.25), transparent);
+  pointer-events: none;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* Focus styles — underline accent */
 input:focus, textarea:focus, select:focus {

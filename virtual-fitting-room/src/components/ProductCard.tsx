@@ -13,14 +13,6 @@ interface ProductCardProps {
   onGenerate: () => void;
 }
 
-const storeColors: Record<string, string> = {
-  "Princess Polly": "bg-pink-400",
-  Peppermayo: "bg-amber-400",
-  "Oh Polly": "bg-teal-400",
-  "House of CB": "bg-purple-500",
-  Revolve: "bg-red-500",
-};
-
 export default function ProductCard({
   title,
   price,
@@ -33,50 +25,103 @@ export default function ProductCard({
 }: ProductCardProps) {
   const hasGenerated = generatedImages && generatedImages.length > 0;
   const displayImage = hasGenerated ? generatedImages[0] : images[0];
-  const badgeColor = storeColors[store] || "bg-gray-500";
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 group">
+    <div
+      className="overflow-hidden card-hover group"
+      style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-lg)" }}
+    >
       <div
-        className="relative aspect-[3/4] bg-stone-100 cursor-pointer overflow-hidden"
+        className="relative aspect-[2/3] overflow-hidden cursor-pointer card-gradient"
+        style={{ background: "var(--bg-elevated)" }}
         onClick={onClick}
       >
         {displayImage && (
           <img
             src={displayImage}
             alt={title}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover card-image"
             loading="lazy"
           />
         )}
-        <span
-          className={`absolute top-2 left-2 ${badgeColor} text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider`}
-        >
-          {store}
-        </span>
+        {hasGenerated && (
+          <span
+            className="absolute top-2.5 left-2.5 px-2 py-0.5 z-10"
+            style={{
+              fontSize: "var(--text-caption, 10px)",
+              fontWeight: "var(--weight-semibold, 600)",
+              borderRadius: "var(--radius-sm)",
+              background: "var(--accent-subtle)",
+              color: "var(--accent)",
+              border: "1px solid var(--accent-border)",
+              letterSpacing: "var(--tracking-wider, 0.06em)",
+            }}
+          >
+            Your fit
+          </span>
+        )}
+        {!hasGenerated && (
+          <span
+            className="absolute top-2.5 left-2.5 px-2 py-0.5 z-10"
+            style={{
+              fontSize: "var(--text-caption, 10px)",
+              fontWeight: "var(--weight-semibold, 600)",
+              borderRadius: "var(--radius-sm)",
+              background: "var(--overlay-light)",
+              color: "var(--text-primary)",
+              backdropFilter: "blur(4px)",
+              letterSpacing: "var(--tracking-wider, 0.06em)",
+              textTransform: "uppercase",
+            }}
+          >
+            {store}
+          </span>
+        )}
         {(images.length > 1 || (generatedImages && generatedImages.length > 1)) && (
-          <span className="absolute bottom-2 right-2 bg-black/60 text-white text-[11px] px-2 py-0.5 rounded-full">
+          <span
+            className="absolute bottom-2.5 right-2.5 px-2 py-0.5 z-10"
+            style={{
+              fontSize: "var(--text-caption, 10px)",
+              fontWeight: "var(--weight-medium, 500)",
+              background: "var(--overlay-medium)",
+              backdropFilter: "blur(4px)",
+              color: "var(--text-primary)",
+              borderRadius: "var(--radius-sm)",
+            }}
+          >
             {hasGenerated ? generatedImages.length : images.length} photos
           </span>
         )}
-        {hasGenerated && (
-          <span className="absolute top-2 right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-            YOUR FIT
-          </span>
-        )}
         {isGenerating && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center gap-2"
+            style={{ background: "var(--overlay-heavy)", backdropFilter: "blur(8px)" }}
+          >
+            <div
+              className="w-5 h-5 rounded-full animate-spin"
+              style={{ border: "2px solid var(--accent-muted)", borderTopColor: "var(--accent)" }}
+            />
+            <span style={{ fontSize: "var(--text-xs, 11px)", color: "var(--text-secondary)" }}>
+              Creating your look...
+            </span>
           </div>
         )}
       </div>
-      <div className="p-3">
-        <h3 className="text-xs font-medium leading-tight line-clamp-2">
+      <div className="p-3.5">
+        <p className="mb-0.5" style={{ fontSize: "var(--text-caption, 10px)", color: "var(--text-tertiary)", letterSpacing: "var(--tracking-wider, 0.06em)", textTransform: "uppercase" }}>
+          {store}
+        </p>
+        <h3
+          className="line-clamp-2 mb-2"
+          style={{ fontSize: "var(--text-sm, 13px)", fontWeight: "var(--weight-medium, 500)", lineHeight: "var(--leading-snug, 1.3)", color: "var(--text-primary)" }}
+        >
           {title}
         </h3>
-        <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center justify-between">
           {price && (
-            <span className="text-sm font-semibold">${price}</span>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-base, 15px)", color: "var(--text-primary)" }}>
+              ${price}
+            </span>
           )}
           {!hasGenerated && !isGenerating && (
             <button
@@ -84,7 +129,18 @@ export default function ProductCard({
                 e.stopPropagation();
                 onGenerate();
               }}
-              className="text-[10px] bg-stone-900 text-white px-3 py-1 rounded-full hover:bg-stone-700 transition"
+              className="px-3 py-1.5"
+              style={{
+                fontSize: "var(--text-caption, 10px)",
+                fontWeight: "var(--weight-medium, 500)",
+                background: "var(--accent)",
+                color: "var(--bg-base)",
+                borderRadius: "var(--radius-md)",
+                letterSpacing: "var(--tracking-wider, 0.06em)",
+                border: "none",
+                cursor: "pointer",
+                transition: "var(--transition-fast)",
+              }}
             >
               Try On
             </button>
