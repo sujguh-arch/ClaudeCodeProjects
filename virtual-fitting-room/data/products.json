@@ -6,7 +6,7 @@
     "price": 45,
     "store": "Peppermayo Exclusive",
     "category": "dress",
-    "lengthInches": null,
+    "lengthInches": 15.9,
     "images": [
       "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/CerinaHighNeckMiniDressNavy4Peppermayo.jpg?v=1764654211",
       "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/CerinaHighNeckMiniDressNavy1Peppermayo.jpg?v=1764654211",
@@ -24,7 +24,7 @@
     "price": 41,
     "store": "Peppermayo Exclusive",
     "category": "dress",
-    "lengthInches": null,
+    "lengthInches": 40.6,
     "images": [
       "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/Brittany-Chiffon-Maxi-Dress-Yellow-4jpg.jpg?v=1738643207",
       "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/Brittany-Chiffon-Maxi-Dress-Yellow-1jpg.jpg?v=1738643207",
@@ -34,26 +34,6 @@
       "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/Brittany-Chiffon-Maxi-Dress-Yellow-6jpg.jpg?v=1738643207"
     ],
     "createdAt": "2026-03-21T08:52:27.141Z"
-  },
-  {
-    "id": "109476d5-5672-4fb8-95b8-a62345230f8c",
-    "url": "https://us.princesspolly.com/products/lanchester-mini-dress-white",
-    "title": "Lanchester Mini Dress White",
-    "price": 65,
-    "store": "Princess Polly",
-    "category": "dress",
-    "lengthInches": null,
-    "images": [
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/0-modelinfo-elise-us2_fc1d775e-b4a9-40c4-976f-e6a7e2d5c9f9.jpg?v=1772647646",
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/1-modelinfo-lauren-us2_f3980670-b0b9-469c-8387-c01f42bd42ab.jpg?v=1773034381",
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/2-modelinfo-lauren-us2_46d6d848-e165-4f01-8fa0-c1d699163874.jpg?v=1773034381",
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/3-modelinfo-lauren-us2_fa85bd44-ef37-4bef-99b9-1a94741a08ec.jpg?v=1773034381",
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/4-modelinfo-lauren-us2_10fd5b5a-75d2-418b-8786-b4ab92c64601.jpg?v=1773034381",
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/5-modelinfo-lauren-us2_8a86357c-c326-4e28-906c-a3a0fd868bab.jpg?v=1773034381",
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/6-modelinfo-lauren-us2_ab02251a-eac2-4e7a-b574-5312875e9df4.jpg?v=1773034381",
-      "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/0-modelinfo-lauren-us2_28bb76f9-0b4d-4d05-866a-55af6d48ab5d.jpg?v=1773034381"
-    ],
-    "createdAt": "2026-03-21T18:06:36.231Z"
   },
   {
     "id": "3feb2b52-8e09-4564-bd70-d44fadbdcb97",
