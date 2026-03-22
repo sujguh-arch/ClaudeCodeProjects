@@ -5,50 +5,5 @@
     "items": {},
     "createdAt": "2026-03-21T20:15:46.360Z",
     "updatedAt": "2026-03-21T20:15:46.360Z"
-  },
-  {
-    "id": "01476be2-4ca3-46b1-b9fb-22adb99bee8e",
-    "name": "Remove Item Test",
-    "items": {
-      "dress": "4a12afbb-d961-4d49-a30d-66401c8943c6"
-    },
-    "createdAt": "2026-03-22T20:02:46.583Z",
-    "updatedAt": "2026-03-22T20:02:46.583Z"
-  },
-  {
-    "id": "4a27f958-3dba-49f4-9ea5-64e4dc9d63a5",
-    "name": "Shoes Slot Test",
-    "items": {
-      "shoes": "37d12d3e-a988-4e34-8a5d-e6351077c720"
-    },
-    "createdAt": "2026-03-22T20:02:49.722Z",
-    "updatedAt": "2026-03-22T20:02:49.722Z"
-  },
-  {
-    "id": "fef12cd3-9e8e-4ce4-aeb7-8fa15120de92",
-    "name": "Remove Item Test",
-    "items": {
-      "dress": "916b6a4a-263b-4ad2-8172-c7c456e5b917"
-    },
-    "createdAt": "2026-03-22T20:06:10.009Z",
-    "updatedAt": "2026-03-22T20:06:10.009Z"
-  },
-  {
-    "id": "d319f1c2-b086-4137-8440-c8ecb0e8da2a",
-    "name": "Remove Item Test",
-    "items": {
-      "dress": "13fdfeb1-31ca-4284-aeaf-99ad6b992b2a"
-    },
-    "createdAt": "2026-03-22T20:23:02.657Z",
-    "updatedAt": "2026-03-22T20:23:02.657Z"
-  },
-  {
-    "id": "8cd6fd80-8f52-4e98-aef6-29e425f2b0f2",
-    "name": "Shoes Slot Test",
-    "items": {
-      "shoes": "d7acb9a5-9093-4b78-9b28-09df0fccd3cc"
-    },
-    "createdAt": "2026-03-22T20:23:05.790Z",
-    "updatedAt": "2026-03-22T20:23:05.790Z"
   }
 ]

@@ -83,9 +83,10 @@ test.describe("product constraint validation", () => {
     for (const dress of dresses) {
       const titleLower = dress.title.toLowerCase();
       for (const excluded of EXCLUDED_COLORS) {
+        const re = new RegExp(`\\b${excluded}\\b`);
         expect
           .soft(
-            titleLower.includes(excluded),
+            re.test(titleLower),
             `Dress "${dress.title}" contains excluded color "${excluded}"`
           )
           .toBe(false);
