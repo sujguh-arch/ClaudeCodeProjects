@@ -35,9 +35,14 @@ describe("detectCategory", () => {
     expect(detect("https://store.com/products/silk-mini", "Silk Mini Dress")).toBe("dress");
   });
 
-  it("defaults to dress for unknown items", async () => {
+  it("defaults to other for unknown items", async () => {
     const detect = await loadDetectCategory();
-    expect(detect("https://store.com/product/thing", "Some Random Thing")).toBe("dress");
+    expect(detect("https://store.com/product/thing", "Some Random Thing")).toBe("other");
+  });
+
+  it("detects dresses explicitly", async () => {
+    const detect = await loadDetectCategory();
+    expect(detect("https://store.com/products/silk-mini-dress", "Silk Mini Dress")).toBe("dress");
   });
 });
 
