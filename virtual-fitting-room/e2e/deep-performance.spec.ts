@@ -57,6 +57,8 @@ test.describe("deep performance", () => {
     });
     const product = await resp.json();
 
+    await page.reload();
+    await page.waitForTimeout(500);
     await page.getByRole("button", { name: /closet/i }).click();
     await page.waitForTimeout(300);
 

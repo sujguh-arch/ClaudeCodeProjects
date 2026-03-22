@@ -30,6 +30,10 @@ test.describe("deep product flow", () => {
     const product = await resp.json();
     expect(resp.ok()).toBeTruthy();
 
+    // Reload so the client fetches the updated product list
+    await page.reload();
+    await page.waitForTimeout(500);
+
     // Switch to closet tab and verify product appears
     await page.getByRole("button", { name: /closet/i }).click();
     await page.waitForTimeout(300);
@@ -96,6 +100,8 @@ test.describe("deep product flow", () => {
     });
     const product = await resp.json();
 
+    await page.reload();
+    await page.waitForTimeout(500);
     await page.getByRole("button", { name: /closet/i }).click();
     await page.waitForTimeout(300);
 
@@ -143,6 +149,8 @@ test.describe("deep product flow", () => {
     });
     const shoes = await shoesResp.json();
 
+    await page.reload();
+    await page.waitForTimeout(500);
     await page.getByRole("button", { name: /closet/i }).click();
     await page.waitForTimeout(300);
 
@@ -191,6 +199,8 @@ test.describe("deep product flow", () => {
     });
     const product = await resp.json();
 
+    await page.reload();
+    await page.waitForTimeout(500);
     await page.getByRole("button", { name: /closet/i }).click();
     await page.waitForTimeout(300);
 
@@ -296,6 +306,8 @@ test.describe("deep product flow", () => {
     });
     const product = await resp.json();
 
+    await page.reload();
+    await page.waitForTimeout(500);
     await page.getByRole("button", { name: /closet/i }).click();
     await page.waitForTimeout(300);
 

@@ -5,5 +5,23 @@
     "items": {},
     "createdAt": "2026-03-21T20:15:46.360Z",
     "updatedAt": "2026-03-21T20:15:46.360Z"
+  },
+  {
+    "id": "3132eddc-3f82-4230-8f29-82b7603ec68b",
+    "name": "Remove Item Test",
+    "items": {
+      "dress": "6671119a-05e6-441b-a508-ceb0e6520c59"
+    },
+    "createdAt": "2026-03-22T21:07:48.203Z",
+    "updatedAt": "2026-03-22T21:07:48.203Z"
+  },
+  {
+    "id": "90cf2d45-dfb7-4b24-a344-8147f1e5667c",
+    "name": "Shoes Slot Test",
+    "items": {
+      "shoes": "a7be47c1-0b72-43fc-b406-9f6c8f4c5e77"
+    },
+    "createdAt": "2026-03-22T21:07:51.332Z",
+    "updatedAt": "2026-03-22T21:07:51.332Z"
   }
 ]
