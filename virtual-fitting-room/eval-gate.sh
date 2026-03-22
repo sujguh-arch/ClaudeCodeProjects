@@ -123,11 +123,15 @@ if [ -f "$PRODUCTS_FILE" ]; then
   ")
   [ "$PRICE_BAD" != "NONE" ] && fail "Over-budget dresses:\n$PRICE_BAD" || pass "Dress prices OK"
 
-  # Excluded colors
+  # Excluded colors (word boundary matching to avoid false positives like "Brittany" matching "tan")
   COLOR_BAD=$(node -e "
     const p=require('$PRODUCTS_FILE');
     const exc=['hot pink','beige','nude','tan','olive','moss','khaki','gray','grey','pink'];
-    const bad=p.filter(x=>x.category==='dress'&&exc.some(c=>(x.title||'').toLowerCase().includes(c)));
+    const bad=p.filter(x=>{
+      if(x.category!=='dress') return false;
+      const t=' '+(x.title||'').toLowerCase()+' ';
+      return exc.some(c=>t.match(new RegExp('\\\\b'+c+'\\\\b')));
+    });
     if(bad.length) console.log(bad.map(x=>x.title).join('\\n'));
     else console.log('NONE');
   ")
@@ -136,8 +140,12 @@ if [ -f "$PRODUCTS_FILE" ]; then
   # Excluded styles
   STYLE_BAD=$(node -e "
     const p=require('$PRODUCTS_FILE');
-    const exc=['strapless','corset','tube top','cowl','floral','print','beachy','tropical','hawaiian'];
-    const bad=p.filter(x=>x.category==='dress'&&exc.some(s=>(x.title||'').toLowerCase().includes(s)));
+    const exc=['strapless','corset','tube top','cowl neck','floral','print','beachy','tropical','hawaiian'];
+    const bad=p.filter(x=>{
+      if(x.category!=='dress') return false;
+      const t=' '+(x.title||'').toLowerCase()+' ';
+      return exc.some(s=>t.match(new RegExp('\\\\b'+s.replace(/ /g,'\\\\s+')+'\\\\b')));
+    });
     if(bad.length) console.log(bad.map(x=>x.title).join('\\n'));
     else console.log('NONE');
   ")

@@ -46,8 +46,12 @@ run_eval_gate() {
   local step_name="$1"
   log "  [EVAL GATE v2] Running 3-stage validation for: $step_name"
   if [ -f eval-gate.sh ]; then
-    bash eval-gate.sh "$step_name" 2>&1 | tee -a "$LOG_FILE"
-    local exit_code=$?
+    local exit_code=0
+    bash eval-gate.sh "$step_name" 2>&1 | tee -a "$LOG_FILE" || exit_code=${PIPESTATUS[0]}
+    # Also check directly
+    if [ $exit_code -eq 0 ] && grep -q "VERDICT: FAIL" /tmp/eval-gate-report.txt 2>/dev/null; then
+      exit_code=1
+    fi
     if [ $exit_code -eq 0 ]; then
       log "  [EVAL GATE] PASSED for: $step_name"
     else
