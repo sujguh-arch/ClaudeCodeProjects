@@ -36,11 +36,11 @@ interface Outfit {
 }
 
 const SLOTS = [
-  { key: "dress", label: "Dress", icon: "👗", aspect: "aspect-[4/3] sm:aspect-auto", span: "col-span-2 sm:row-span-2" },
-  { key: "shoes", label: "Shoes", icon: "👠", aspect: "aspect-[4/5]", span: "" },
-  { key: "tights", label: "Tights", icon: "🦵", aspect: "aspect-[4/5]", span: "" },
-  { key: "bag", label: "Bag", icon: "👜", aspect: "aspect-[4/5]", span: "" },
-  { key: "accessories", label: "Accessories", icon: "💎", aspect: "aspect-[4/5]", span: "" },
+  { key: "dress", label: "Dress", aspect: "aspect-[2/3] sm:aspect-auto", span: "col-span-2 sm:row-span-2" },
+  { key: "shoes", label: "Shoes", aspect: "aspect-[2/3]", span: "" },
+  { key: "tights", label: "Tights", aspect: "aspect-[2/3]", span: "" },
+  { key: "bag", label: "Bag", aspect: "aspect-[2/3]", span: "" },
+  { key: "accessories", label: "Accessories", aspect: "aspect-[2/3]", span: "" },
 ] as const;
 
 export default function OutfitPage({ params }: { params: Promise<{ id: string }> }) {
@@ -210,7 +210,10 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
             </svg>
           </motion.button>
         </Link>
-        <h1 className="text-sm tracking-[0.25em] uppercase font-extralight" style={{ color: "var(--text-primary)" }}>
+        <h1
+          className="tracking-[0.15em] uppercase"
+          style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg)", color: "var(--text-primary)" }}
+        >
           mirror
         </h1>
         <div className="w-9" />
@@ -232,13 +235,13 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
           </div>
         ) : (
           <motion.h2
-            className="text-2xl font-light cursor-pointer"
-            style={{ color: "var(--text-primary)" }}
+            className="cursor-pointer"
+            style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-xl)", color: "var(--text-primary)" }}
             onClick={() => setEditingName(true)}
             whileHover={{ opacity: 0.7 }}
           >
             {outfit.name}
-            <span className="text-xs ml-2" style={{ color: "var(--text-tertiary)" }}>tap to edit</span>
+            <span className="ml-2" style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)", fontFamily: "var(--font-body)" }}>tap to edit</span>
           </motion.h2>
         )}
         {totalPrice > 0 && (
@@ -284,23 +287,17 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
                       )}
                       {/* Category label */}
                       <div
-                        className="absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider"
-                        style={{ background: "var(--accent)", color: "#0A0A09" }}
+                        className="absolute top-2 left-2 px-2 py-0.5"
+                        style={{ fontSize: "var(--text-xs)", fontWeight: "var(--weight-bold)", background: "var(--accent)", color: "var(--bg-base)", borderRadius: "var(--radius-sm)" }}
                       >
                         {slot.label}
                       </div>
                       {/* Remove button */}
                       <motion.button
-                        whileHover={{ opacity: 1, scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => handleRemoveItem(slot.key)}
                         className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full opacity-70"
-                        style={{
-                          background: "rgba(0,0,0,0.5)",
-                          backdropFilter: "blur(4px)",
-                          color: "var(--text-secondary)",
-                          fontSize: "10px",
-                        }}
+                        style={{ background: "var(--overlay-medium)", backdropFilter: "blur(4px)", color: "var(--text-secondary)", fontSize: "var(--text-xs)" }}
                       >
                         ✕
                       </motion.button>
@@ -312,7 +309,7 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             className="absolute inset-0 flex flex-col items-center justify-center gap-2"
-                            style={{ background: "rgba(17,17,16,0.7)", backdropFilter: "blur(8px)" }}
+                            style={{ background: "var(--overlay-heavy)", backdropFilter: "blur(8px)" }}
                           >
                             <motion.div
                               animate={{ rotate: 360 }}
@@ -320,29 +317,29 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
                               className="w-5 h-5 rounded-full"
                               style={{ border: "2px solid var(--accent-muted)", borderTopColor: "var(--accent)" }}
                             />
-                            <span className="text-[10px]" style={{ color: "var(--text-secondary)" }}>
-                              Creating look
+                            <span style={{ fontSize: "var(--text-xs)", color: "var(--text-secondary)" }}>
+                              Creating look...
                             </span>
                           </motion.div>
                         )}
                       </AnimatePresence>
                       {gen.length > 0 && (
                         <div
-                          className="absolute bottom-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider"
-                          style={{ background: "var(--accent)", color: "#0A0A09" }}
+                          className="absolute bottom-2 left-2 px-2 py-0.5"
+                          style={{ fontSize: "var(--text-xs)", fontWeight: "var(--weight-bold)", background: "var(--accent-subtle)", color: "var(--accent)", border: "1px solid var(--accent-border)", borderRadius: "var(--radius-sm)" }}
                         >
                           Your fit
                         </div>
                       )}
                     </div>
-                    <div className="p-2.5">
-                      <h3 className="text-[11px] font-medium leading-snug line-clamp-1" style={{ color: "var(--text-primary)" }}>
+                    <div className="p-3">
+                      <h3 className="line-clamp-1" style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", lineHeight: "var(--leading-tight)", color: "var(--text-primary)" }}>
                         {product.title}
                       </h3>
                       <div className="flex items-center justify-between mt-1">
-                        <span className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>{product.store}</span>
+                        <span style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)" }}>{product.store}</span>
                         {product.price && (
-                          <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
+                          <span style={{ fontSize: "var(--text-base)", fontWeight: "var(--weight-bold)", color: "var(--text-primary)" }}>
                             ${product.price}
                           </span>
                         )}
@@ -354,13 +351,14 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
                   <motion.div
                     whileHover={{ borderColor: "var(--accent-muted)" }}
                     className={`${slot.aspect} flex flex-col items-center justify-center cursor-pointer p-4`}
+                    style={{ transition: "var(--transition-normal)" }}
                     onClick={() => { setAddingSlot(slot.key); setSlotUrl(""); }}
                   >
-                    <span className="text-2xl mb-2 opacity-40">{slot.icon}</span>
-                    <span className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>
+                    <span className="text-xl mb-2 opacity-30">+</span>
+                    <span style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", color: "var(--text-secondary)" }}>
                       Add {slot.label}
                     </span>
-                    <span className="text-[10px] mt-0.5" style={{ color: "var(--text-tertiary)" }}>
+                    <span className="mt-0.5" style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)" }}>
                       Paste a link
                     </span>
                   </motion.div>
@@ -378,7 +376,7 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
             className="rounded-[var(--radius-lg)] p-4"
             style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)" }}
           >
-            <p className="text-[10px] uppercase tracking-[0.2em] font-semibold mb-3" style={{ color: "var(--text-tertiary)" }}>
+            <p className="mb-3" style={{ fontSize: "var(--text-xs)", letterSpacing: "0.1em", fontWeight: "var(--weight-medium)", color: "var(--text-tertiary)" }}>
               Shop this outfit
             </p>
             <div className="space-y-2">
@@ -392,10 +390,10 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
                     rel="noopener noreferrer"
                     className="flex items-center justify-between py-1.5 group"
                   >
-                    <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                      {slot.icon} {product.title}
+                    <span style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
+                      {product.title}
                     </span>
-                    <span className="text-xs font-semibold group-hover:underline" style={{ color: "var(--accent)" }}>
+                    <span className="group-hover:underline" style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", color: "var(--accent)" }}>
                       {product.price ? `$${product.price}` : "View"} →
                     </span>
                   </a>
@@ -423,7 +421,7 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-            style={{ background: "var(--bg-overlay)", backdropFilter: "blur(12px)" }}
+            style={{ background: "var(--overlay-heavy)", backdropFilter: "blur(12px)" }}
             onClick={(e) => e.target === e.currentTarget && setAddingSlot(null)}
           >
             <motion.div
@@ -431,14 +429,14 @@ export default function OutfitPage({ params }: { params: Promise<{ id: string }>
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="w-full sm:max-w-md sm:rounded-[var(--radius-xl)] rounded-t-[28px] p-8"
-              style={{ background: "var(--bg-surface)" }}
+              className="w-full sm:max-w-md p-8"
+              style={{ background: "var(--bg-surface)", borderRadius: "var(--radius-sheet) var(--radius-sheet) 0 0" }}
             >
               <div className="w-10 h-1 rounded-full mx-auto mb-6 sm:hidden" style={{ background: "var(--border-default)" }} />
-              <h3 className="text-lg font-light mb-1" style={{ color: "var(--text-primary)" }}>
+              <h3 className="mb-1" style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg)", color: "var(--text-primary)" }}>
                 Add {SLOTS.find((s) => s.key === addingSlot)?.label}
               </h3>
-              <p className="text-xs mb-5" style={{ color: "var(--text-tertiary)" }}>
+              <p className="mb-5" style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)" }}>
                 Paste a product link from any store
               </p>
               <form
