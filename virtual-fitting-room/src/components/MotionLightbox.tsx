@@ -115,7 +115,7 @@ export default function MotionLightbox({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50"
-        style={{ background: "rgba(0,0,0,0.7)" }}
+        style={{ background: "var(--overlay-heavy)" }}
         onClick={(e) => e.target === e.currentTarget && onClose()}
       >
         <motion.div
@@ -177,7 +177,7 @@ export default function MotionLightbox({
                     className="w-1.5 h-1.5 rounded-full transition-all duration-300"
                     style={{
                       background:
-                        i === currentIndex ? "var(--accent)" : "rgba(255,255,255,0.3)",
+                        i === currentIndex ? "var(--accent)" : "rgba(255,255,255,0.4)",
                       width: i === currentIndex ? "16px" : "6px",
                     }}
                   />
@@ -219,7 +219,7 @@ export default function MotionLightbox({
               target="_blank"
               rel="noopener noreferrer"
               className="block w-full py-3.5 rounded-[var(--radius-md)] text-sm font-semibold tracking-wider uppercase text-center"
-              style={{ background: "var(--accent)", color: "#0A0A09" }}
+              style={{ background: "var(--accent)", color: "var(--bg-base)" }}
             >
               Shop this look
             </motion.a>
@@ -237,7 +237,7 @@ export default function MotionLightbox({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
       className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "rgba(0,0,0,0.96)" }}
+      style={{ background: "var(--bg-base)" }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.button
@@ -247,7 +247,7 @@ export default function MotionLightbox({
         className="absolute top-4 right-5 w-10 h-10 flex items-center justify-center text-xl z-10 rounded-full"
         style={{
           color: "var(--text-tertiary)",
-          background: "rgba(255,255,255,0.06)",
+          background: "var(--bg-elevated)",
         }}
       >
         ✕
@@ -269,7 +269,7 @@ export default function MotionLightbox({
             className="absolute left-2 text-3xl select-none p-3 rounded-full z-10"
             style={{
               color: "var(--text-tertiary)",
-              background: "rgba(255,255,255,0.06)",
+              background: "var(--bg-elevated)",
             }}
           >
             ‹
@@ -303,7 +303,7 @@ export default function MotionLightbox({
             className="absolute right-2 text-3xl select-none p-3 rounded-full z-10"
             style={{
               color: "var(--text-tertiary)",
-              background: "rgba(255,255,255,0.06)",
+              background: "var(--bg-elevated)",
             }}
           >
             ›
@@ -345,7 +345,7 @@ export default function MotionLightbox({
                 className="w-full aspect-[3/4] object-cover cursor-pointer transition-all"
                 style={{
                   borderRadius: "var(--radius-sm)",
-                  opacity: i === currentIndex ? 1 : 0.25,
+                  opacity: i === currentIndex ? 1 : 0.5,
                   border:
                     i === currentIndex
                       ? "2px solid var(--accent)"
@@ -370,7 +370,7 @@ export default function MotionLightbox({
             target="_blank"
             rel="noopener noreferrer"
             className="mt-auto py-3 rounded-[var(--radius-md)] text-sm font-semibold tracking-wider uppercase text-center transition-all"
-            style={{ background: "var(--accent)", color: "#0A0A09" }}
+            style={{ background: "var(--accent)", color: "var(--bg-base)" }}
           >
             Shop this look
           </motion.a>

@@ -83,8 +83,8 @@ export default function SettingsPage() {
           </motion.span>
         </Link>
         <h1
-          className="text-sm tracking-[0.2em] uppercase font-light"
-          style={{ color: "var(--text-primary)" }}
+          className="tracking-[0.15em] uppercase"
+          style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg)", color: "var(--text-primary)" }}
         >
           Settings
         </h1>
@@ -207,8 +207,8 @@ export default function SettingsPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full py-3 rounded-[var(--radius-md)] text-sm font-semibold tracking-wider uppercase"
-              style={{ background: "var(--accent)", color: "#0A0A09" }}
+              className="w-full py-3"
+              style={{ borderRadius: "var(--radius-md)", fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", letterSpacing: "0.05em", background: "var(--accent)", color: "var(--bg-base)" }}
             >
               Update PIN
             </motion.button>
@@ -221,12 +221,8 @@ export default function SettingsPage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={logout}
-            className="w-full py-3 rounded-[var(--radius-md)] text-sm font-semibold tracking-wider uppercase"
-            style={{
-              background: "transparent",
-              color: "var(--error)",
-              border: "1px solid var(--error)",
-            }}
+            className="w-full py-3"
+            style={{ borderRadius: "var(--radius-md)", fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", letterSpacing: "0.05em", background: "transparent", color: "var(--error)", border: "1px solid var(--error)" }}
           >
             Lock App
           </motion.button>
