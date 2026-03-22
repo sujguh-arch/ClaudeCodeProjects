@@ -44,20 +44,39 @@ log "Max duration: ${MAX_DURATION}s ($(( MAX_DURATION / 60 )) minutes)"
 # Eval gate function — runs deterministic checks after every step
 run_eval_gate() {
   local step_name="$1"
-  log "  [EVAL GATE] Running for: $step_name"
+  log "  [EVAL GATE v2] Running 3-stage validation for: $step_name"
   if [ -f eval-gate.sh ]; then
-    bash eval-gate.sh 2>&1 | tee -a "$LOG_FILE"
+    bash eval-gate.sh "$step_name" 2>&1 | tee -a "$LOG_FILE"
     local exit_code=$?
     if [ $exit_code -eq 0 ]; then
       log "  [EVAL GATE] PASSED for: $step_name"
     else
-      log "  [EVAL GATE] $exit_code FAILURES for: $step_name — running auto-fix..."
-      # Auto-fix: have Claude read the eval report and fix issues
-      timeout 300s claude \
+      log "  [EVAL GATE] $exit_code FAILURES for: $step_name — auto-fixing..."
+      # Atris-style: read eval report + lessons learned, fix with full context
+      timeout 420s claude \
         --print \
         --dangerously-skip-permissions \
-        --max-turns 15 \
-        "READ /tmp/eval-gate-report.txt. Fix ALL failures listed. Then re-run: bash eval-gate.sh. Do not stop until all checks pass or you have tried 3 times." \
+        --max-turns 20 \
+        "You are fixing quality issues found by the eval gate. You are EMPOWERED to install any packages, re-architect code, or make whatever changes are needed for a perfect product.
+
+READ these files:
+1. /tmp/eval-gate-report.txt — the failures to fix
+2. /tmp/eval-lessons.md — lessons from previous eval runs (learn from past mistakes)
+3. /tmp/eval-benchmarks.json — performance trends across steps
+4. CLAUDE.md — project constraints
+
+Fix ALL failures. For each fix:
+- Explain what was wrong and why
+- Make the fix
+- If a product violates constraints, REMOVE it from data/products.json
+- If a URL is broken, try to find a replacement or remove the product
+- If tests fail, fix the test or the code (prefer fixing code)
+- If the build fails, fix TypeScript errors
+- If latency is bad, optimize (lazy loading, code splitting, etc.)
+- Install any needed packages with npm install
+
+After fixing, re-run: bash eval-gate.sh '$step_name'
+If issues remain after 2 attempts, document what could not be fixed in /tmp/eval-lessons.md and move on." \
         2>&1 | tee -a "$LOG_FILE" || log "  [EVAL GATE] Auto-fix timed out"
       commit_and_push "Eval gate fixes for: $step_name"
     fi
