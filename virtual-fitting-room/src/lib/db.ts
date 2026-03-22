@@ -161,7 +161,11 @@ export function getSettings(): Settings {
       model: "google/nano-banana-pro",
     };
   }
-  return JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf-8"));
+  const settings = JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf-8"));
+  if (!settings.replicateToken) {
+    settings.replicateToken = process.env.REPLICATE_API_TOKEN || "";
+  }
+  return settings;
 }
 
 export function saveSettings(settings: Settings) {
