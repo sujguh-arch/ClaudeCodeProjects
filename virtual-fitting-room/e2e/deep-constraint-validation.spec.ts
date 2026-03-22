@@ -43,7 +43,11 @@ let products: Product[];
 test.beforeAll(async () => {
   const dataPath = path.join(process.cwd(), "data", "products.json");
   const raw = fs.readFileSync(dataPath, "utf-8");
-  products = JSON.parse(raw);
+  const all = JSON.parse(raw);
+  // Filter out ephemeral test products created by other E2E specs
+  products = all.filter((p: Product) =>
+    p.store !== "TestStore" && !p.url?.includes("test-store.com")
+  );
 });
 
 test.describe("product constraint validation", () => {

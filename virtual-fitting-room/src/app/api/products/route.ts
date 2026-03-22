@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
       id: randomUUID(),
       url: body.url || "",
       title: body.title,
-      price: body.price || null,
+      price: body.price ?? null,
       store: body.store || "Manual",
       category: body.category || "dress",
       lengthInches: body.lengthInches || null,
