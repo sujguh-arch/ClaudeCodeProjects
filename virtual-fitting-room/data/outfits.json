@@ -7,84 +7,30 @@
     "updatedAt": "2026-03-21T20:15:46.360Z"
   },
   {
-    "id": "4e74d40a-81d8-4caa-90ec-db9867aa131e",
-    "name": "Slot Test Outfit",
-    "items": {
-      "dress": "42fd03eb-ab3a-4893-ba7e-8fd5f9e390df"
-    },
-    "createdAt": "2026-03-22T19:48:54.164Z",
-    "updatedAt": "2026-03-22T19:48:54.173Z"
-  },
-  {
-    "id": "7396c739-ad4a-4379-a847-fb4d9515a474",
+    "id": "01476be2-4ca3-46b1-b9fb-22adb99bee8e",
     "name": "Remove Item Test",
     "items": {
-      "dress": "2e8cba3f-17cb-4b6a-ac8d-a79b86aece7a"
+      "dress": "4a12afbb-d961-4d49-a30d-66401c8943c6"
     },
-    "createdAt": "2026-03-22T19:49:04.282Z",
-    "updatedAt": "2026-03-22T19:49:04.282Z"
+    "createdAt": "2026-03-22T20:02:46.583Z",
+    "updatedAt": "2026-03-22T20:02:46.583Z"
   },
   {
-    "id": "d18e418e-774b-49ab-8d74-99b2a8d03270",
+    "id": "4a27f958-3dba-49f4-9ea5-64e4dc9d63a5",
     "name": "Shoes Slot Test",
     "items": {
-      "shoes": "5bf9775f-196b-42f6-acbd-e85d9cf0ad1b"
+      "shoes": "37d12d3e-a988-4e34-8a5d-e6351077c720"
     },
-    "createdAt": "2026-03-22T19:49:07.490Z",
-    "updatedAt": "2026-03-22T19:49:07.490Z"
+    "createdAt": "2026-03-22T20:02:49.722Z",
+    "updatedAt": "2026-03-22T20:02:49.722Z"
   },
   {
-    "id": "dafc92d1-8628-4691-94eb-0b82c494c97a",
-    "name": "Slot Test Outfit",
-    "items": {
-      "dress": "4cdceae3-e9cc-44d6-8091-ddc86657a5b0"
-    },
-    "createdAt": "2026-03-22T19:53:37.055Z",
-    "updatedAt": "2026-03-22T19:53:37.065Z"
-  },
-  {
-    "id": "41f25733-4d8f-42e1-9506-5a3db2192e25",
+    "id": "fef12cd3-9e8e-4ce4-aeb7-8fa15120de92",
     "name": "Remove Item Test",
     "items": {
-      "dress": "2b52fbc9-2097-410c-8f5b-10e06a04748e"
+      "dress": "916b6a4a-263b-4ad2-8172-c7c456e5b917"
     },
-    "createdAt": "2026-03-22T19:53:47.604Z",
-    "updatedAt": "2026-03-22T19:53:47.604Z"
-  },
-  {
-    "id": "3ddedcfe-862a-485a-bf88-c31e5e544cbe",
-    "name": "Shoes Slot Test",
-    "items": {
-      "shoes": "8bebe7c5-2cca-4991-a9c8-217ad85ed282"
-    },
-    "createdAt": "2026-03-22T19:53:51.063Z",
-    "updatedAt": "2026-03-22T19:53:51.063Z"
-  },
-  {
-    "id": "d80c50a8-a208-4049-a00f-7dae77546909",
-    "name": "Slot Test Outfit",
-    "items": {
-      "dress": "e7bdbd10-d42f-4435-879c-d141bba35cfe"
-    },
-    "createdAt": "2026-03-22T19:55:22.680Z",
-    "updatedAt": "2026-03-22T19:55:22.689Z"
-  },
-  {
-    "id": "bd729e51-6aa2-4e95-8570-e2ca6e80c3b9",
-    "name": "Remove Item Test",
-    "items": {
-      "dress": "481fef04-0d3a-4732-8009-d02ddba1eabc"
-    },
-    "createdAt": "2026-03-22T19:55:33.047Z",
-    "updatedAt": "2026-03-22T19:55:33.047Z"
-  },
-  {
-    "id": "acaa3dcf-1b2a-4ca3-947b-0ed12e9f7a21",
-    "name": "Shoes Slot Test",
-    "items": {
-      "shoes": "6fe69306-a0ca-44bd-b503-f8dbabe002cb"
-    },
-    "createdAt": "2026-03-22T19:55:36.317Z",
-    "updatedAt": "2026-03-22T19:55:36.317Z"
+    "createdAt": "2026-03-22T20:06:10.009Z",
+    "updatedAt": "2026-03-22T20:06:10.009Z"
   }
 ]

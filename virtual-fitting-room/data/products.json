@@ -368,8 +368,21 @@
     "createdAt": "2026-03-22T20:10:09.000Z"
   },
   {
-    "id": "6340ffa2-af36-4f34-9f52-1ff4788e6623",
-    "url": "https://test-store.com/deep-test-1774208950487",
+    "id": "aab33c00-aa7c-4b89-9321-59a2a43ce4d2",
+    "url": "https://test-store.com/perf-lb-1774209775767",
+    "title": "Perf Lightbox Test",
+    "price": 50,
+    "store": "TestStore",
+    "category": "dress",
+    "lengthInches": null,
+    "images": [
+      "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/perf-lb.jpg"
+    ],
+    "createdAt": "2026-03-22T20:02:55.784Z"
+  },
+  {
+    "id": "88f208b9-2fcd-4375-9a78-ed6932d0abb2",
+    "url": "https://test-store.com/deep-test-1774209826043",
     "title": "Deep Test Dress - Emerald",
     "price": 75,
     "store": "TestStore",
@@ -378,11 +391,11 @@
     "images": [
       "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/test-deep.jpg"
     ],
-    "createdAt": "2026-03-22T19:49:10.504Z"
+    "createdAt": "2026-03-22T20:03:46.061Z"
   },
   {
-    "id": "b1a28de8-1b83-469e-b4c8-1354955882fd",
-    "url": "https://test-store.com/lightbox-test-1774208959405",
+    "id": "2e94d9e9-5c76-4335-b97a-0c667a135bf2",
+    "url": "https://test-store.com/lightbox-test-1774209835101",
     "title": "Lightbox Test Dress",
     "price": 60,
     "store": "TestStore",
@@ -392,11 +405,11 @@
       "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/test-lb1.jpg",
       "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/test-lb2.jpg"
     ],
-    "createdAt": "2026-03-22T19:49:19.411Z"
+    "createdAt": "2026-03-22T20:03:55.107Z"
   },
   {
-    "id": "fd9ce51a-103f-4e5b-9ae6-df6e41e7d993",
-    "url": "https://test-store.com/filter-dress-1774208990795",
+    "id": "4d3e7ca1-72c5-4124-929a-bd6f0fd27bf1",
+    "url": "https://test-store.com/filter-dress-1774209866506",
     "title": "Filter Test Dress",
     "price": 50,
     "store": "TestStore",
@@ -405,11 +418,11 @@
     "images": [
       "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/filter-dress.jpg"
     ],
-    "createdAt": "2026-03-22T19:49:50.818Z"
+    "createdAt": "2026-03-22T20:04:26.524Z"
   },
   {
-    "id": "313e5bc0-4eb2-4a32-bea5-6cda141132f0",
-    "url": "https://test-store.com/filter-shoes-1774208990824",
+    "id": "dc951fba-6e55-4795-95dd-6d7c0b097d38",
+    "url": "https://test-store.com/filter-shoes-1774209866531",
     "title": "Filter Test Heels",
     "price": 80,
     "store": "TestStore",
@@ -418,11 +431,11 @@
     "images": [
       "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/filter-shoes.jpg"
     ],
-    "createdAt": "2026-03-22T19:49:50.829Z"
+    "createdAt": "2026-03-22T20:04:26.538Z"
   },
   {
-    "id": "0f0be90c-d811-4065-8923-bd88a5447729",
-    "url": "https://test-store.com/free-1774208998573",
+    "id": "046d3f84-f5fe-43bf-bd90-ea33199f9fbb",
+    "url": "https://test-store.com/free-1774209874268",
     "title": "Free Dress Test",
     "price": null,
     "store": "TestStore",
@@ -431,11 +444,11 @@
     "images": [
       "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/free.jpg"
     ],
-    "createdAt": "2026-03-22T19:49:58.594Z"
+    "createdAt": "2026-03-22T20:04:34.288Z"
   },
   {
-    "id": "41467926-c36f-486a-831b-4c68262f7178",
-    "url": "https://us.peppermayo.com/products/test-shop-button-1774209010397",
+    "id": "b78a4f8b-eac2-46dd-8ff3-b16eb717ce9e",
+    "url": "https://us.peppermayo.com/products/test-shop-button-1774209886023",
     "title": "Shop Button Test Dress",
     "price": 45,
     "store": "Peppermayo",
@@ -444,101 +457,6 @@
     "images": [
       "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/shop-btn.jpg"
     ],
-    "createdAt": "2026-03-22T19:50:10.404Z"
-  },
-  {
-    "id": "f2ee3052-54fd-4c5b-ac4a-482c484c586c",
-    "url": "https://test-store.com/lightbox-test-1774209087014",
-    "title": "Lightbox Test Dress",
-    "price": 60,
-    "store": "TestStore",
-    "category": "dress",
-    "lengthInches": null,
-    "images": [
-      "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/test-lb1.jpg",
-      "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/test-lb2.jpg"
-    ],
-    "createdAt": "2026-03-22T19:51:27.020Z"
-  },
-  {
-    "id": "66918cdd-7b80-4358-960c-f3c6aa7ceea3",
-    "url": "https://us.peppermayo.com/products/test-shop-button-1774209100362",
-    "title": "Shop Button Test Dress",
-    "price": 45,
-    "store": "Peppermayo",
-    "category": "dress",
-    "lengthInches": null,
-    "images": [
-      "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/shop-btn.jpg"
-    ],
-    "createdAt": "2026-03-22T19:51:40.368Z"
-  },
-  {
-    "id": "5545b75e-836d-4107-9597-a463be23395b",
-    "url": "https://test-store.com/lightbox-test-1774209117602",
-    "title": "Lightbox Test Dress",
-    "price": 60,
-    "store": "TestStore",
-    "category": "dress",
-    "lengthInches": null,
-    "images": [
-      "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/test-lb1.jpg",
-      "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/test-lb2.jpg"
-    ],
-    "createdAt": "2026-03-22T19:51:57.608Z"
-  },
-  {
-    "id": "3ab69c35-4535-432e-b8f8-6d676625c10d",
-    "url": "https://us.peppermayo.com/products/test-shop-button-1774209129696",
-    "title": "Shop Button Test Dress",
-    "price": 45,
-    "store": "Peppermayo",
-    "category": "dress",
-    "lengthInches": null,
-    "images": [
-      "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/shop-btn.jpg"
-    ],
-    "createdAt": "2026-03-22T19:52:09.701Z"
-  },
-  {
-    "id": "224e95f3-6868-4ae9-9ded-f3b3d8144c80",
-    "url": "https://test-store.com/lightbox-test-1774209141538",
-    "title": "Lightbox Test Dress",
-    "price": 60,
-    "store": "TestStore",
-    "category": "dress",
-    "lengthInches": null,
-    "images": [
-      "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/test-lb1.jpg",
-      "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/test-lb2.jpg"
-    ],
-    "createdAt": "2026-03-22T19:52:21.558Z"
-  },
-  {
-    "id": "b24f084b-353c-4b89-be14-d8513b98818d",
-    "url": "https://test-store.com/lightbox-test-1774209237780",
-    "title": "Lightbox Test Dress",
-    "price": 60,
-    "store": "TestStore",
-    "category": "dress",
-    "lengthInches": null,
-    "images": [
-      "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/test-lb1.jpg",
-      "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/test-lb2.jpg"
-    ],
-    "createdAt": "2026-03-22T19:53:57.786Z"
-  },
-  {
-    "id": "5120621a-3319-4466-a124-8fc806754109",
-    "url": "https://us.peppermayo.com/products/test-shop-button-1774209251725",
-    "title": "Shop Button Test Dress",
-    "price": 45,
-    "store": "Peppermayo",
-    "category": "dress",
-    "lengthInches": null,
-    "images": [
-      "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/shop-btn.jpg"
-    ],
-    "createdAt": "2026-03-22T19:54:11.731Z"
+    "createdAt": "2026-03-22T20:04:46.030Z"
   }
 ]
