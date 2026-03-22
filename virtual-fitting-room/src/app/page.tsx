@@ -8,6 +8,9 @@ const MotionLightbox = dynamic(() => import("@/components/MotionLightbox"), {
   ssr: false,
 });
 import { useToast } from "@/components/Toast";
+import SkeletonGrid from "@/components/SkeletonGrid";
+import { EmptyOutfits, EmptyCloset } from "@/components/EmptyState";
+import ProductInput from "@/components/ProductInput";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -81,51 +84,6 @@ const tabContentVariants = {
   center: { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" as const } },
   exit: { opacity: 0, y: -8, transition: { duration: 0.15, ease: "easeIn" as const } },
 };
-
-/* --- Skeleton components --- */
-function SkeletonCard() {
-  return (
-    <div className="skeleton-card">
-      <div className="skeleton-image" />
-      <div className="p-3 flex flex-col gap-2.5">
-        <div className="skeleton-text skeleton-text-long" />
-        <div className="skeleton-text skeleton-text-short" />
-      </div>
-    </div>
-  );
-}
-
-function SkeletonGrid({ count, cols }: { count: number; cols: string }) {
-  return (
-    <div className={`grid ${cols} gap-3 sm:gap-4`}>
-      {Array.from({ length: count }).map((_, i) => (
-        <SkeletonCard key={i} />
-      ))}
-    </div>
-  );
-}
-
-/* --- Empty state icons (inline SVG, no emoji) --- */
-function HangerIcon() {
-  return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
-      <path d="M24 8a4 4 0 0 1 4 4c0 2-2 3-4 4" />
-      <path d="M8 32l16-16 16 16" />
-      <path d="M8 32h32" />
-      <circle cx="24" cy="8" r="2" />
-    </svg>
-  );
-}
-
-function SparkleIcon() {
-  return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
-      <path d="M24 4v8M24 36v8M4 24h8M36 24h8" />
-      <path d="M10 10l6 6M32 32l6 6M10 38l6-6M32 16l6-6" />
-      <circle cx="24" cy="24" r="4" />
-    </svg>
-  );
-}
 
 export default function Home() {
   const { toast } = useToast();
@@ -435,34 +393,13 @@ export default function Home() {
         style={{ y: heroY, opacity: heroOpacity }}
         className="px-5 pt-8 pb-6 sm:pt-10 sm:pb-8 max-w-xl mx-auto"
       >
-        <form onSubmit={handleSubmit} className="relative">
-          <input
-            ref={inputRef}
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="Paste a product link..."
-            className="w-full pl-5 pr-28 py-4"
-            style={{ borderRadius: "var(--radius-lg)", background: "var(--bg-surface)", border: "1px solid var(--border-default)", color: "var(--text-primary)", fontSize: "var(--text-sm)", transition: "var(--transition-normal)" }}
-          />
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            type="submit"
-            disabled={loading || !url.trim()}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 px-5 py-2.5 disabled:opacity-30"
-            style={{ borderRadius: "var(--radius-md)", background: loading ? "var(--accent-muted)" : "var(--accent)", color: "var(--bg-base)", fontSize: "var(--text-xs)", fontWeight: "var(--weight-medium)", letterSpacing: "var(--tracking-wide)", transition: "var(--transition-fast)" }}
-          >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full animate-spin" style={{ border: "2px solid rgba(10,10,9,0.2)", borderTopColor: "var(--bg-base)" }} />
-                Adding
-              </span>
-            ) : (
-              "Add"
-            )}
-          </motion.button>
-        </form>
+        <ProductInput
+          ref={inputRef}
+          url={url}
+          loading={loading}
+          onUrlChange={setUrl}
+          onSubmit={handleSubmit}
+        />
       </motion.header>
 
       {/* Tabs */}
@@ -623,31 +560,7 @@ export default function Home() {
                 </motion.div>
 
                 {outfits.length === 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-center py-20 px-6"
-                  >
-                    <div className="flex justify-center mb-5">
-                      <SparkleIcon />
-                    </div>
-                    <p className="mb-2" style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg)", color: "var(--text-secondary)" }}>
-                      Style starts here
-                    </p>
-                    <p className="mb-6" style={{ fontSize: "var(--text-sm)", color: "var(--text-tertiary)", lineHeight: "var(--leading-relaxed)", maxWidth: "280px", margin: "0 auto" }}>
-                      Combine a dress, shoes, tights, bag, and accessories into one complete look
-                    </p>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleCreateOutfit}
-                      className="px-6 py-2.5"
-                      style={{ borderRadius: "var(--radius-md)", background: "var(--accent)", color: "var(--bg-base)", fontSize: "var(--text-xs)", fontWeight: "var(--weight-medium)", letterSpacing: "var(--tracking-wider)" }}
-                    >
-                      Create your first outfit
-                    </motion.button>
-                  </motion.div>
+                  <EmptyOutfits onCreateOutfit={handleCreateOutfit} />
                 )}
               </>
             )}
@@ -838,29 +751,7 @@ export default function Home() {
                 )}
 
                 {filteredProducts.length === 0 && !loading && (
-                  <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="text-center py-20 px-6">
-                    <div className="flex justify-center mb-5">
-                      <HangerIcon />
-                    </div>
-                    <p className="mb-2" style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg)", color: "var(--text-secondary)" }}>
-                      {category === "all" ? "Your closet awaits" : `No ${category === "bag" ? "bags" : category} yet`}
-                    </p>
-                    <p className="mb-6" style={{ fontSize: "var(--text-sm)", color: "var(--text-tertiary)", lineHeight: "var(--leading-relaxed)", maxWidth: "260px", margin: "0 auto" }}>
-                      {category === "all"
-                        ? "Find something you love and paste the link above"
-                        : `Browse your favorite stores and add a ${category === "bag" ? "bag" : category}`
-                      }
-                    </p>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => inputRef.current?.focus()}
-                      className="px-6 py-2.5"
-                      style={{ borderRadius: "var(--radius-md)", border: "1px solid var(--border-default)", background: "transparent", color: "var(--text-secondary)", fontSize: "var(--text-xs)", fontWeight: "var(--weight-medium)", letterSpacing: "var(--tracking-wider)", transition: "var(--transition-fast)" }}
-                    >
-                      Add your first piece
-                    </motion.button>
-                  </motion.div>
+                  <EmptyCloset category={category} onFocusInput={() => inputRef.current?.focus()} />
                 )}
               </>
             )}

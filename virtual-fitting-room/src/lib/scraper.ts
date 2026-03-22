@@ -85,6 +85,7 @@ export async function scrapeShopifyProduct(
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
       },
+      signal: AbortSignal.timeout(10_000),
     });
 
     if (!resp.ok) return null;
@@ -120,6 +121,7 @@ export async function scrapeGenericProduct(
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
       },
+      signal: AbortSignal.timeout(10_000),
     });
     const html = await resp.text();
 
