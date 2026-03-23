@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 const BLUR_PLACEHOLDER =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iIzFFMUQxQSIvPjwvc3ZnPg==";
@@ -37,8 +38,14 @@ export default function ProductCard({
 
   return (
     <div
+      data-testid="product-card"
       className="overflow-hidden card-hover group"
-      style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-lg)" }}
+      style={{
+        background: "var(--bg-card)",
+        border: "1px solid var(--border-default)",
+        borderRadius: "var(--radius-lg)",
+        boxShadow: "var(--shadow-card)",
+      }}
     >
       <div
         className="relative aspect-[2/3] overflow-hidden cursor-pointer card-gradient"
@@ -59,15 +66,15 @@ export default function ProductCard({
         )}
         {hasGenerated && (
           <span
-            className="absolute top-2.5 left-2.5 px-2 py-0.5 z-10"
+            className="absolute top-3 left-3 px-2.5 py-1 z-10"
             style={{
-              fontSize: "var(--text-caption, 10px)",
-              fontWeight: "var(--weight-semibold, 600)",
+              fontSize: "var(--text-caption)",
+              fontWeight: "var(--weight-semibold)",
               borderRadius: "var(--radius-sm)",
               background: "var(--accent-subtle)",
               color: "var(--accent)",
               border: "1px solid var(--accent-border)",
-              letterSpacing: "var(--tracking-wider, 0.06em)",
+              letterSpacing: "var(--tracking-wider)",
             }}
           >
             Your fit
@@ -75,15 +82,15 @@ export default function ProductCard({
         )}
         {!hasGenerated && (
           <span
-            className="absolute top-2.5 left-2.5 px-2 py-0.5 z-10"
+            className="absolute top-3 left-3 px-2.5 py-1 z-10"
             style={{
-              fontSize: "var(--text-caption, 10px)",
-              fontWeight: "var(--weight-semibold, 600)",
+              fontSize: "var(--text-caption)",
+              fontWeight: "var(--weight-semibold)",
               borderRadius: "var(--radius-sm)",
-              background: "var(--overlay-light)",
+              background: "rgba(0,0,0,0.5)",
               color: "var(--text-primary)",
-              backdropFilter: "blur(4px)",
-              letterSpacing: "var(--tracking-wider, 0.06em)",
+              backdropFilter: "blur(8px)",
+              letterSpacing: "var(--tracking-wider)",
               textTransform: "uppercase",
             }}
           >
@@ -92,12 +99,12 @@ export default function ProductCard({
         )}
         {(images.length > 1 || (generatedImages && generatedImages.length > 1)) && (
           <span
-            className="absolute bottom-2.5 right-2.5 px-2 py-0.5 z-10"
+            className="absolute bottom-3 right-3 px-2 py-0.5 z-10"
             style={{
-              fontSize: "var(--text-caption, 10px)",
-              fontWeight: "var(--weight-medium, 500)",
-              background: "var(--overlay-medium)",
-              backdropFilter: "blur(4px)",
+              fontSize: "var(--text-caption)",
+              fontWeight: "var(--weight-medium)",
+              background: "rgba(0,0,0,0.5)",
+              backdropFilter: "blur(8px)",
               color: "var(--text-primary)",
               borderRadius: "var(--radius-sm)",
             }}
@@ -105,58 +112,65 @@ export default function ProductCard({
             {hasGenerated ? generatedImages.length : images.length} photos
           </span>
         )}
-        {isGenerating && (
-          <div
-            className="absolute inset-0 flex flex-col items-center justify-center gap-2"
-            style={{ background: "var(--overlay-heavy)", backdropFilter: "blur(8px)" }}
-          >
-            <div
-              className="w-5 h-5 rounded-full animate-spin"
-              style={{ border: "2px solid var(--accent-muted)", borderTopColor: "var(--accent)" }}
-            />
-            <span style={{ fontSize: "var(--text-xs, 11px)", color: "var(--text-secondary)" }}>
-              Creating your look...
-            </span>
-          </div>
-        )}
+        <AnimatePresence>
+          {isGenerating && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 flex flex-col items-center justify-center gap-3"
+              style={{ background: "var(--overlay-heavy)", backdropFilter: "blur(8px)" }}
+            >
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+                className="w-6 h-6 rounded-full"
+                style={{ border: "2px solid var(--accent-muted)", borderTopColor: "var(--accent)" }}
+              />
+              <span style={{ fontSize: "var(--text-xs)", color: "var(--text-secondary)", letterSpacing: "var(--tracking-wide)" }}>
+                Creating your look...
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
       <div className="p-3.5">
-        <p className="mb-0.5" style={{ fontSize: "var(--text-caption, 10px)", color: "var(--text-tertiary)", letterSpacing: "var(--tracking-wider, 0.06em)", textTransform: "uppercase" }}>
+        <p className="mb-1" style={{ fontSize: "var(--text-caption)", color: "var(--text-tertiary)", letterSpacing: "var(--tracking-wider)", textTransform: "uppercase" }}>
           {store}
         </p>
         <h3
           className="line-clamp-2 mb-2"
-          style={{ fontSize: "var(--text-sm, 13px)", fontWeight: "var(--weight-medium, 500)", lineHeight: "var(--leading-snug, 1.3)", color: "var(--text-primary)" }}
+          style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", lineHeight: "var(--leading-snug)", color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis" }}
         >
           {title}
         </h3>
         <div className="flex items-center justify-between">
           {price != null && (
-            <span style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-base, 15px)", color: "var(--text-primary)" }}>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-base)", color: "var(--text-primary)" }}>
               {formatPrice(price)}
             </span>
           )}
           {!hasGenerated && !isGenerating && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onGenerate();
-              }}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              data-testid="tryon-button"
+              onClick={(e) => { e.stopPropagation(); onGenerate(); }}
               className="px-3 py-1.5"
               style={{
-                fontSize: "var(--text-caption, 10px)",
-                fontWeight: "var(--weight-medium, 500)",
+                fontSize: "var(--text-caption)",
+                fontWeight: "var(--weight-semibold)",
                 background: "var(--accent)",
                 color: "var(--bg-base)",
                 borderRadius: "var(--radius-md)",
-                letterSpacing: "var(--tracking-wider, 0.06em)",
+                letterSpacing: "var(--tracking-wider)",
                 border: "none",
                 cursor: "pointer",
                 transition: "var(--transition-fast)",
               }}
             >
               Try On
-            </button>
+            </motion.button>
           )}
         </div>
       </div>

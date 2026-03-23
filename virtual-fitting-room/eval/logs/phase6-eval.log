@@ -1,0 +1,369 @@
+
+Running 12 tests using 1 worker
+
+[SOFT FAIL] Princess Polly: scrape didn't add a product (anti-bot, invalid URL, or timeout)
+  ✓   1 [chromium] › eval-gates/phase6-real-flows.spec.ts:80:7 › Live scrape: Princess Polly (1.9s)
+[SOFT FAIL] Peppermayo: scrape didn't add a product (anti-bot, invalid URL, or timeout)
+  ✓   2 [chromium] › eval-gates/phase6-real-flows.spec.ts:80:7 › Live scrape: Peppermayo (1.9s)
+[SOFT FAIL] Oh Polly: scrape didn't add a product (anti-bot, invalid URL, or timeout)
+  ✓   3 [chromium] › eval-gates/phase6-real-flows.spec.ts:80:7 › Live scrape: Oh Polly (1.9s)
+[SOFT FAIL] House of CB: scrape didn't add a product (anti-bot, invalid URL, or timeout)
+  ✓   4 [chromium] › eval-gates/phase6-real-flows.spec.ts:80:7 › Live scrape: House of CB (1.9s)
+[SOFT FAIL] Wolford: scrape didn't add a product (anti-bot, invalid URL, or timeout)
+  ✓   5 [chromium] › eval-gates/phase6-real-flows.spec.ts:80:7 › Live scrape: Wolford (1.8s)
+  ✘   6 [chromium] › eval-gates/phase6-real-flows.spec.ts:144:5 › Try-on flow: select dress → generate → result displayed (6.8s)
+  ✘   7 [chromium] › eval-gates/phase6-real-flows.spec.ts:144:5 › Try-on flow: select dress → generate → result displayed (retry #1) (6.9s)
+  ✘   8 [chromium] › eval-gates/phase6-real-flows.spec.ts:213:5 › Outfit flow: create outfit → add items → view (1.7s)
+  ✘   9 [chromium] › eval-gates/phase6-real-flows.spec.ts:213:5 › Outfit flow: create outfit → add items → view (retry #1) (1.8s)
+  ✘  10 [chromium] › eval-gates/phase6-real-flows.spec.ts:269:5 › Error handling: invalid URL shows error, app stays interactive (5.9s)
+  ✘  11 [chromium] › eval-gates/phase6-real-flows.spec.ts:269:5 › Error handling: invalid URL shows error, app stays interactive (retry #1) (5.9s)
+  ✘  12 [chromium] › eval-gates/phase6-real-flows.spec.ts:320:5 › Dedup: adding existing product URL is rejected (1.0m)
+  ✘  13 [chromium] › eval-gates/phase6-real-flows.spec.ts:320:5 › Dedup: adding existing product URL is rejected (retry #1) (1.0m)
+[PERF] /api/products: 16ms
+[PERF] /api/settings: 4ms
+  ✓  14 [chromium] › eval-gates/phase6-real-flows.spec.ts:361:5 › API performance: products < 500ms, settings < 200ms (35ms)
+  ✘  15 [chromium] › eval-gates/phase6-real-flows.spec.ts:379:5 › UI performance: category switching is fast (1.0m)
+  ✘  16 [chromium] › eval-gates/phase6-real-flows.spec.ts:379:5 › UI performance: category switching is fast (retry #1) (1.0m)
+[PERF] Images: 0/0 loaded (100%)
+  ✓  17 [chromium] › eval-gates/phase6-real-flows.spec.ts:409:5 › Image loading: 80% of visible images load within 3s (5.8s)
+
+
+  1) [chromium] › eval-gates/phase6-real-flows.spec.ts:144:5 › Try-on flow: select dress → generate → result displayed 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('[data-testid=\'product-card\']').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('[data-testid=\'product-card\']').first()[22m
+
+
+      166 |     // Click first product card
+      167 |     const card = page.locator("[data-testid='product-card']").first();
+    > 168 |     await expect(card).toBeVisible({ timeout: 5000 });
+          |                        ^
+      169 |     await card.click();
+      170 |     await page.waitForTimeout(1000);
+      171 |
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase6-real-flows.spec.ts:168:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-Try-on-f-d5cdf-generate-→-result-displayed-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase6-real-flows-Try-on-f-d5cdf-generate-→-result-displayed-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('[data-testid=\'product-card\']').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('[data-testid=\'product-card\']').first()[22m
+
+
+      166 |     // Click first product card
+      167 |     const card = page.locator("[data-testid='product-card']").first();
+    > 168 |     await expect(card).toBeVisible({ timeout: 5000 });
+          |                        ^
+      169 |     await card.click();
+      170 |     await page.waitForTimeout(1000);
+      171 |
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase6-real-flows.spec.ts:168:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-Try-on-f-d5cdf-generate-→-result-displayed-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase6-real-flows-Try-on-f-d5cdf-generate-→-result-displayed-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-Try-on-f-d5cdf-generate-→-result-displayed-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace eval/test-results/phase6-real-flows-Try-on-f-d5cdf-generate-→-result-displayed-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › eval-gates/phase6-real-flows.spec.ts:213:5 › Outfit flow: create outfit → add items → view 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThanOrEqual[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: >= [32m2[39m
+    Received:    [31m0[39m
+
+      251 |   const images = page.locator("img");
+      252 |   const imageCount = await images.count();
+    > 253 |   expect(imageCount).toBeGreaterThanOrEqual(2);
+          |                      ^
+      254 |
+      255 |   // Verify outfit name
+      256 |   const body = await page.textContent("body");
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase6-real-flows.spec.ts:253:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-Outfit-f-8f81f-e-outfit-→-add-items-→-view-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase6-real-flows-Outfit-f-8f81f-e-outfit-→-add-items-→-view-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThanOrEqual[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: >= [32m2[39m
+    Received:    [31m0[39m
+
+      251 |   const images = page.locator("img");
+      252 |   const imageCount = await images.count();
+    > 253 |   expect(imageCount).toBeGreaterThanOrEqual(2);
+          |                      ^
+      254 |
+      255 |   // Verify outfit name
+      256 |   const body = await page.textContent("body");
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase6-real-flows.spec.ts:253:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-Outfit-f-8f81f-e-outfit-→-add-items-→-view-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase6-real-flows-Outfit-f-8f81f-e-outfit-→-add-items-→-view-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-Outfit-f-8f81f-e-outfit-→-add-items-→-view-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace eval/test-results/phase6-real-flows-Outfit-f-8f81f-e-outfit-→-add-items-→-view-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › eval-gates/phase6-real-flows.spec.ts:269:5 › Error handling: invalid URL shows error, app stays interactive 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      287 |   const toastVisible = await page.locator("[class*='toast'], [role='status'], [role='alert']").first().isVisible().catch(() => false);
+      288 |
+    > 289 |   expect(errorVisible || toastVisible).toBeTruthy();
+          |                                        ^
+      290 |
+      291 |   await page.screenshot({ path: path.join(EVAL_DIR, "error-invalid-url.png") });
+      292 |
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase6-real-flows.spec.ts:289:40
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-Error-ha-5c2a6-error-app-stays-interactive-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase6-real-flows-Error-ha-5c2a6-error-app-stays-interactive-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      287 |   const toastVisible = await page.locator("[class*='toast'], [role='status'], [role='alert']").first().isVisible().catch(() => false);
+      288 |
+    > 289 |   expect(errorVisible || toastVisible).toBeTruthy();
+          |                                        ^
+      290 |
+      291 |   await page.screenshot({ path: path.join(EVAL_DIR, "error-invalid-url.png") });
+      292 |
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase6-real-flows.spec.ts:289:40
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-Error-ha-5c2a6-error-app-stays-interactive-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase6-real-flows-Error-ha-5c2a6-error-app-stays-interactive-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-Error-ha-5c2a6-error-app-stays-interactive-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace eval/test-results/phase6-real-flows-Error-ha-5c2a6-error-app-stays-interactive-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [chromium] › eval-gates/phase6-real-flows.spec.ts:320:5 › Dedup: adding existing product URL is rejected 
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      347 |
+      348 |   const hasDedupFeedback = dedupMsg || /already|duplicate|exists/i.test(toastMsg || "");
+    > 349 |   expect(hasDedupFeedback).toBeTruthy();
+          |                            ^
+      350 |
+      351 |   // Product count should not increase
+      352 |   const countAfter = await page.locator("[data-testid='product-card']").count();
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase6-real-flows.spec.ts:349:28
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-Dedup-ad-5176e-ing-product-URL-is-rejected-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase6-real-flows-Dedup-ad-5176e-ing-product-URL-is-rejected-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      347 |
+      348 |   const hasDedupFeedback = dedupMsg || /already|duplicate|exists/i.test(toastMsg || "");
+    > 349 |   expect(hasDedupFeedback).toBeTruthy();
+          |                            ^
+      350 |
+      351 |   // Product count should not increase
+      352 |   const countAfter = await page.locator("[data-testid='product-card']").count();
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase6-real-flows.spec.ts:349:28
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-Dedup-ad-5176e-ing-product-URL-is-rejected-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase6-real-flows-Dedup-ad-5176e-ing-product-URL-is-rejected-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-Dedup-ad-5176e-ing-product-URL-is-rejected-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace eval/test-results/phase6-real-flows-Dedup-ad-5176e-ing-product-URL-is-rejected-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [chromium] › eval-gates/phase6-real-flows.spec.ts:379:5 › UI performance: category switching is fast 
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('[data-testid=\'category-all\']')[22m
+    [2m    - locator resolved to <button tabindex="0" data-category="all" data-testid="category-all" class="px-4 py-2 whitespace-nowrap flex-shrink-0">…</button>[22m
+    [2m  - attempting click action[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - element is outside of the viewport[22m
+    [2m    - retrying click action[22m
+    [2m    - waiting 20ms[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - element is outside of the viewport[22m
+    [2m    - retrying click action[22m
+    [2m      - waiting 100ms[22m
+    [2m    - waiting for element to be visible, enabled and stable[22m
+    [2m    - element is not stable[22m
+    [2m  108 × retrying click action[22m
+    [2m        - waiting 500ms[22m
+    [2m        - waiting for element to be visible, enabled and stable[22m
+    [2m        - element is visible, enabled and stable[22m
+    [2m        - scrolling into view if needed[22m
+    [2m        - done scrolling[22m
+    [2m        - element is outside of the viewport[22m
+    [2m  - retrying click action[22m
+    [2m    - waiting 500ms[22m
+
+
+      390 |
+      391 |     const start = Date.now();
+    > 392 |     await tab.click();
+          |               ^
+      393 |     // Wait for grid to update
+      394 |     await page.waitForTimeout(200);
+      395 |     const elapsed = Date.now() - start;
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase6-real-flows.spec.ts:392:15
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-UI-performance-category-switching-is-fast-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase6-real-flows-UI-performance-category-switching-is-fast-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('[data-testid=\'category-all\']')[22m
+    [2m    - locator resolved to <button tabindex="0" data-category="all" data-testid="category-all" class="px-4 py-2 whitespace-nowrap flex-shrink-0">…</button>[22m
+    [2m  - attempting click action[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - element is outside of the viewport[22m
+    [2m    - retrying click action[22m
+    [2m    - waiting 20ms[22m
+    [2m    2 × waiting for element to be visible, enabled and stable[22m
+    [2m      - element is visible, enabled and stable[22m
+    [2m      - scrolling into view if needed[22m
+    [2m      - done scrolling[22m
+    [2m      - element is outside of the viewport[22m
+    [2m    - retrying click action[22m
+    [2m      - waiting 100ms[22m
+    [2m    - waiting for element to be visible, enabled and stable[22m
+    [2m    - element is not stable[22m
+    [2m  108 × retrying click action[22m
+    [2m        - waiting 500ms[22m
+    [2m        - waiting for element to be visible, enabled and stable[22m
+    [2m        - element is visible, enabled and stable[22m
+    [2m        - scrolling into view if needed[22m
+    [2m        - done scrolling[22m
+    [2m        - element is outside of the viewport[22m
+    [2m  - retrying click action[22m
+    [2m    - waiting 500ms[22m
+
+
+      390 |
+      391 |     const start = Date.now();
+    > 392 |     await tab.click();
+          |               ^
+      393 |     // Wait for grid to update
+      394 |     await page.waitForTimeout(200);
+      395 |     const elapsed = Date.now() - start;
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase6-real-flows.spec.ts:392:15
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-UI-performance-category-switching-is-fast-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase6-real-flows-UI-performance-category-switching-is-fast-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    eval/test-results/phase6-real-flows-UI-performance-category-switching-is-fast-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace eval/test-results/phase6-real-flows-UI-performance-category-switching-is-fast-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5 failed
+    [chromium] › eval-gates/phase6-real-flows.spec.ts:144:5 › Try-on flow: select dress → generate → result displayed 
+    [chromium] › eval-gates/phase6-real-flows.spec.ts:213:5 › Outfit flow: create outfit → add items → view 
+    [chromium] › eval-gates/phase6-real-flows.spec.ts:269:5 › Error handling: invalid URL shows error, app stays interactive 
+    [chromium] › eval-gates/phase6-real-flows.spec.ts:320:5 › Dedup: adding existing product URL is rejected 
+    [chromium] › eval-gates/phase6-real-flows.spec.ts:379:5 › UI performance: category switching is fast 
+  7 passed (5.0m)

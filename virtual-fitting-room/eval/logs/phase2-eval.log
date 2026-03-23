@@ -1,0 +1,88 @@
+[WebServer] [33m[1m⚠[22m[39m turbopack.root should be absolute, using: /workspaces/ClaudeCodeProjects/virtual-fitting-room
+[WebServer] Turbopack build encountered 1 warnings:
+[WebServer] ./next.config.ts
+[WebServer] Encountered unexpected file in NFT list
+[WebServer] A file was traced that indicates that the whole project was traced unintentionally. Somewhere in the import trace below, there are:
+[WebServer] - filesystem operations (like [32mpath.join[39m, [32mpath.resolve[39m or [32mfs.readFile[39m), or
+[WebServer] - very dynamic requires (like [32mrequire('./' + foo)[39m).
+[WebServer] To resolve this, you can
+[WebServer] - remove them if possible, or
+[WebServer] - only use them in development, or
+[WebServer] - make sure they are statically scoped to some subfolder: [32mpath.join(process.cwd(), 'data', bar)[39m, or
+[WebServer] - add ignore comments: [32mpath.join(/*turbopackIgnore: true*/ process.cwd(), bar)[39m
+[WebServer] 
+[WebServer] Import trace:
+[WebServer]   App Route:
+[WebServer]     ./next.config.ts
+[WebServer]     ./src/lib/db.ts
+[WebServer]     ./src/app/api/products/route.ts
+[WebServer] 
+[WebServer] 
+[WebServer] [33m[1m⚠[22m[39m turbopack.root should be absolute, using: /workspaces/ClaudeCodeProjects/virtual-fitting-room
+
+Running 9 tests using 1 worker
+
+Stores found: peppermayo exclusive, princess polly, billini, wolford, therapy, oh polly, house of cb
+Target stores matched: 5/5
+  ✓  1 [chromium] › eval-gates/phase2-catalog.spec.ts:33:5 › products.json has products from at least 4 of 5 target stores (5ms)
+Total products: 46
+  ✓  2 [chromium] › eval-gates/phase2-catalog.spec.ts:50:5 › catalog has at least 15 total products (3ms)
+Categories: dress, shoes, bag, accessories, tights
+  ✓  3 [chromium] › eval-gates/phase2-catalog.spec.ts:55:5 › products span at least 3 categories (2ms)
+Wolford tights: 6
+  ✓  4 [chromium] › eval-gates/phase2-catalog.spec.ts:61:5 › Wolford has at least 2 tights/stockings (2ms)
+  ✓  5 [chromium] › eval-gates/phase2-catalog.spec.ts:69:5 › no duplicate product URLs (2ms)
+Constraint violations: [ [32m'Brittany Chiffon Maxi Dress - Pastel Yellow: excluded color "tan"'[39m ]
+  ✘  6 [chromium] › eval-gates/phase2-catalog.spec.ts:75:5 › dress constraints are enforced (5ms)
+Constraint violations: [ [32m'Brittany Chiffon Maxi Dress - Pastel Yellow: excluded color "tan"'[39m ]
+  ✘  7 [chromium] › eval-gates/phase2-catalog.spec.ts:75:5 › dress constraints are enforced (retry #1) (7ms)
+URL check: 10/10 passed
+  ✓  8 [chromium] › eval-gates/phase2-catalog.spec.ts:111:5 › every product URL resolves (sample of 10) (5.2s)
+  ✓  9 [chromium] › eval-gates/phase2-catalog.spec.ts:139:5 › every product has at least one image URL (2ms)
+[WebServer] [31m[1m⨯[22m[39m The requested resource isn't a valid image for /uploads/reference.jpg received [1mnull[22m
+  ✓  10 [chromium] › eval-gates/phase2-catalog.spec.ts:144:5 › products display in the app UI (1.9s)
+
+
+  1) [chromium] › eval-gates/phase2-catalog.spec.ts:75:5 › dress constraints are enforced ──────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m0[39m
+    Received: [31m1[39m
+
+      106 |     console.log("Constraint violations:", violations);
+      107 |   }
+    > 108 |   expect(violations.length).toBe(0);
+          |                             ^
+      109 | });
+      110 |
+      111 | test("every product URL resolves (sample of 10)", async ({ request }) => {
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase2-catalog.spec.ts:108:29
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m0[39m
+    Received: [31m1[39m
+
+      106 |     console.log("Constraint violations:", violations);
+      107 |   }
+    > 108 |   expect(violations.length).toBe(0);
+          |                             ^
+      109 | });
+      110 |
+      111 | test("every product URL resolves (sample of 10)", async ({ request }) => {
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase2-catalog.spec.ts:108:29
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    eval/test-results/phase2-catalog-dress-constraints-are-enforced-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace eval/test-results/phase2-catalog-dress-constraints-are-enforced-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › eval-gates/phase2-catalog.spec.ts:75:5 › dress constraints are enforced ───────────
+  8 passed (21.6s)

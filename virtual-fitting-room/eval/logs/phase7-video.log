@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 [chromium] › eval-gates/phase7-video.spec.ts:8:5 › complete happy path video recording (15.2s)
+
+  1 passed (16.4s)

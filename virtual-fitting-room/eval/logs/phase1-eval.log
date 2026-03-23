@@ -1,0 +1,89 @@
+[WebServer] [33m[1m⚠[22m[39m turbopack.root should be absolute, using: /workspaces/ClaudeCodeProjects/virtual-fitting-room
+[WebServer] Turbopack build encountered 1 warnings:
+[WebServer] ./next.config.ts
+[WebServer] Encountered unexpected file in NFT list
+[WebServer] A file was traced that indicates that the whole project was traced unintentionally. Somewhere in the import trace below, there are:
+[WebServer] - filesystem operations (like [32mpath.join[39m, [32mpath.resolve[39m or [32mfs.readFile[39m), or
+[WebServer] - very dynamic requires (like [32mrequire('./' + foo)[39m).
+[WebServer] To resolve this, you can
+[WebServer] - remove them if possible, or
+[WebServer] - only use them in development, or
+[WebServer] - make sure they are statically scoped to some subfolder: [32mpath.join(process.cwd(), 'data', bar)[39m, or
+[WebServer] - add ignore comments: [32mpath.join(/*turbopackIgnore: true*/ process.cwd(), bar)[39m
+[WebServer] 
+[WebServer] Import trace:
+[WebServer]   App Route:
+[WebServer]     ./next.config.ts
+[WebServer]     ./src/lib/db.ts
+[WebServer]     ./src/app/api/products/route.ts
+[WebServer] 
+[WebServer] 
+[WebServer] [33m[1m⚠[22m[39m turbopack.root should be absolute, using: /workspaces/ClaudeCodeProjects/virtual-fitting-room
+
+Running 7 tests using 1 worker
+
+  ✓  1 [chromium] › eval-gates/phase1-design.spec.ts:18:5 › home page loads with products or empty state — not blank/crashed (3.0s)
+  ✘  2 [chromium] › eval-gates/phase1-design.spec.ts:33:5 › category tabs are clickable and switch content (821ms)
+  ✘  3 [chromium] › eval-gates/phase1-design.spec.ts:33:5 › category tabs are clickable and switch content (retry #1) (913ms)
+  ✓  4 [chromium] › eval-gates/phase1-design.spec.ts:59:5 › product cards are visible and clickable (834ms)
+  ✓  5 [chromium] › eval-gates/phase1-design.spec.ts:87:5 › images load without broken src (800ms)
+  ✓  6 [chromium] › eval-gates/phase1-design.spec.ts:105:5 › navigation between pages works without crashes (383ms)
+  ✓  7 [chromium] › eval-gates/phase1-design.spec.ts:118:5 › page is styled — not raw unstyled HTML (755ms)
+  ✓  8 [chromium] › eval-gates/phase1-design.spec.ts:147:5 › mobile layout has no horizontal overflow (772ms)
+
+
+  1) [chromium] › eval-gates/phase1-design.spec.ts:33:5 › category tabs are clickable and switch content 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThanOrEqual[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: >= [32m3[39m
+    Received:    [31m0[39m
+
+      54 |
+      55 |   // At least 3 category tabs must be interactive
+    > 56 |   expect(tabsFound).toBeGreaterThanOrEqual(3);
+         |                     ^
+      57 | });
+      58 |
+      59 | test("product cards are visible and clickable", async ({ page }) => {
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase1-design.spec.ts:56:21
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase1-design-category-tabs-are-clickable-and-switch-content-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase1-design-category-tabs-are-clickable-and-switch-content-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThanOrEqual[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: >= [32m3[39m
+    Received:    [31m0[39m
+
+      54 |
+      55 |   // At least 3 category tabs must be interactive
+    > 56 |   expect(tabsFound).toBeGreaterThanOrEqual(3);
+         |                     ^
+      57 | });
+      58 |
+      59 | test("product cards are visible and clickable", async ({ page }) => {
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase1-design.spec.ts:56:21
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase1-design-category-tabs-are-clickable-and-switch-content-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase1-design-category-tabs-are-clickable-and-switch-content-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    eval/test-results/phase1-design-category-tabs-are-clickable-and-switch-content-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace eval/test-results/phase1-design-category-tabs-are-clickable-and-switch-content-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › eval-gates/phase1-design.spec.ts:33:5 › category tabs are clickable and switch content 
+  6 passed (32.9s)

@@ -15,13 +15,15 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isAuthed, setIsAuthed] = useState(false);
-  const [checking, setChecking] = useState(true);
+  const skipAuth = process.env.NEXT_PUBLIC_SKIP_AUTH === "true";
+  const [isAuthed, setIsAuthed] = useState(skipAuth);
+  const [checking, setChecking] = useState(!skipAuth);
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [mode, setMode] = useState<"login" | "setup">("login");
 
   useEffect(() => {
+    if (skipAuth) return;
     const stored = localStorage.getItem("mirror_pin");
     const session = sessionStorage.getItem("mirror_session");
     if (!stored) {
@@ -33,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else {
       setChecking(false);
     }
-  }, []);
+  }, [skipAuth]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

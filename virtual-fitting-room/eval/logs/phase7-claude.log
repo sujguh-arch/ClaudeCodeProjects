@@ -1,0 +1,15 @@
+All tasks complete. Here's a summary:
+
+**Task 11 - Long Product Titles**: Added `overflow: hidden; textOverflow: ellipsis` to card titles (alongside existing `line-clamp-2`). Lightbox titles now have `wordWrap: break-word; overflowWrap: break-word` for full display.
+
+**Task 12 - Missing Image Fallback**: Created `ImageWithFallback` component using `onError` handler. Falls back to a styled dark gradient placeholder with a fashion icon and store name. Applied to product grid cards and try-on thumbnails. Lightbox also handles `motion.img` errors with inline fallback.
+
+**Task 13 - Empty Category States**: Already implemented via `EmptyCloset` component with category-specific messages, hanger icon, and "Add your first piece" CTA. Renders automatically when `filteredProducts.length === 0`.
+
+**Task 14 - Back/Forward Navigation**: Tab state persisted via URL hash (`#outfits`, `#tryon`, `#settings`). Restored on mount. Lightbox pushes a history entry on open; browser back button triggers `popstate` to close it.
+
+**Task 15 - Reference Photo Management**: Already fully implemented — settings tab shows current photo, file upload with preview, saves to `public/uploads/reference_*.jpg` via `/api/settings` API.
+
+**Task 20 - Final Proof Video**: `eval-gates/phase7-video.spec.ts` written and passing. Video saved to `eval/videos/happy-path.webm`.
+
+**Eval Results**: Phase 4 — 7/8 passed (1 pre-existing failure: 3 console 500 errors from broken external image URLs, not from our changes). Phase 7 — 1/1 passed.

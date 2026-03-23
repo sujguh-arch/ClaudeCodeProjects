@@ -1,0 +1,14 @@
+Phase 4 is complete. Here's a summary of what was done:
+
+**Fixes applied:**
+1. **Dedup API** (`src/app/api/products/route.ts`) — Changed both dedup paths to return `409 Conflict` with `{ error: "Product already exists", duplicate: true }` instead of silently returning the existing product
+2. **Frontend duplicate handling** (`src/app/page.tsx`) — Added 409 response handling in `handleSubmit` to show a toast "This product is already in your closet"
+3. **Category filter counts** (`src/app/page.tsx`) — Filter chips now show counts like "Dresses (12)"
+4. **Add button accessibility** (`src/components/ProductInput.tsx`) — Removed `!url.trim()` from disabled condition so the button is always clickable (empty submit is handled by the form handler)
+5. **Unit tests** (`src/__tests__/api/products.test.ts`) — Updated dedup tests to expect 409 status
+
+**Verification results:**
+- `npm run build` — succeeds
+- `npm run test` — 90/90 tests pass
+- Phase 4 eval gate — 8/8 tests pass
+- Screenshots captured in `eval/final/` (mobile + desktop for all pages)

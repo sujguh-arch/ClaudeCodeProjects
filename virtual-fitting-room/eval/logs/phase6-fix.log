@@ -1,0 +1,3 @@
+All 12 tests pass (0 failures). The issue was that the previous run didn't have `NEXT_PUBLIC_SKIP_AUTH=true` baked into the build. The Playwright config already includes this in the `webServer.command`, so when starting from scratch (no existing server on port 3000), the build and server start correctly with auth bypassed.
+
+The app code didn't need changes — the tests pass as-is with a clean build. The `NEXT_PUBLIC_SKIP_AUTH=true npm run build` I just ran fixed the build artifact.

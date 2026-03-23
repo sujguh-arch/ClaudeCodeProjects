@@ -1,0 +1,34 @@
+[WebServer] [33m[1m⚠[22m[39m turbopack.root should be absolute, using: /workspaces/ClaudeCodeProjects/virtual-fitting-room
+[WebServer] Turbopack build encountered 1 warnings:
+[WebServer] ./next.config.ts
+[WebServer] Encountered unexpected file in NFT list
+[WebServer] A file was traced that indicates that the whole project was traced unintentionally. Somewhere in the import trace below, there are:
+[WebServer] - filesystem operations (like [32mpath.join[39m, [32mpath.resolve[39m or [32mfs.readFile[39m), or
+[WebServer] - very dynamic requires (like [32mrequire('./' + foo)[39m).
+[WebServer] To resolve this, you can
+[WebServer] - remove them if possible, or
+[WebServer] - only use them in development, or
+[WebServer] - make sure they are statically scoped to some subfolder: [32mpath.join(process.cwd(), 'data', bar)[39m, or
+[WebServer] - add ignore comments: [32mpath.join(/*turbopackIgnore: true*/ process.cwd(), bar)[39m
+[WebServer] 
+[WebServer] Import trace:
+[WebServer]   App Route:
+[WebServer]     ./next.config.ts
+[WebServer]     ./src/lib/db.ts
+[WebServer]     ./src/app/api/products/route.ts
+[WebServer] 
+[WebServer] 
+[WebServer] [33m[1m⚠[22m[39m turbopack.root should be absolute, using: /workspaces/ClaudeCodeProjects/virtual-fitting-room
+
+Running 8 tests using 1 worker
+
+  ✓  1 [chromium] › eval-gates/phase4-final.spec.ts:19:5 › User Flow: open app → browse categories → view product details (6.1s)
+  ✓  2 [chromium] › eval-gates/phase4-final.spec.ts:51:5 › User Flow: add product by URL → appears in closet (7.3s)
+  ✓  3 [chromium] › eval-gates/phase4-final.spec.ts:87:5 › User Flow: adding duplicate URL is rejected (28ms)
+  ✓  4 [chromium] › eval-gates/phase4-final.spec.ts:115:5 › User Flow: settings page loads and shows configuration (800ms)
+  ✓  5 [chromium] › eval-gates/phase4-final.spec.ts:130:5 › Visual: app has consistent dark theme (948ms)
+  ✓  6 [chromium] › eval-gates/phase4-final.spec.ts:149:5 › Visual: no console errors on page load (972ms)
+  ✓  7 [chromium] › eval-gates/phase4-final.spec.ts:169:5 › Visual: all pages have no 500 errors (421ms)
+  ✓  8 [chromium] › eval-gates/phase4-final.spec.ts:179:5 › Final: capture all pages for morning review (3.2s)
+
+  8 passed (31.9s)

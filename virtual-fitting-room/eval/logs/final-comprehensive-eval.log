@@ -1,0 +1,81 @@
+
+Running 8 tests using 1 worker
+
+  ✓  1 [chromium] › eval-gates/phase4-final.spec.ts:19:5 › User Flow: open app → browse categories → view product details (4.0s)
+  ✓  2 [chromium] › eval-gates/phase4-final.spec.ts:51:5 › User Flow: add product by URL → appears in closet (6.7s)
+  ✓  3 [chromium] › eval-gates/phase4-final.spec.ts:87:5 › User Flow: adding duplicate URL is rejected (23ms)
+  ✓  4 [chromium] › eval-gates/phase4-final.spec.ts:115:5 › User Flow: settings page loads and shows configuration (685ms)
+  ✓  5 [chromium] › eval-gates/phase4-final.spec.ts:130:5 › Visual: app has consistent dark theme (630ms)
+Console errors: [
+  [32m'Failed to load resource: the server responded with a status of 500 (Internal Server Error)'[39m,
+  [32m'Failed to load resource: the server responded with a status of 500 (Internal Server Error)'[39m,
+  [32m'Failed to load resource: the server responded with a status of 500 (Internal Server Error)'[39m,
+  [32m'Failed to load resource: the server responded with a status of 500 (Internal Server Error)'[39m
+]
+  ✘  6 [chromium] › eval-gates/phase4-final.spec.ts:149:5 › Visual: no console errors on page load (658ms)
+Console errors: [
+  [32m'Failed to load resource: the server responded with a status of 500 (Internal Server Error)'[39m,
+  [32m'Failed to load resource: the server responded with a status of 500 (Internal Server Error)'[39m,
+  [32m'Failed to load resource: the server responded with a status of 500 (Internal Server Error)'[39m,
+  [32m'Failed to load resource: the server responded with a status of 500 (Internal Server Error)'[39m
+]
+  ✘  7 [chromium] › eval-gates/phase4-final.spec.ts:149:5 › Visual: no console errors on page load (retry #1) (722ms)
+  ✓  8 [chromium] › eval-gates/phase4-final.spec.ts:169:5 › Visual: all pages have no 500 errors (217ms)
+  ✓  9 [chromium] › eval-gates/phase4-final.spec.ts:179:5 › Final: capture all pages for morning review (1.8s)
+
+
+  1) [chromium] › eval-gates/phase4-final.spec.ts:149:5 › Visual: no console errors on page load ───
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m3[39m
+    Received:   [31m4[39m
+
+      164 |     console.log("Console errors:", realErrors);
+      165 |   }
+    > 166 |   expect(realErrors.length).toBeLessThan(3);
+          |                             ^
+      167 | });
+      168 |
+      169 | test("Visual: all pages have no 500 errors", async ({ page }) => {
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase4-final.spec.ts:166:29
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase4-final-Visual-no-console-errors-on-page-load-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase4-final-Visual-no-console-errors-on-page-load-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m3[39m
+    Received:   [31m4[39m
+
+      164 |     console.log("Console errors:", realErrors);
+      165 |   }
+    > 166 |   expect(realErrors.length).toBeLessThan(3);
+          |                             ^
+      167 | });
+      168 |
+      169 | test("Visual: all pages have no 500 errors", async ({ page }) => {
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase4-final.spec.ts:166:29
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase4-final-Visual-no-console-errors-on-page-load-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase4-final-Visual-no-console-errors-on-page-load-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    eval/test-results/phase4-final-Visual-no-console-errors-on-page-load-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace eval/test-results/phase4-final-Visual-no-console-errors-on-page-load-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › eval-gates/phase4-final.spec.ts:149:5 › Visual: no console errors on page load ────
+  7 passed (19.0s)

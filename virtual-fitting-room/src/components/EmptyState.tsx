@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 function HangerIcon() {
   return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
       <path d="M24 8a4 4 0 0 1 4 4c0 2-2 3-4 4" />
       <path d="M8 32l16-16 16 16" />
       <path d="M8 32h32" />
@@ -15,7 +15,7 @@ function HangerIcon() {
 
 function SparkleIcon() {
   return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}>
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
       <path d="M24 4v8M24 36v8M4 24h8M36 24h8" />
       <path d="M10 10l6 6M32 32l6 6M10 38l6-6M32 16l6-6" />
       <circle cx="24" cy="24" r="4" />
@@ -41,11 +41,19 @@ export function EmptyOutfits({ onCreateOutfit }: { onCreateOutfit: () => void })
         Combine a dress, shoes, tights, bag, and accessories into one complete look
       </p>
       <motion.button
-        whileHover={{ scale: 1.02 }}
+        whileHover={{ scale: 1.02, boxShadow: "0 4px 20px rgba(212,175,97,0.25)" }}
         whileTap={{ scale: 0.98 }}
         onClick={onCreateOutfit}
+        data-testid="add-button"
         className="px-6 py-2.5"
-        style={{ borderRadius: "var(--radius-md)", background: "var(--accent)", color: "var(--bg-base)", fontSize: "var(--text-xs)", fontWeight: "var(--weight-medium)", letterSpacing: "var(--tracking-wider)" }}
+        style={{
+          borderRadius: "var(--radius-md)",
+          background: "var(--accent)",
+          color: "var(--bg-base)",
+          fontSize: "var(--text-xs)",
+          fontWeight: "var(--weight-semibold)",
+          letterSpacing: "var(--tracking-wider)",
+        }}
       >
         Create your first outfit
       </motion.button>
@@ -78,8 +86,18 @@ export function EmptyCloset({
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={onFocusInput}
+        data-testid="add-button"
         className="px-6 py-2.5"
-        style={{ borderRadius: "var(--radius-md)", border: "1px solid var(--border-default)", background: "transparent", color: "var(--text-secondary)", fontSize: "var(--text-xs)", fontWeight: "var(--weight-medium)", letterSpacing: "var(--tracking-wider)", transition: "var(--transition-fast)" }}
+        style={{
+          borderRadius: "var(--radius-md)",
+          border: "1px solid var(--border-default)",
+          background: "transparent",
+          color: "var(--text-secondary)",
+          fontSize: "var(--text-xs)",
+          fontWeight: "var(--weight-semibold)",
+          letterSpacing: "var(--tracking-wider)",
+          transition: "var(--transition-fast)",
+        }}
       >
         Add your first piece
       </motion.button>

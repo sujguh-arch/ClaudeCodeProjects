@@ -20,7 +20,10 @@ export async function POST(req: NextRequest) {
     // Dedup check
     const existing = getProducts();
     if (body.url && existing.some((p) => p.url === body.url)) {
-      return NextResponse.json(existing.find((p) => p.url === body.url));
+      return NextResponse.json(
+        { error: "Product already exists", duplicate: true },
+        { status: 409 }
+      );
     }
 
     const product: Product = {
@@ -42,7 +45,12 @@ export async function POST(req: NextRequest) {
     // Dedup check
     const existing = getProducts();
     const dupe = existing.find((p) => p.url === body.url);
-    if (dupe) return NextResponse.json(dupe);
+    if (dupe) {
+      return NextResponse.json(
+        { error: "Product already exists", duplicate: true },
+        { status: 409 }
+      );
+    }
 
     const scraped = await scrapeGenericProduct(body.url);
     if (!scraped) {

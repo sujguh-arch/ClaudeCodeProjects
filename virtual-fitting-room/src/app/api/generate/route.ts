@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { productId } = await req.json();
+  const { productId, outfitItems } = await req.json();
   const product = getProduct(productId);
 
   if (!product) {
@@ -49,9 +49,10 @@ export async function POST(req: NextRequest) {
   try {
     const generated = await generateRendering(
       productId,
-      firstImage,
+      product.images,
       product.category,
-      renderingId
+      renderingId,
+      outfitItems
     );
 
     // Fire-and-forget: generate remaining images in background
@@ -89,7 +90,7 @@ function generateRemainingInBackground(
     for (let i = 0; i < images.length; i += BATCH_SIZE) {
       const batch = images.slice(i, i + BATCH_SIZE);
       await Promise.allSettled(
-        batch.map((image) => generateRendering(productId, image, category, randomUUID()))
+        batch.map((image) => generateRendering(productId, [image], category, randomUUID()))
       );
     }
   })().catch(() => {

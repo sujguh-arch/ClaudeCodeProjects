@@ -31,7 +31,12 @@ export default function MotionLightbox({
   const [direction, setDirection] = useState(0);
   const [sheetY, setSheetY] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const constraintsRef = useRef<HTMLDivElement>(null);
+
+  function handleImageError(index: number) {
+    setFailedImages((prev) => new Set([...prev, index]));
+  }
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);
@@ -42,14 +47,8 @@ export default function MotionLightbox({
 
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") {
-        setDirection(1);
-        onNext();
-      }
-      if (e.key === "ArrowLeft") {
-        setDirection(-1);
-        onPrev();
-      }
+      if (e.key === "ArrowRight") { setDirection(1); onNext(); }
+      if (e.key === "ArrowLeft") { setDirection(-1); onPrev(); }
       if (e.key === "Escape") onClose();
     },
     [onNext, onPrev, onClose]
@@ -64,15 +63,8 @@ export default function MotionLightbox({
     };
   }, [handleKey]);
 
-  function goNext() {
-    setDirection(1);
-    onNext();
-  }
-
-  function goPrev() {
-    setDirection(-1);
-    onPrev();
-  }
+  function goNext() { setDirection(1); onNext(); }
+  function goPrev() { setDirection(-1); onPrev(); }
 
   function handleSwipe(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
     const swipeThreshold = 40;
@@ -88,36 +80,28 @@ export default function MotionLightbox({
   }
 
   function handleSheetDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
-    if (info.offset.y > 100 || info.velocity.y > 400) {
-      onClose();
-    }
+    if (info.offset.y > 100 || info.velocity.y > 400) onClose();
     setSheetY(0);
   }
 
   const slideVariants = {
-    enter: (dir: number) => ({
-      x: dir > 0 ? 100 : -100,
-      opacity: 0,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-    },
-    exit: (dir: number) => ({
-      x: dir < 0 ? 100 : -100,
-      opacity: 0,
-    }),
+    enter: (dir: number) => ({ x: dir > 0 ? 100 : -100, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir < 0 ? 100 : -100, opacity: 0 }),
   };
 
+  const formatPrice = (p: number) => p % 1 === 0 ? `$${p}` : `$${p.toFixed(2)}`;
+
   if (isMobile) {
-    // Mobile: bottom sheet
     return (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50"
-        style={{ background: "var(--overlay-heavy)", backdropFilter: "blur(4px)" }}
+        role="dialog"
+        data-testid="lightbox"
+        style={{ background: "var(--overlay-heavy)", backdropFilter: "blur(8px)" }}
         onClick={(e) => e.target === e.currentTarget && onClose()}
       >
         <motion.div
@@ -130,24 +114,39 @@ export default function MotionLightbox({
           dragElastic={0.2}
           onDrag={handleSheetDrag}
           onDragEnd={handleSheetDragEnd}
-          className="absolute bottom-0 left-0 right-0 rounded-t-[28px] overflow-hidden"
+          className="absolute bottom-0 left-0 right-0 overflow-hidden"
           style={{
             background: "var(--bg-surface)",
+            borderRadius: "var(--radius-sheet) var(--radius-sheet) 0 0",
             maxHeight: "95vh",
             paddingBottom: "env(safe-area-inset-bottom, 0px)",
+            boxShadow: "var(--shadow-modal)",
           }}
         >
-          {/* Drag handle */}
           <div className="flex justify-center pt-3 pb-2">
-            <div
-              className="w-10 h-1 rounded-full"
-              style={{ background: "var(--border-default)" }}
-            />
+            <div className="w-10 h-1 rounded-full" style={{ background: "var(--border-default)" }} />
           </div>
 
-          {/* Image area */}
           <div className="relative aspect-[3/4] overflow-hidden" ref={constraintsRef}>
             <AnimatePresence initial={false} custom={direction} mode="popLayout">
+              {failedImages.has(currentIndex) ? (
+                <motion.div
+                  key={`fallback-${currentIndex}`}
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="absolute inset-0 flex flex-col items-center justify-center gap-2"
+                  style={{ background: "linear-gradient(135deg, #1C1C1C 0%, #2A2A2A 50%, #1C1C1C 100%)" }}
+                >
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                  </svg>
+                  <span style={{ fontSize: "var(--text-caption)", color: "var(--text-tertiary)", letterSpacing: "var(--tracking-wider)", textTransform: "uppercase", opacity: 0.6 }}>{store}</span>
+                </motion.div>
+              ) : (
               <motion.img
                 key={currentIndex}
                 custom={direction}
@@ -163,23 +162,20 @@ export default function MotionLightbox({
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.5}
                 onDragEnd={handleSwipe}
+                onError={() => handleImageError(currentIndex)}
               />
+              )}
             </AnimatePresence>
 
-            {/* Dots */}
             {images.length > 1 && (
               <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
                 {images.map((_, i) => (
                   <button
                     key={i}
-                    onClick={() => {
-                      setDirection(i > currentIndex ? 1 : -1);
-                      onGoTo(i);
-                    }}
-                    className="w-1.5 h-1.5 rounded-full transition-all duration-300"
+                    onClick={() => { setDirection(i > currentIndex ? 1 : -1); onGoTo(i); }}
+                    className="h-1.5 rounded-full transition-all duration-300"
                     style={{
-                      background:
-                        i === currentIndex ? "var(--accent)" : "rgba(255,255,255,0.4)",
+                      background: i === currentIndex ? "var(--accent)" : "rgba(255,255,255,0.4)",
                       width: i === currentIndex ? "16px" : "6px",
                     }}
                   />
@@ -188,40 +184,38 @@ export default function MotionLightbox({
             )}
           </div>
 
-          {/* Info */}
           <div className="px-5 pt-4 pb-2">
-            <p className="mb-1" style={{ fontSize: "var(--text-caption, 10px)", color: "var(--text-tertiary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            <p className="mb-1" style={{ fontSize: "var(--text-caption)", color: "var(--text-tertiary)", letterSpacing: "var(--tracking-wider)", textTransform: "uppercase" }}>
               {store}
             </p>
-            <h2
-              className="font-medium mb-1.5"
-              style={{ fontSize: "var(--text-sm, 13px)", color: "var(--text-primary)", lineHeight: "var(--leading-snug, 1.3)" }}
-            >
+            <h2 className="font-medium mb-1.5" style={{ fontSize: "var(--text-sm)", color: "var(--text-primary)", lineHeight: "var(--leading-snug)", wordWrap: "break-word", overflowWrap: "break-word" }}>
               {title}
             </h2>
             {price && (
-              <p
-                className="mb-3"
-                style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg, 20px)", color: "var(--text-primary)" }}
-              >
-                {price % 1 === 0 ? `$${price}` : `$${price.toFixed(2)}`}
+              <p className="mb-3" style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg)", color: "var(--text-primary)" }}>
+                {formatPrice(price)}
               </p>
             )}
           </div>
 
-          {/* CTA */}
-          <div
-            className="px-5 pb-4"
-            style={{ paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))" }}
-          >
+          <div className="px-5 pb-4" style={{ paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))" }}>
             <motion.a
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="block w-full py-3.5 rounded-[var(--radius-md)] text-sm font-semibold tracking-wider uppercase text-center"
-              style={{ background: "var(--accent)", color: "var(--bg-base)" }}
+              className="block w-full py-3.5 text-center"
+              style={{
+                borderRadius: "var(--radius-md)",
+                background: "var(--accent)",
+                color: "var(--bg-base)",
+                fontSize: "var(--text-sm)",
+                fontWeight: "var(--weight-semibold)",
+                letterSpacing: "var(--tracking-wider)",
+                textTransform: "uppercase",
+                textDecoration: "none",
+              }}
             >
               Shop this look
             </motion.a>
@@ -239,7 +233,9 @@ export default function MotionLightbox({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
       className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "var(--bg-base)" }}
+      role="dialog"
+      data-testid="lightbox"
+      style={{ background: "rgba(10,10,10,0.95)" }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.button
@@ -247,38 +243,49 @@ export default function MotionLightbox({
         whileTap={{ scale: 0.9 }}
         onClick={onClose}
         className="absolute top-4 right-5 w-10 h-10 flex items-center justify-center text-xl z-10 rounded-full"
-        style={{
-          color: "var(--text-tertiary)",
-          background: "var(--bg-elevated)",
-        }}
+        style={{ color: "var(--text-tertiary)", background: "var(--bg-elevated)", border: "1px solid var(--border-default)" }}
       >
         ✕
       </motion.button>
 
       <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
+        initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
         className="flex w-full max-w-[1100px] max-h-[92vh] px-4 gap-6"
       >
-        {/* Main image */}
         <div className="flex-1 flex items-center justify-center relative">
           <motion.button
             whileHover={{ scale: 1.2 }}
             whileTap={{ scale: 0.9 }}
             onClick={goPrev}
             className="absolute left-2 text-3xl select-none p-3 rounded-full z-10"
-            style={{
-              color: "var(--text-tertiary)",
-              background: "var(--bg-elevated)",
-            }}
+            style={{ color: "var(--text-tertiary)", background: "var(--bg-elevated)", border: "1px solid var(--border-default)" }}
           >
             ‹
           </motion.button>
 
           <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
             <AnimatePresence initial={false} custom={direction} mode="popLayout">
+              {failedImages.has(currentIndex) ? (
+                <motion.div
+                  key={`fallback-${currentIndex}`}
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="flex flex-col items-center justify-center gap-3 w-80 h-96"
+                  style={{ background: "linear-gradient(135deg, #1C1C1C 0%, #2A2A2A 50%, #1C1C1C 100%)", borderRadius: "var(--radius-lg)" }}
+                >
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                  </svg>
+                  <span style={{ fontSize: "var(--text-caption)", color: "var(--text-tertiary)", letterSpacing: "var(--tracking-wider)", textTransform: "uppercase", opacity: 0.6 }}>{store}</span>
+                </motion.div>
+              ) : (
               <motion.img
                 key={currentIndex}
                 custom={direction}
@@ -289,12 +296,15 @@ export default function MotionLightbox({
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                 src={images[currentIndex]}
                 alt={title}
-                className="max-w-full max-h-[88vh] object-contain rounded-[var(--radius-lg)]"
+                className="max-w-full max-h-[88vh] object-contain"
+                style={{ borderRadius: "var(--radius-lg)" }}
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.3}
                 onDragEnd={handleSwipe}
+                onError={() => handleImageError(currentIndex)}
               />
+              )}
             </AnimatePresence>
           </div>
 
@@ -303,41 +313,31 @@ export default function MotionLightbox({
             whileTap={{ scale: 0.9 }}
             onClick={goNext}
             className="absolute right-2 text-3xl select-none p-3 rounded-full z-10"
-            style={{
-              color: "var(--text-tertiary)",
-              background: "var(--bg-elevated)",
-            }}
+            style={{ color: "var(--text-tertiary)", background: "var(--bg-elevated)", border: "1px solid var(--border-default)" }}
           >
             ›
           </motion.button>
         </div>
 
-        {/* Sidebar */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.15 }}
-          className="hidden md:flex flex-col w-60 py-6"
+          className="hidden md:flex flex-col w-64 py-6"
         >
-          <p className="mb-1" style={{ fontSize: "var(--text-caption, 10px)", color: "var(--text-tertiary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          <p className="mb-1" style={{ fontSize: "var(--text-caption)", color: "var(--text-tertiary)", letterSpacing: "var(--tracking-wider)", textTransform: "uppercase" }}>
             {store}
           </p>
-          <h2
-            className="font-medium mb-1.5"
-            style={{ fontSize: "var(--text-sm, 13px)", color: "var(--text-primary)", lineHeight: "var(--leading-snug, 1.3)" }}
-          >
+          <h2 className="font-medium mb-1.5" style={{ fontSize: "var(--text-sm)", color: "var(--text-primary)", lineHeight: "var(--leading-snug)", wordWrap: "break-word", overflowWrap: "break-word" }}>
             {title}
           </h2>
           {price && (
-            <p
-              className="mb-5"
-              style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg, 20px)", color: "var(--text-primary)" }}
-            >
-              {price % 1 === 0 ? `$${price}` : `$${price.toFixed(2)}`}
+            <p className="mb-5" style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg)", color: "var(--text-primary)" }}>
+              {formatPrice(price)}
             </p>
           )}
 
-          <div className="grid grid-cols-3 gap-1.5 mb-3">
+          <div className="grid grid-cols-3 gap-2 mb-3">
             {images.map((img, i) => (
               <motion.img
                 key={i}
@@ -348,31 +348,34 @@ export default function MotionLightbox({
                 style={{
                   borderRadius: "var(--radius-sm)",
                   opacity: i === currentIndex ? 1 : 0.5,
-                  border:
-                    i === currentIndex
-                      ? "2px solid var(--accent)"
-                      : "2px solid transparent",
+                  border: i === currentIndex ? "2px solid var(--accent)" : "2px solid transparent",
                 }}
-                onClick={() => {
-                  setDirection(i > currentIndex ? 1 : -1);
-                  onGoTo(i);
-                }}
+                onClick={() => { setDirection(i > currentIndex ? 1 : -1); onGoTo(i); }}
               />
             ))}
           </div>
 
-          <p className="text-xs text-center mb-4" style={{ color: "var(--text-tertiary)" }}>
+          <p className="text-center mb-4" style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)" }}>
             {currentIndex + 1} of {images.length}
           </p>
 
           <motion.a
-            whileHover={{ scale: 1.03, boxShadow: "0 4px 20px rgba(201,169,110,0.3)" }}
+            whileHover={{ scale: 1.03, boxShadow: "0 4px 24px rgba(212,175,97,0.25)" }}
             whileTap={{ scale: 0.97 }}
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-auto py-3 rounded-[var(--radius-md)] text-sm font-semibold tracking-wider uppercase text-center transition-all"
-            style={{ background: "var(--accent)", color: "var(--bg-base)" }}
+            className="mt-auto py-3.5 text-center transition-all"
+            style={{
+              borderRadius: "var(--radius-md)",
+              background: "var(--accent)",
+              color: "var(--bg-base)",
+              fontSize: "var(--text-sm)",
+              fontWeight: "var(--weight-semibold)",
+              letterSpacing: "var(--tracking-wider)",
+              textTransform: "uppercase",
+              textDecoration: "none",
+            }}
           >
             Shop this look
           </motion.a>

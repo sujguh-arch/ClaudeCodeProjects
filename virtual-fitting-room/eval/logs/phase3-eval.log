@@ -1,0 +1,34 @@
+[WebServer] [33m[1m⚠[22m[39m turbopack.root should be absolute, using: /workspaces/ClaudeCodeProjects/virtual-fitting-room
+[WebServer] Turbopack build encountered 1 warnings:
+[WebServer] ./next.config.ts
+[WebServer] Encountered unexpected file in NFT list
+[WebServer] A file was traced that indicates that the whole project was traced unintentionally. Somewhere in the import trace below, there are:
+[WebServer] - filesystem operations (like [32mpath.join[39m, [32mpath.resolve[39m or [32mfs.readFile[39m), or
+[WebServer] - very dynamic requires (like [32mrequire('./' + foo)[39m).
+[WebServer] To resolve this, you can
+[WebServer] - remove them if possible, or
+[WebServer] - only use them in development, or
+[WebServer] - make sure they are statically scoped to some subfolder: [32mpath.join(process.cwd(), 'data', bar)[39m, or
+[WebServer] - add ignore comments: [32mpath.join(/*turbopackIgnore: true*/ process.cwd(), bar)[39m
+[WebServer] 
+[WebServer] Import trace:
+[WebServer]   App Route:
+[WebServer]     ./next.config.ts
+[WebServer]     ./src/lib/db.ts
+[WebServer]     ./src/app/api/products/route.ts
+[WebServer] 
+[WebServer] 
+[WebServer] [33m[1m⚠[22m[39m turbopack.root should be absolute, using: /workspaces/ClaudeCodeProjects/virtual-fitting-room
+
+Running 6 tests using 1 worker
+
+  ✓  1 [chromium] › eval-gates/phase3-integration.spec.ts:18:5 › full browse → click product → see detail flow (2.5s)
+  ✓  2 [chromium] › eval-gates/phase3-integration.spec.ts:43:5 › try-on / generate button exists and is clickable (1.1s)
+  ✓  3 [chromium] › eval-gates/phase3-integration.spec.ts:66:5 › outfit builder page loads and shows products (829ms)
+Generated images found: 4
+All eval files: 01-browse-start.png, 02-product-detail.png, 03-tryon-button.png, 04-outfit-builder.png, generation-dress.png, generation-outfit.png, generation-tights.png
+  ✓  4 [chromium] › eval-gates/phase3-integration.spec.ts:92:5 › real generation images exist in eval/phase3 (1ms)
+  ✓  5 [chromium] › eval-gates/phase3-integration.spec.ts:110:5 › API routes respond correctly (48ms)
+  ✓  6 [chromium] › eval-gates/phase3-integration.spec.ts:127:5 › products API returns correct data shape (16ms)
+
+  6 passed (15.7s)

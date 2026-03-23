@@ -1,27 +1,32 @@
 [
   {
-    "id": "8ead1fdf-a221-4efd-bdac-a32ed20fa5e5",
-    "name": "Date Night SF",
-    "items": {},
-    "createdAt": "2026-03-21T20:15:46.360Z",
-    "updatedAt": "2026-03-21T20:15:46.360Z"
+    "id": "0793e8db-a3a8-4de2-8cc8-00751f15cabd",
+    "name": "New Outfit",
+    "items": {
+      "dress": "45bb1d2d-ab01-4e16-a491-6e3cbc12ac0f",
+      "shoes": "9e6c2bcd-b402-49cd-87bf-290367267179",
+      "tights": "99cc8853-602e-473f-83d9-14524230b3c2",
+      "bag": "238df638-6b42-4a4e-b3b1-be4287e3acce",
+      "accessories": [
+        "b4522270-8066-44b2-b0fb-0cca631a3615"
+      ]
+    },
+    "createdAt": "2026-03-23T19:22:09.150Z",
+    "updatedAt": "2026-03-23T19:49:21.312Z"
   },
   {
-    "id": "3132eddc-3f82-4230-8f29-82b7603ec68b",
-    "name": "Remove Item Test",
+    "id": "b0cc6c60-ba27-4e67-a6cc-a3a01c1c8cd9",
+    "name": "Mister Jiu's",
     "items": {
-      "dress": "6671119a-05e6-441b-a508-ceb0e6520c59"
+      "dress": "0a6094d9-8834-4586-ae95-db18ec4e7e18",
+      "shoes": "39c28ed8-08b9-4699-87eb-407e6084455c",
+      "tights": "99cc8853-602e-473f-83d9-14524230b3c2",
+      "bag": "238df638-6b42-4a4e-b3b1-be4287e3acce",
+      "accessories": [
+        "b5f5a339-b3f6-4398-8ee7-62dda9597148"
+      ]
     },
-    "createdAt": "2026-03-22T21:07:48.203Z",
-    "updatedAt": "2026-03-22T21:07:48.203Z"
-  },
-  {
-    "id": "90cf2d45-dfb7-4b24-a344-8147f1e5667c",
-    "name": "Shoes Slot Test",
-    "items": {
-      "shoes": "a7be47c1-0b72-43fc-b406-9f6c8f4c5e77"
-    },
-    "createdAt": "2026-03-22T21:07:51.332Z",
-    "updatedAt": "2026-03-22T21:07:51.332Z"
+    "createdAt": "2026-03-23T19:26:47.965Z",
+    "updatedAt": "2026-03-23T19:27:32.694Z"
   }
 ]

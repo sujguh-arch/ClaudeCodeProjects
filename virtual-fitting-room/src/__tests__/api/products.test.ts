@@ -105,9 +105,9 @@ describe("POST /api/products", () => {
         images: ["https://img.test.com/dup.jpg"],
       }) as any
     );
+    expect(res.status).toBe(409);
     const data = await res.json();
-    expect(data.id).toBe("existing-1");
-    expect(data.title).toBe("Existing Dress");
+    expect(data.duplicate).toBe(true);
   });
 
   it("scrapes product from URL", async () => {
@@ -136,8 +136,9 @@ describe("POST /api/products", () => {
     const res = await POST(
       jsonRequest("POST", { url: "https://testshop.com/products/scraped-dress" }) as any
     );
+    expect(res.status).toBe(409);
     const data = await res.json();
-    expect(data.id).toBe("existing-2");
+    expect(data.duplicate).toBe(true);
   });
 
   it("returns 400 when scraper finds no images", async () => {

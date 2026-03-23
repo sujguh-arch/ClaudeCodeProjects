@@ -1,50 +1,100 @@
 [
   {
-    "id": "9864acf6-81ad-4d88-b7b9-59774a431e5c",
-    "productId": "b9a56118-b686-49db-8222-abeb41cae03c",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/CerinaHighNeckMiniDressNavy4Peppermayo.jpg?v=1764654211",
-    "generatedImage": "/generated/9864acf6-81ad-4d88-b7b9-59774a431e5c.jpg",
+    "id": "9f620c22-e656-4453-a608-cf4aba38ac38",
+    "productId": "45bb1d2d-ab01-4e16-a491-6e3cbc12ac0f",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/15381-Black_Eirlys_9.jpg?v=1773665447",
+    "generatedImage": "/api/images/9f620c22-e656-4453-a608-cf4aba38ac38.jpg",
     "status": "done",
-    "createdAt": "2026-03-21T08:45:12.383Z"
+    "createdAt": "2026-03-23T19:23:36.890Z"
   },
   {
-    "id": "68974fbd-b195-4452-aecb-215cbdbc454f",
-    "productId": "b9a56118-b686-49db-8222-abeb41cae03c",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/CerinaHighNeckMiniDressNavy1Peppermayo.jpg?v=1764654211",
-    "generatedImage": "/generated/68974fbd-b195-4452-aecb-215cbdbc454f.jpg",
-    "status": "done",
-    "createdAt": "2026-03-21T08:45:36.815Z"
+    "id": "c7c7f520-e669-4a69-bb84-966f6068972b",
+    "productId": "45bb1d2d-ab01-4e16-a491-6e3cbc12ac0f",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/15381-Black_Eirlys_10.jpg?v=1773665447",
+    "generatedImage": "",
+    "status": "error",
+    "createdAt": "2026-03-23T19:24:19.521Z",
+    "error": "All product images were flagged as sensitive content by the AI model"
   },
   {
-    "id": "983d3de3-191f-4626-951b-a70e74bb2710",
-    "productId": "b9a56118-b686-49db-8222-abeb41cae03c",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/CerinaHighNeckMiniDressNavy2Peppermayo.jpg?v=1764654211",
-    "generatedImage": "/generated/983d3de3-191f-4626-951b-a70e74bb2710.jpg",
+    "id": "a57e1396-de04-4573-bd6f-6f9ecbad890c",
+    "productId": "45bb1d2d-ab01-4e16-a491-6e3cbc12ac0f",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/15381-Black_Eirlys_5.jpg?v=1773665447",
+    "generatedImage": "/api/images/a57e1396-de04-4573-bd6f-6f9ecbad890c.jpg",
     "status": "done",
-    "createdAt": "2026-03-21T08:46:11.737Z"
+    "createdAt": "2026-03-23T19:24:19.525Z"
   },
   {
-    "id": "1135ab4a-1270-49c9-9724-91936e5bf31f",
-    "productId": "b9a56118-b686-49db-8222-abeb41cae03c",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/CerinaHighNeckMiniDressNavy3Peppermayo.jpg?v=1764654211",
-    "generatedImage": "/generated/1135ab4a-1270-49c9-9724-91936e5bf31f.jpg",
+    "id": "76eb3f51-eb03-4e86-9e46-b06a4b8ac442",
+    "productId": "45bb1d2d-ab01-4e16-a491-6e3cbc12ac0f",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/15381-Black_Eirlys_3.jpg?v=1773665447",
+    "generatedImage": "/api/images/76eb3f51-eb03-4e86-9e46-b06a4b8ac442.jpg",
     "status": "done",
-    "createdAt": "2026-03-21T08:46:50.477Z"
+    "createdAt": "2026-03-23T19:24:19.529Z"
   },
   {
-    "id": "5d063879-09d6-437b-a464-f50fb3035a02",
-    "productId": "b9a56118-b686-49db-8222-abeb41cae03c",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/CerinaHighNeckMiniDressNavy5Peppermayo.jpg?v=1764654211",
-    "generatedImage": "/generated/5d063879-09d6-437b-a464-f50fb3035a02.jpg",
-    "status": "done",
-    "createdAt": "2026-03-21T08:47:19.868Z"
+    "id": "690ae334-9016-4161-9ba6-ac334ac242cd",
+    "productId": "45bb1d2d-ab01-4e16-a491-6e3cbc12ac0f",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/15381-Black_Eirlys_4.jpg?v=1773665447",
+    "generatedImage": "",
+    "status": "error",
+    "createdAt": "2026-03-23T19:24:57.230Z",
+    "error": "All product images were flagged as sensitive content by the AI model"
   },
   {
-    "id": "f2cda8aa-50ad-46eb-be5b-4ca9a6dadfb1",
-    "productId": "b9a56118-b686-49db-8222-abeb41cae03c",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/CerinaHighNeckMiniDressNavy6Peppermayo.jpg?v=1764654211",
-    "generatedImage": "/generated/f2cda8aa-50ad-46eb-be5b-4ca9a6dadfb1.jpg",
+    "id": "c8f15b81-125a-4b90-a58d-470dbc1fbf59",
+    "productId": "45bb1d2d-ab01-4e16-a491-6e3cbc12ac0f",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/15381-Black_Eirlys_1.jpg?v=1773665447",
+    "generatedImage": "/api/images/c8f15b81-125a-4b90-a58d-470dbc1fbf59.jpg",
     "status": "done",
-    "createdAt": "2026-03-21T08:47:41.457Z"
+    "createdAt": "2026-03-23T19:24:57.232Z"
+  },
+  {
+    "id": "0089674f-343c-4187-8f43-9a7e72bd9c56",
+    "productId": "0a6094d9-8834-4586-ae95-db18ec4e7e18",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/EternaMiniDressBlack6Peppermayo.jpg?v=1761018039",
+    "generatedImage": "/api/images/0089674f-343c-4187-8f43-9a7e72bd9c56.jpg",
+    "status": "done",
+    "createdAt": "2026-03-23T19:27:35.494Z"
+  },
+  {
+    "id": "791c42bc-0945-4142-99ce-2246346aff3e",
+    "productId": "0a6094d9-8834-4586-ae95-db18ec4e7e18",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/EternaMiniDressBlack1Peppermayo.jpg?v=1761018039",
+    "generatedImage": "/api/images/791c42bc-0945-4142-99ce-2246346aff3e.jpg",
+    "status": "done",
+    "createdAt": "2026-03-23T19:28:13.342Z"
+  },
+  {
+    "id": "02cf7603-aaaf-4220-80e9-67066bd5225a",
+    "productId": "0a6094d9-8834-4586-ae95-db18ec4e7e18",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/EternaMiniDressBlack2Peppermayo.jpg?v=1761018038",
+    "generatedImage": "/api/images/02cf7603-aaaf-4220-80e9-67066bd5225a.jpg",
+    "status": "done",
+    "createdAt": "2026-03-23T19:28:13.344Z"
+  },
+  {
+    "id": "19102717-e51f-4483-942d-233e811d7680",
+    "productId": "0a6094d9-8834-4586-ae95-db18ec4e7e18",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/EternaMiniDressBlack3Peppermayo.jpg?v=1761018039",
+    "generatedImage": "/api/images/19102717-e51f-4483-942d-233e811d7680.jpg",
+    "status": "done",
+    "createdAt": "2026-03-23T19:28:13.346Z"
+  },
+  {
+    "id": "3a00224a-8600-4c12-896a-c333b2fbfb28",
+    "productId": "0a6094d9-8834-4586-ae95-db18ec4e7e18",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/EternaMiniDressBlack4Peppermayo.jpg?v=1761018038",
+    "generatedImage": "/api/images/3a00224a-8600-4c12-896a-c333b2fbfb28.jpg",
+    "status": "done",
+    "createdAt": "2026-03-23T19:28:48.192Z"
+  },
+  {
+    "id": "22cb6c6f-e382-4c09-9cb5-f0a1d2ed8118",
+    "productId": "0a6094d9-8834-4586-ae95-db18ec4e7e18",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/EternaMiniDressBlack5Peppermayo.jpg?v=1761018038",
+    "generatedImage": "/api/images/22cb6c6f-e382-4c09-9cb5-f0a1d2ed8118.jpg",
+    "status": "done",
+    "createdAt": "2026-03-23T19:28:48.194Z"
   }
 ]

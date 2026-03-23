@@ -1,0 +1,96 @@
+[WebServer] [33m[1m⚠[22m[39m turbopack.root should be absolute, using: /workspaces/ClaudeCodeProjects/virtual-fitting-room
+[WebServer] Turbopack build encountered 1 warnings:
+[WebServer] ./next.config.ts
+[WebServer] Encountered unexpected file in NFT list
+[WebServer] A file was traced that indicates that the whole project was traced unintentionally. Somewhere in the import trace below, there are:
+[WebServer] - filesystem operations (like [32mpath.join[39m, [32mpath.resolve[39m or [32mfs.readFile[39m), or
+[WebServer] - very dynamic requires (like [32mrequire('./' + foo)[39m).
+[WebServer] To resolve this, you can
+[WebServer] - remove them if possible, or
+[WebServer] - only use them in development, or
+[WebServer] - make sure they are statically scoped to some subfolder: [32mpath.join(process.cwd(), 'data', bar)[39m, or
+[WebServer] - add ignore comments: [32mpath.join(/*turbopackIgnore: true*/ process.cwd(), bar)[39m
+[WebServer] 
+[WebServer] Import trace:
+[WebServer]   App Route:
+[WebServer]     ./next.config.ts
+[WebServer]     ./src/lib/db.ts
+[WebServer]     ./src/app/api/products/route.ts
+[WebServer] 
+[WebServer] 
+[WebServer] [33m[1m⚠[22m[39m turbopack.root should be absolute, using: /workspaces/ClaudeCodeProjects/virtual-fitting-room
+
+Running 7 tests using 1 worker
+
+  ✓  1 [chromium] › eval-gates/phase1-design.spec.ts:18:5 › home page loads with products or empty state — not blank/crashed (1.1s)
+[WebServer] [31m[1m⨯[22m[39m The requested resource isn't a valid image for /uploads/reference.jpg received [1mnull[22m
+[WebServer] [31m[1m⨯[22m[39m The requested resource isn't a valid image for /uploads/reference.jpg received [1mnull[22m
+  ✓  2 [chromium] › eval-gates/phase1-design.spec.ts:33:5 › category tabs are clickable and switch content (5.5s)
+[WebServer] [31m[1m⨯[22m[39m The requested resource isn't a valid image for /uploads/reference.jpg received [1mnull[22m
+  ✘  3 [chromium] › eval-gates/phase1-design.spec.ts:59:5 › product cards are visible and clickable (2.6s)
+[WebServer] [31m[1m⨯[22m[39m The requested resource isn't a valid image for /uploads/reference.jpg received [1mnull[22m
+  ✘  4 [chromium] › eval-gates/phase1-design.spec.ts:59:5 › product cards are visible and clickable (retry #1) (3.0s)
+[WebServer] [31m[1m⨯[22m[39m The requested resource isn't a valid image for /uploads/reference.jpg received [1mnull[22m
+  ✓  5 [chromium] › eval-gates/phase1-design.spec.ts:87:5 › images load without broken src (1.1s)
+[WebServer] [31m[1m⨯[22m[39m The requested resource isn't a valid image for /uploads/reference.jpg received [1mnull[22m
+[WebServer] [31m[1m⨯[22m[39m The requested resource isn't a valid image for /uploads/reference.jpg received [1mnull[22m
+  ✓  6 [chromium] › eval-gates/phase1-design.spec.ts:105:5 › navigation between pages works without crashes (523ms)
+[WebServer] [31m[1m⨯[22m[39m The requested resource isn't a valid image for /uploads/reference.jpg received [1mnull[22m
+  ✓  7 [chromium] › eval-gates/phase1-design.spec.ts:118:5 › page is styled — not raw unstyled HTML (958ms)
+[WebServer] [31m[1m⨯[22m[39m The requested resource isn't a valid image for /uploads/reference.jpg received [1mnull[22m
+  ✓  8 [chromium] › eval-gates/phase1-design.spec.ts:147:5 › mobile layout has no horizontal overflow (921ms)
+
+
+  1) [chromium] › eval-gates/phase1-design.spec.ts:59:5 › product cards are visible and clickable ──
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      80 |     const dialogVisible = await page.$("[role='dialog'], [class*='lightbox'], [class*='modal'], [class*='Lightbox']");
+      81 |     const urlChanged = url !== "http://localhost:3000/";
+    > 82 |     expect(dialogVisible !== null || urlChanged).toBeTruthy();
+         |                                                  ^
+      83 |   }
+      84 |   // If no cards, that's OK for phase 1 (products may not be loaded yet)
+      85 | });
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase1-design.spec.ts:82:50
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase1-design-product-cards-are-visible-and-clickable-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase1-design-product-cards-are-visible-and-clickable-chromium/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      80 |     const dialogVisible = await page.$("[role='dialog'], [class*='lightbox'], [class*='modal'], [class*='Lightbox']");
+      81 |     const urlChanged = url !== "http://localhost:3000/";
+    > 82 |     expect(dialogVisible !== null || urlChanged).toBeTruthy();
+         |                                                  ^
+      83 |   }
+      84 |   // If no cards, that's OK for phase 1 (products may not be loaded yet)
+      85 | });
+        at /workspaces/ClaudeCodeProjects/virtual-fitting-room/eval-gates/phase1-design.spec.ts:82:50
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    eval/test-results/phase1-design-product-cards-are-visible-and-clickable-chromium-retry1/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: eval/test-results/phase1-design-product-cards-are-visible-and-clickable-chromium-retry1/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    eval/test-results/phase1-design-product-cards-are-visible-and-clickable-chromium-retry1/trace.zip
+    Usage:
+
+        npx playwright show-trace eval/test-results/phase1-design-product-cards-are-visible-and-clickable-chromium-retry1/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › eval-gates/phase1-design.spec.ts:59:5 › product cards are visible and clickable ───
+  6 passed (29.3s)

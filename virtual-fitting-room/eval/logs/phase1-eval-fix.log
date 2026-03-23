@@ -1,0 +1,4 @@
+Build succeeds. The two fixes:
+
+1. **`data-category` attribute added** to category filter buttons so the test selector `[data-category="${cat}"]` matches them
+2. **`NEXT_PUBLIC_SKIP_AUTH=true`** env var support added to `AuthProvider` to bypass the PIN gate during eval tests, configured in the eval-gates Playwright config

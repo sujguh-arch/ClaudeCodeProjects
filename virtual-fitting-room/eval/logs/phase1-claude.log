@@ -1,0 +1,25 @@
+UI rebuild complete. Here's a summary of all changes:
+
+**Design Tokens (globals.css)**
+- Updated to spec: `#0A0A0A` background, `rgba(255,255,255,0.04)` card bg, `#F5F0EB` text, `#D4AF61` accent
+- New radius scale: 16px cards, 12px buttons, 24px modals
+- Added `--bg-card`, `--bg-frosted`, `--radius-full`, `--tab-bar-height`
+- Added `pulse-glow`, `reveal-slide`, `glass-card` utilities
+
+**Main Page (page.tsx) — Complete Rebuild**
+- Bottom tab bar with 4 tabs: Closet, Outfits, Try-On, Settings (with SVG icons + animated indicator pill)
+- **Closet tab**: Product URL input + pill-shaped category filter chips + product grid with cards showing store badge, favorite heart, photo count, "Try On" / "View Fit" buttons
+- **Outfits tab**: Header with "+ New Outfit" button + outfit card grid
+- **Try-On tab**: Dedicated flow — select product from grid → side-by-side before/after with reference photo → Generate button → spring-animated reveal
+- **Settings tab**: Reference photo upload + PIN change (inline, no page navigation needed)
+- All `data-testid` attributes added: `product-card`, `category-tab`, `add-button`, `lightbox`, `tryon-button`
+
+**Components Updated**
+- `MotionLightbox`: New glass-style borders, updated tokens, `data-testid="lightbox"`
+- `ProductCard`: Glass card styling, motion animations on buttons, `data-testid` attrs
+- `EmptyState`: Updated to new design tokens
+- `ProductInput`: Updated styling with `data-testid="add-button"`
+
+**Outfit & Settings Pages**: Updated to match new design system (frosted glass nav, card backgrounds, consistent spacing)
+
+**All API routes, data files, scraper, db, and generate modules untouched.**

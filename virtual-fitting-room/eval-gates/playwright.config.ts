@@ -19,7 +19,7 @@ export default defineConfig({
   ],
   // Production server — NOT dev mode
   webServer: {
-    command: "npm run build && npm start",
+    command: "NEXT_PUBLIC_SKIP_AUTH=true npm run build && NEXT_PUBLIC_SKIP_AUTH=true npm start",
     cwd: "..",
     port: 3000,
     reuseExistingServer: true,

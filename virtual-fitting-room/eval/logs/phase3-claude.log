@@ -1,0 +1,22 @@
+All 3 generations look great — high quality fashion photos with consistent face/model:
+
+1. **Dress** — Pastel yellow chiffon maxi dress, clean full-body shot
+2. **Tights** — Navy mini dress with black sheer tights and heels
+3. **Outfit** — Yellow maxi dress combined with black ankle strap heels
+
+## Phase 3 Summary
+
+**Completed all steps:**
+
+1. **Products display correctly** — 46 products from 7 stores (Peppermayo, Princess Polly, Wolford, Oh Polly, House of CB, Billini, Therapy) render in the closet grid
+2. **Category filtering works** — Dresses (18), Shoes (8), Tights (6), Bags (4), Accessories (10) all filter properly
+3. **Lightbox works** — Added `role="dialog"` to MotionLightbox for accessibility and test compatibility
+4. **Outfit builder** — Created a "Phase 3 Test Outfit" with dress + shoes, loads at `/outfit/new`
+5. **3 real Replicate generations completed** (well under $0.50 budget):
+   - `eval/phase3/generation-dress.png` — Chiffon Maxi Dress try-on
+   - `eval/phase3/generation-tights.png` — Wolford Individual 20 Tights try-on
+   - `eval/phase3/generation-outfit.png` — Dress + shoes outfit try-on
+6. **Generated images registered** in `data/renderings.json` and copied to `public/generated/` so they display in the UI
+
+**Build:** `npm run build` passes cleanly
+**Eval gate:** All 6/6 phase 3 tests pass

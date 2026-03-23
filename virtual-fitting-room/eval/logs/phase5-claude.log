@@ -1,0 +1,13 @@
+All 6 tasks complete. Here's a summary of what was done:
+
+**TASK 1: Skeleton Loading** - Outfit builder page now shows skeleton cards (shimmer-animated nav, title, and grid slots) instead of a bare spinner while data loads. Closet/outfits tabs already had `SkeletonGrid`.
+
+**TASK 2: Image Optimization** - Already complete in the codebase: all images use `next/image` with `fill`, `sizes`, `loading="lazy"`, `placeholder="blur"`, and `blurDataURL`.
+
+**TASK 3: Smooth Page Transitions** - Tab switching now slides content **directionally** (left-to-right or right-to-left based on tab index). Lightbox spring animation enhanced from `scale: 0.95` to `0.9` with softer damping for more visible spring.
+
+**TASK 4: Dark Mode Consistency** - Fixed `AddProductModal` (was `bg-white`, `text-stone-*`, light borders) to use CSS custom properties matching the dark theme. Added `background: #0A0A0A` to `<html>` element to prevent white flash on page load.
+
+**TASK 5: Bundle Size** - Verified: largest chunk is ~222KB (Next.js runtime). framer-motion is tree-shaken via named imports. No unused dependencies found. `msw` is dev-only. Clean.
+
+**TASK 6: Shop Links** - Every product card in the closet grid now has a subtle outlined "Shop" link with external-link arrow icon (`target="_blank" rel="noopener"`), using proper `<a>` semantics alongside the Try On button. Lightbox and outfit page already had shop links.

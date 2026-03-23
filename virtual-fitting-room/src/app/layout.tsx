@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="en" data-scroll-behavior="smooth" style={{ background: "#0A0A0A" }}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -41,7 +41,16 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <ClientProviders>{children}</ClientProviders>
+        <div style={{
+          maxWidth: "430px",
+          margin: "0 auto",
+          minHeight: "100vh",
+          borderLeft: "1px solid rgba(255,255,255,0.06)",
+          borderRight: "1px solid rgba(255,255,255,0.06)",
+          position: "relative",
+        }}>
+          <ClientProviders>{children}</ClientProviders>
+        </div>
       </body>
     </html>
   );

@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import ImageWithFallback from "@/components/ImageWithFallback";
 const MotionLightbox = dynamic(() => import("@/components/MotionLightbox"), {
   ssr: false,
 });
 import { useToast } from "@/components/Toast";
 import SkeletonGrid from "@/components/SkeletonGrid";
 import { EmptyOutfits, EmptyCloset } from "@/components/EmptyState";
-import ProductInput from "@/components/ProductInput";
-import Link from "next/link";
+import AddProductModal from "@/components/AddProductModal";
 import { useRouter } from "next/navigation";
 
 const BLUR_PLACEHOLDER =
@@ -52,7 +52,7 @@ interface Outfit {
   createdAt: string;
 }
 
-type Tab = "outfits" | "closet";
+type Tab = "closet" | "outfits" | "settings";
 type CategoryFilter = "all" | "dress" | "shoes" | "tights" | "bag" | "accessories";
 
 const CATEGORIES: { key: CategoryFilter; label: string }[] = [
@@ -62,6 +62,42 @@ const CATEGORIES: { key: CategoryFilter; label: string }[] = [
   { key: "tights", label: "Tights" },
   { key: "bag", label: "Bags" },
   { key: "accessories", label: "Accessories" },
+];
+
+/* --- Icons --- */
+function ClosetIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? "var(--accent)" : "var(--text-secondary)"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z" />
+      <polyline points="9 22 9 12 15 12 15 22" />
+    </svg>
+  );
+}
+
+function OutfitsIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? "var(--accent)" : "var(--text-secondary)"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="9" rx="1" />
+      <rect x="14" y="3" width="7" height="5" rx="1" />
+      <rect x="14" y="12" width="7" height="9" rx="1" />
+      <rect x="3" y="16" width="7" height="5" rx="1" />
+    </svg>
+  );
+}
+
+function SettingsIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? "var(--accent)" : "var(--text-secondary)"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  );
+}
+
+const TAB_ITEMS: { key: Tab; label: string; Icon: React.FC<{ active: boolean }> }[] = [
+  { key: "closet", label: "Closet", Icon: ClosetIcon },
+  { key: "outfits", label: "Outfits", Icon: OutfitsIcon },
+  { key: "settings", label: "Settings", Icon: SettingsIcon },
 ];
 
 /* --- Animation variants --- */
@@ -75,50 +111,54 @@ const cardVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring" as const, stiffness: 260, damping: 25 },
+    transition: { type: "spring" as const, stiffness: 300, damping: 30 },
   },
 };
 
+const TAB_ORDER: Tab[] = ["closet", "outfits", "settings"];
+
 const tabContentVariants = {
-  enter: { opacity: 0, y: 8 },
+  enter: () => ({ opacity: 0, y: 8 }),
   center: { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" as const } },
-  exit: { opacity: 0, y: -8, transition: { duration: 0.15, ease: "easeIn" as const } },
+  exit: () => ({ opacity: 0, y: -4, transition: { duration: 0.15, ease: "easeIn" as const } }),
 };
 
 export default function Home() {
   const { toast } = useToast();
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("outfits");
+  const [tab, setTabRaw] = useState<Tab>("closet");
+  const [tabDirection, setTabDirection] = useState(0);
+  const setTab = (next: Tab) => {
+    const from = TAB_ORDER.indexOf(tab);
+    const to = TAB_ORDER.indexOf(next);
+    setTabDirection(to > from ? 1 : -1);
+    setTabRaw(next);
+    if (typeof window !== "undefined") {
+      const hash = next === "closet" ? "" : `#${next}`;
+      window.history.replaceState(null, "", hash || window.location.pathname);
+    }
+  };
   const [products, setProducts] = useState<Product[]>([]);
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [renderings, setRenderings] = useState<Rendering[]>([]);
   const [generating, setGenerating] = useState<Set<string>>(new Set());
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [lightbox, setLightbox] = useState<{
     product: Product;
     images: string[];
     index: number;
   } | null>(null);
-  const [url, setUrl] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("all");
-  const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [refPhoto, setRefPhoto] = useState<string | null>(null);
   const [showOnboard, setShowOnboard] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const heroRef = useRef<HTMLDivElement>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  const { scrollY } = useScroll();
-  const heroY = useTransform(scrollY, [0, 300], [0, -40]);
-  const heroOpacity = useTransform(scrollY, [0, 200], [1, 0.6]);
+  // Settings state
+  const [settingsUploading, setSettingsUploading] = useState(false);
 
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handler, { passive: true });
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
+  // Serve uploaded reference photos through API route to avoid 404 in production
+  const refPhotoSrc = refPhoto?.startsWith("/uploads/") ? "/api/reference-photo" : refPhoto;
 
   const load = useCallback(async () => {
     const [pRes, rRes, sRes, oRes] = await Promise.all([
@@ -136,20 +176,17 @@ export default function Home() {
     setInitialLoading(false);
   }, []);
 
+  // Restore tab from URL hash on mount
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "") as Tab;
+    if (TAB_ORDER.includes(hash)) {
+      setTabRaw(hash);
+    }
+  }, []);
+
   useEffect(() => {
     load();
-    const saved = localStorage.getItem("mirror_favs");
-    if (saved) setFavorites(new Set(JSON.parse(saved)));
   }, [load]);
-
-  function toggleFav(id: string) {
-    setFavorites((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      localStorage.setItem("mirror_favs", JSON.stringify([...next]));
-      return next;
-    });
-  }
 
   function getGenerated(pid: string): string[] {
     return renderings
@@ -157,41 +194,6 @@ export default function Home() {
       .map((r) => r.generatedImage);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!url.trim()) return;
-    setLoading(true);
-    try {
-      const resp = await fetch("/api/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      });
-      if (!resp.ok) throw new Error("Couldn't find that product");
-      const product = await resp.json();
-      setUrl("");
-      await load();
-      toast("Product added to closet!", "success");
-
-      setGenerating((prev) => new Set([...prev, product.id]));
-      await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: product.id }),
-      });
-      await load();
-      setGenerating((prev) => {
-        const next = new Set(prev);
-        next.delete(product.id);
-        return next;
-      });
-      toast("Try-on images ready!", "success");
-    } catch (err) {
-      toast(err instanceof Error ? err.message : "Something went wrong", "error");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleCreateOutfit() {
     try {
@@ -250,6 +252,42 @@ export default function Home() {
   function openLightbox(product: Product) {
     const gen = getGenerated(product.id);
     setLightbox({ product, images: gen.length > 0 ? gen : product.images, index: 0 });
+    window.history.pushState({ lightbox: true }, "");
+  }
+
+  function closeLightbox() {
+    setLightbox(null);
+  }
+
+  // Close lightbox on browser back
+  useEffect(() => {
+    function handlePopState() {
+      if (lightbox) {
+        setLightbox(null);
+      }
+    }
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [lightbox]);
+
+
+  // Settings handlers
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSettingsUploading(true);
+    const formData = new FormData();
+    formData.append("referencePhoto", file);
+    try {
+      await fetch("/api/settings", { method: "POST", body: formData });
+      const s = await (await fetch("/api/settings")).json();
+      setRefPhoto(s.referencePhoto);
+      toast("Reference photo updated", "success");
+    } catch {
+      toast("Failed to upload photo", "error");
+    } finally {
+      setSettingsUploading(false);
+    }
   }
 
   function getOutfitPreviewImages(outfit: Outfit): string[] {
@@ -282,54 +320,62 @@ export default function Home() {
     : products.filter((p) => p.category === category);
 
   return (
-    <main
-      className="min-h-screen"
-      style={{ paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))" }}
-    >
-      {/* Nav */}
-      <motion.nav
+    <main className="min-h-screen relative">
+      {/* Top header bar */}
+      <header
         className="sticky top-0 z-40 px-5 py-3 flex items-center justify-between"
         style={{
-          background: scrolled ? "var(--bg-frosted)" : "transparent",
-          backdropFilter: scrolled ? "blur(16px) saturate(1.4)" : "none",
-          WebkitBackdropFilter: scrolled ? "blur(16px) saturate(1.4)" : "none",
-          borderBottom: scrolled ? "1px solid var(--border-subtle)" : "1px solid transparent",
-          transition: "var(--transition-normal)",
+          background: "var(--bg-frosted)",
+          backdropFilter: "blur(20px) saturate(1.4)",
+          WebkitBackdropFilter: "blur(20px) saturate(1.4)",
+          borderBottom: "1px solid var(--border-subtle)",
         }}
       >
         <div className="flex items-center gap-3">
           {refPhoto && (
-            <Image
-              src={refPhoto}
-              alt=""
-              width={28}
-              height={28}
-              className="rounded-full object-cover"
-              style={{ border: "1px solid var(--accent-muted)", width: 28, height: 28 }}
-            />
+            <div className="relative w-8 h-8 rounded-full overflow-hidden flex-shrink-0" style={{ border: "1.5px solid var(--accent-muted)" }}>
+              <Image
+                src={refPhotoSrc!}
+                alt=""
+                width={32}
+                height={32}
+                className="object-cover w-full h-full"
+              />
+            </div>
           )}
           <h1
-            className="uppercase"
-            style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-lg)", color: "var(--text-primary)", letterSpacing: "var(--tracking-widest)" }}
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "var(--text-lg)",
+              color: "var(--text-primary)",
+              letterSpacing: "var(--tracking-widest)",
+              textTransform: "uppercase",
+            }}
           >
             mirror
           </h1>
         </div>
-        <Link href="/settings" aria-label="Settings">
-          <motion.button
-            whileHover={{ scale: 1.05, rotate: 15 }}
-            whileTap={{ scale: 0.95 }}
-            aria-label="Settings"
-            className="w-9 h-9 flex items-center justify-center rounded-full"
-            style={{ background: "var(--bg-elevated)", color: "var(--text-secondary)", transition: "var(--transition-fast)" }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-            </svg>
-          </motion.button>
-        </Link>
-      </motion.nav>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowAddModal(true)}
+          data-testid="add-button"
+          className="w-9 h-9 flex items-center justify-center rounded-full"
+          style={{ background: "var(--accent)", color: "var(--bg-base)", border: "none", cursor: "pointer" }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </motion.button>
+      </header>
+
+      {/* Add Product Modal */}
+      <AnimatePresence>
+        {showAddModal && (
+          <AddProductModal onClose={() => setShowAddModal(false)} onAdded={load} />
+        )}
+      </AnimatePresence>
 
       {/* Onboarding Sheet */}
       <AnimatePresence>
@@ -339,7 +385,7 @@ export default function Home() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-            style={{ background: "var(--overlay-heavy)", backdropFilter: "blur(12px)" }}
+            style={{ background: "var(--overlay-heavy)", backdropFilter: "blur(16px)" }}
           >
             <motion.div
               initial={{ y: 100, opacity: 0 }}
@@ -347,11 +393,18 @@ export default function Home() {
               exit={{ y: 100, opacity: 0 }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
               className="w-full sm:max-w-md p-8 sm:p-10"
-              style={{ background: "var(--bg-surface)", borderRadius: "var(--radius-sheet) var(--radius-sheet) 0 0", }}
+              style={{
+                background: "rgba(15,15,15,0.85)",
+                backdropFilter: "blur(24px) saturate(1.5)",
+                WebkitBackdropFilter: "blur(24px) saturate(1.5)",
+                borderRadius: "24px 24px 0 0",
+                borderTop: "1px solid rgba(255,255,255,0.1)",
+                boxShadow: "var(--shadow-modal)",
+              }}
             >
               <div className="w-10 h-1 rounded-full mx-auto mb-8 sm:hidden" style={{ background: "var(--border-default)" }} />
               <h2
-                className="text-center mb-1"
+                className="text-center mb-2"
                 style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-xl)", color: "var(--text-primary)" }}
               >
                 mirror
@@ -363,21 +416,39 @@ export default function Home() {
                 <motion.div
                   whileHover={{ borderColor: "var(--accent-muted)" }}
                   className="p-10 text-center mb-6 cursor-pointer relative"
-                  style={{ borderRadius: "var(--radius-lg)", border: "1px dashed var(--border-default)", background: "var(--bg-elevated)", transition: "var(--transition-normal)" }}
+                  style={{
+                    borderRadius: "var(--radius-lg)",
+                    border: "1.5px dashed var(--border-default)",
+                    background: "var(--bg-elevated)",
+                    transition: "var(--transition-normal)",
+                  }}
                 >
                   <input type="file" name="referencePhoto" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required />
-                  <div className="text-3xl mb-3 opacity-40">+</div>
-                  <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>Tap to upload your photo</p>
+                  <div className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: "var(--accent-subtle)", border: "1px solid var(--accent-border)" }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="8" r="5" />
+                      <path d="M20 21a8 8 0 0 0-16 0" />
+                    </svg>
+                  </div>
+                  <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", fontWeight: "var(--weight-medium)" }}>Tap to upload your photo</p>
                   <p className="mt-1" style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)" }}>A clear face photo works best</p>
                 </motion.div>
                 <input type="hidden" name="replicateToken" value="configured" />
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
+                  whileHover={{ scale: 1.02, boxShadow: "0 4px 20px rgba(212,175,97,0.25)" }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={uploading}
                   className="w-full py-3.5 disabled:opacity-40"
-                  style={{ borderRadius: "var(--radius-md)", background: "var(--accent)", color: "var(--bg-base)", fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", letterSpacing: "var(--tracking-wide)", transition: "var(--transition-fast)" }}
+                  style={{
+                    borderRadius: "var(--radius-md)",
+                    background: "var(--accent)",
+                    color: "var(--bg-base)",
+                    fontSize: "var(--text-sm)",
+                    fontWeight: "var(--weight-semibold)",
+                    letterSpacing: "var(--tracking-wide)",
+                    transition: "var(--transition-fast)",
+                  }}
                 >
                   {uploading ? "Setting up..." : "Get started"}
                 </motion.button>
@@ -387,377 +458,398 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Hero / Input */}
-      <motion.header
-        ref={heroRef}
-        style={{ y: heroY, opacity: heroOpacity }}
-        className="px-5 pt-8 pb-6 sm:pt-10 sm:pb-8 max-w-xl mx-auto"
-      >
-        <ProductInput
-          ref={inputRef}
-          url={url}
-          loading={loading}
-          onUrlChange={setUrl}
-          onSubmit={handleSubmit}
-        />
-      </motion.header>
-
-      {/* Tabs */}
-      <div className="px-5 max-w-5xl mx-auto mt-2 mb-6">
-        <div className="relative flex gap-1 p-1" style={{ background: "var(--bg-surface)", borderRadius: "var(--radius-md)" }}>
-          {(["outfits", "closet"] as Tab[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className="relative flex-1 py-2 z-10"
-              style={{
-                color: tab === t ? "var(--text-primary)" : "var(--text-tertiary)",
-                fontSize: "var(--text-xs)",
-                fontWeight: "var(--weight-medium)",
-                letterSpacing: "var(--tracking-wide)",
-                transition: "color var(--transition-fast)",
-                background: "transparent",
-                border: "none",
-              }}
+      {/* Tab Content */}
+      <div style={{ paddingBottom: "calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px) + 16px)" }}>
+        <AnimatePresence mode="wait" custom={tabDirection}>
+          {/* ===== CLOSET TAB ===== */}
+          {tab === "closet" && (
+            <motion.div
+              key="closet"
+              custom={tabDirection}
+              variants={tabContentVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
             >
-              {tab === t && (
-                <motion.div
-                  layoutId="tab-indicator"
-                  className="absolute inset-0"
-                  style={{ background: "var(--bg-elevated)", borderRadius: "var(--radius-sm)" }}
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-              <span className="relative z-10">
-                {t === "outfits" ? `Outfits (${outfits.length})` : `Closet (${products.length})`}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Tab Content with AnimatePresence */}
-      <AnimatePresence mode="wait">
-        {tab === "outfits" && (
-          <motion.div
-            key="outfits"
-            variants={tabContentVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            className="px-4 sm:px-6 max-w-5xl mx-auto"
-          >
-            {/* Loading skeletons */}
-            {initialLoading ? (
-              <SkeletonGrid count={4} cols="grid-cols-2 sm:grid-cols-3" />
-            ) : (
-              <>
-                <motion.div
-                  variants={gridVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3"
-                >
-                  {/* New Outfit Card */}
-                  <motion.div
-                    variants={cardVariants}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleCreateOutfit}
-                    className="overflow-hidden cursor-pointer aspect-[2/3] flex flex-col items-center justify-center"
-                    style={{ border: "1px dashed var(--border-default)", background: "var(--bg-surface)", borderRadius: "var(--radius-lg)", transition: "var(--transition-normal)" }}
-                  >
-                    <motion.span
-                      className="text-2xl"
-                      style={{ color: "var(--text-tertiary)", opacity: 0.4 }}
-                      whileHover={{ scale: 1.2, opacity: 0.7 }}
-                    >
-                      +
-                    </motion.span>
-                    <span className="mt-2" style={{ fontSize: "var(--text-xs)", color: "var(--text-secondary)", fontWeight: "var(--weight-medium)", letterSpacing: "var(--tracking-wide)" }}>
-                      New Outfit
-                    </span>
-                  </motion.div>
-
-                  {/* Outfit Cards */}
-                  {outfits.map((outfit) => {
-                    const imgs = getOutfitPreviewImages(outfit);
-                    const price = getOutfitPrice(outfit);
-                    const itemCount = Object.values(outfit.items).filter((v) =>
-                      Array.isArray(v) ? v.length > 0 : !!v
-                    ).length;
-
+              {/* Category filter chips */}
+              <div className="px-4 pt-5 max-w-5xl mx-auto">
+                <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 no-scrollbar" data-testid="category-tab">
+                  {CATEGORIES.map((cat) => {
+                    const count = cat.key === "all"
+                      ? products.length
+                      : products.filter((p) => p.category === cat.key).length;
                     return (
-                      <motion.div
-                        key={outfit.id}
-                        variants={cardVariants}
-                        whileHover={{ scale: 1.02 }}
-                        className="overflow-hidden cursor-pointer card-hover group"
-                        style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-lg)" }}
-                        onClick={() => router.push(`/outfit/${outfit.id}`)}
+                      <motion.button
+                        key={cat.key}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => setCategory(cat.key)}
+                        className="px-3 py-1.5 whitespace-nowrap flex-shrink-0"
+                        data-testid={`category-${cat.key}`}
+                        data-category={cat.key}
+                        style={{
+                          borderRadius: "var(--radius-full)",
+                          background: category === cat.key ? "var(--accent)" : "transparent",
+                          color: category === cat.key ? "var(--bg-base)" : "var(--text-secondary)",
+                          border: `1px solid ${category === cat.key ? "var(--accent)" : "var(--border-default)"}`,
+                          fontSize: "12px",
+                          fontWeight: "var(--weight-medium)",
+                          letterSpacing: "var(--tracking-wide)",
+                          transition: "var(--transition-fast)",
+                        }}
                       >
-                        {/* Preview grid */}
-                        <div className="aspect-[2/3] relative overflow-hidden card-gradient" style={{ background: "var(--bg-elevated)" }}>
-                          {imgs.length === 0 ? (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round" style={{ opacity: 0.4 }}>
-                                <rect x="3" y="3" width="18" height="18" rx="2" />
-                                <circle cx="8.5" cy="8.5" r="1.5" />
-                                <path d="M21 15l-5-5L5 21" />
-                              </svg>
-                              <span style={{ fontSize: "var(--text-caption)", color: "var(--text-tertiary)", letterSpacing: "var(--tracking-wider)" }}>
-                                No items yet
-                              </span>
-                            </div>
-                          ) : imgs.length === 1 ? (
-                            <Image src={imgs[0]} alt={`${outfit.name} preview`} fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover card-image" loading="lazy" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
-                          ) : (
-                            <div className="grid grid-cols-2 grid-rows-2 absolute inset-0">
-                              {imgs.slice(0, 4).map((img, i) => (
-                                <div key={i} className="relative overflow-hidden">
-                                  <Image src={img} alt={`${outfit.name} item ${i + 1}`} fill sizes="(max-width: 640px) 25vw, 17vw" className="object-cover card-image" loading="lazy" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Item count badge */}
-                          <div
-                            className="absolute top-2 left-2 px-2 py-0.5 whitespace-nowrap z-10"
-                            style={{ fontSize: "var(--text-caption)", fontWeight: "var(--weight-semibold)", background: "var(--accent)", color: "var(--bg-base)", borderRadius: "var(--radius-sm)", letterSpacing: "var(--tracking-wide)" }}
-                          >
-                            {itemCount} {itemCount === 1 ? "item" : "items"}
-                          </div>
-
-                          {/* Delete */}
-                          <motion.button
-                            whileTap={{ scale: 0.9 }}
-                            aria-label={`Delete outfit ${outfit.name}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteOutfit(outfit.id);
-                            }}
-                            className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-70"
-                            style={{ background: "var(--overlay-medium)", backdropFilter: "blur(4px)", color: "var(--text-secondary)", fontSize: "var(--text-xs)", transition: "var(--transition-fast)" }}
-                          >
-                            ✕
-                          </motion.button>
-                        </div>
-
-                        <div className="p-3.5">
-                          <h3 className="line-clamp-1 mb-1" style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", color: "var(--text-primary)", lineHeight: "var(--leading-tight)" }}>
-                            {outfit.name}
-                          </h3>
-                          {price > 0 && (
-                            <span style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-semibold)", color: "var(--accent)" }}>
-                              {formatPrice(price)}
-                            </span>
-                          )}
-                        </div>
-                      </motion.div>
+                        {cat.label} ({count})
+                      </motion.button>
                     );
                   })}
-                </motion.div>
+                </div>
+              </div>
 
-                {outfits.length === 0 && (
-                  <EmptyOutfits onCreateOutfit={handleCreateOutfit} />
-                )}
-              </>
-            )}
-          </motion.div>
-        )}
-
-        {tab === "closet" && (
-          <motion.div
-            key="closet"
-            variants={tabContentVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            className="px-4 sm:px-6 max-w-5xl mx-auto"
-          >
-            {/* Category pills */}
-            <div className="flex gap-1.5 mb-5 overflow-x-auto pb-1 px-1 no-scrollbar">
-              {CATEGORIES.map((cat) => (
-                <motion.button
-                  key={cat.key}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setCategory(cat.key)}
-                  className="px-4 py-2 whitespace-nowrap flex-shrink-0"
-                  style={{
-                    borderRadius: "var(--radius-md)",
-                    background: category === cat.key ? "var(--accent)" : "var(--bg-surface)",
-                    color: category === cat.key ? "var(--bg-base)" : "var(--text-secondary)",
-                    border: `1px solid ${category === cat.key ? "var(--accent)" : "var(--border-subtle)"}`,
-                    fontSize: "var(--text-xs)",
-                    fontWeight: "var(--weight-medium)",
-                    letterSpacing: "var(--tracking-wide)",
-                    transition: "var(--transition-fast)",
-                  }}
-                >
-                  {cat.label}
-                </motion.button>
-              ))}
-            </div>
-
-            {/* Loading skeletons */}
-            {initialLoading ? (
-              <SkeletonGrid count={6} cols="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" />
-            ) : (
-              <>
-                {filteredProducts.length > 0 && (
+              {/* Product grid */}
+              <div className="px-4 sm:px-6 max-w-5xl mx-auto">
+                {initialLoading ? (
+                  <SkeletonGrid count={6} cols="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" />
+                ) : (
                   <>
-                    <div className="flex items-center justify-between mb-4 px-1">
-                      <span style={{ fontSize: "var(--text-caption)", letterSpacing: "var(--tracking-widest)", fontWeight: "var(--weight-medium)", color: "var(--text-tertiary)", textTransform: "uppercase" }}>
-                        {filteredProducts.length} {filteredProducts.length === 1 ? "piece" : "pieces"}
-                      </span>
-                    </div>
+                    {filteredProducts.length > 0 && (
+                      <>
+                        <div className="flex items-center justify-between mb-3 px-1">
+                          <span style={{
+                            fontFamily: "var(--font-display)",
+                            fontSize: "10px",
+                            letterSpacing: "0.15em",
+                            fontWeight: "var(--weight-medium)",
+                            color: "var(--text-tertiary)",
+                            textTransform: "uppercase",
+                          }}>
+                            {filteredProducts.length} {filteredProducts.length === 1 ? "piece" : "pieces"}
+                          </span>
+                        </div>
 
-                    <motion.div
-                      variants={gridVariants}
-                      initial="hidden"
-                      animate="visible"
-                      className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"
-                    >
-                      {filteredProducts.map((product) => {
-                        const gen = getGenerated(product.id);
-                        const isGen = generating.has(product.id);
-                        const isFav = favorites.has(product.id);
-                        const img = gen.length > 0 ? gen[0] : product.images[0];
+                        <motion.div
+                          variants={gridVariants}
+                          initial="hidden"
+                          animate="visible"
+                          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"
+                        >
+                          {filteredProducts.map((product) => {
+                            const gen = getGenerated(product.id);
+                            const isGen = generating.has(product.id);
+                            const img = gen.length > 0 ? gen[0] : product.images[0];
 
-                        return (
-                          <motion.div
-                            key={product.id}
-                            variants={cardVariants}
-                            className="group overflow-hidden cursor-pointer card-hover"
-                            style={{ background: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-lg)" }}
-                            onClick={() => openLightbox(product)}
-                          >
-                            <div className="relative aspect-[2/3] overflow-hidden card-gradient" style={{ background: "var(--bg-elevated)" }}>
-                              {img && (
-                                <Image src={img} alt={product.title} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" className="object-cover card-image" loading="lazy" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
-                              )}
-                              <motion.button
-                                whileTap={{ scale: 1.1 }}
-                                aria-label={isFav ? `Remove ${product.title} from favorites` : `Add ${product.title} to favorites`}
-                                onClick={(e) => { e.stopPropagation(); toggleFav(product.id); }}
-                                className="absolute top-2.5 right-2.5 w-9 h-9 flex items-center justify-center rounded-full min-w-[44px] min-h-[44px] z-10"
-                                style={{ background: "var(--overlay-light)", backdropFilter: "blur(8px)" }}
-                              >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill={isFav ? "var(--accent)" : "none"} stroke={isFav ? "var(--accent)" : "var(--text-primary)"} strokeWidth="2">
-                                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                                </svg>
-                              </motion.button>
-
-                              {/* Badge */}
-                              <div
-                                className="absolute top-2.5 left-2.5 px-2 py-0.5 whitespace-nowrap z-10"
+                            return (
+                              <motion.div
+                                key={product.id}
+                                variants={cardVariants}
+                                whileHover={{ y: -2 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                data-testid="product-card"
+                                className="group overflow-hidden cursor-pointer card-hover"
                                 style={{
-                                  fontSize: "var(--text-caption)",
-                                  fontWeight: "var(--weight-semibold)",
-                                  borderRadius: "var(--radius-sm)",
-                                  background: gen.length > 0 ? "var(--accent-subtle)" : "var(--overlay-light)",
-                                  color: gen.length > 0 ? "var(--accent)" : "var(--text-primary)",
-                                  border: gen.length > 0 ? "1px solid var(--accent-border)" : "none",
-                                  backdropFilter: "blur(4px)",
-                                  letterSpacing: "var(--tracking-wider)",
+                                  background: "rgba(255,255,255,0.03)",
+                                  border: "none",
+                                  borderRadius: "12px",
+                                  boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
                                 }}
+                                onClick={() => openLightbox(product)}
                               >
-                                {gen.length > 0 ? "Your fit" : product.category}
-                              </div>
+                                <div className="relative aspect-[3/4] overflow-hidden" style={{ background: "var(--bg-elevated)", borderRadius: "12px 12px 0 0" }}>
+                                  {img && (
+                                    <ImageWithFallback store={product.store} src={img} alt={product.title} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" className="object-cover card-image" loading="lazy" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
+                                  )}
 
-                              {(gen.length > 1 || product.images.length > 1) && (
-                                <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 whitespace-nowrap z-10"
-                                  style={{ fontSize: "var(--text-caption)", fontWeight: "var(--weight-medium)", background: "var(--overlay-medium)", backdropFilter: "blur(4px)", color: "var(--text-primary)", borderRadius: "var(--radius-sm)" }}>
-                                  {gen.length > 0 ? gen.length : product.images.length} photos
+                                  {/* Delete button */}
+                                  <motion.button
+                                    whileTap={{ scale: 0.9 }}
+                                    aria-label={`Remove ${product.title}`}
+                                    onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }}
+                                    className="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-80 z-20"
+                                    style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", color: "var(--text-secondary)", fontSize: "var(--text-xs)", transition: "var(--transition-fast)" }}
+                                  >
+                                    ✕
+                                  </motion.button>
+
+                                  {/* Generating overlay */}
+                                  <AnimatePresence>
+                                    {isGen && (
+                                      <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        className="absolute inset-0 flex flex-col items-center justify-center gap-3"
+                                        style={{ background: "var(--overlay-heavy)", backdropFilter: "blur(8px)" }}
+                                      >
+                                        <motion.div
+                                          animate={{ rotate: 360 }}
+                                          transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+                                          className="w-6 h-6 rounded-full"
+                                          style={{ border: "2px solid var(--accent-muted)", borderTopColor: "var(--accent)" }}
+                                        />
+                                        <span style={{ fontSize: "var(--text-xs)", color: "var(--text-secondary)", letterSpacing: "var(--tracking-wide)" }}>Creating your look...</span>
+                                      </motion.div>
+                                    )}
+                                  </AnimatePresence>
                                 </div>
-                              )}
 
-                              <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                aria-label={`Remove ${product.title}`}
-                                onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }}
-                                className="absolute bottom-2.5 left-2.5 w-7 h-7 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-70 z-20"
-                                style={{ background: "var(--overlay-medium)", backdropFilter: "blur(4px)", color: "var(--text-secondary)", fontSize: "var(--text-xs)", transition: "var(--transition-fast)" }}
-                              >
-                                ✕
-                              </motion.button>
+                                <div className="px-2 pt-2.5 pb-3">
+                                  <h3 className="line-clamp-1" style={{ fontSize: "13px", fontWeight: 500, lineHeight: 1.3, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    {product.title}
+                                  </h3>
+                                  {product.price != null && (
+                                    <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", display: "block", marginTop: "2px" }}>
+                                      {formatPrice(product.price)}
+                                    </span>
+                                  )}
+                                </div>
+                              </motion.div>
+                            );
+                          })}
+                        </motion.div>
+                      </>
+                    )}
 
-                              <AnimatePresence>
-                                {isGen && (
-                                  <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    className="absolute inset-0 flex flex-col items-center justify-center gap-3"
-                                    style={{ background: "var(--overlay-heavy)", backdropFilter: "blur(8px)" }}
-                                  >
-                                    <motion.div
-                                      animate={{ rotate: 360 }}
-                                      transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
-                                      className="w-6 h-6 rounded-full"
-                                      style={{ border: "2px solid var(--accent-muted)", borderTopColor: "var(--accent)" }}
-                                    />
-                                    <span style={{ fontSize: "var(--text-xs)", color: "var(--text-secondary)", letterSpacing: "var(--tracking-wide)" }}>Creating your look...</span>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </div>
-
-                            <div className="p-3.5">
-                              <p className="mb-1" style={{ fontSize: "var(--text-caption)", color: "var(--text-tertiary)", letterSpacing: "var(--tracking-wider)", textTransform: "uppercase" }}>
-                                {product.store}
-                              </p>
-                              <h3 className="line-clamp-2 mb-2" style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", lineHeight: "var(--leading-snug)", color: "var(--text-primary)" }}>
-                                {product.title}
-                              </h3>
-                              <div className="flex items-center justify-between">
-                                {product.price != null && (
-                                  <span style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-base)", color: "var(--text-primary)" }}>
-                                    {formatPrice(product.price)}
-                                  </span>
-                                )}
-                                {gen.length > 0 && (
-                                  <a
-                                    href={product.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="inline-flex items-center gap-1 px-3 py-1"
-                                    style={{
-                                      fontSize: "var(--text-caption)",
-                                      fontWeight: "var(--weight-semibold)",
-                                      color: "var(--bg-base)",
-                                      background: "var(--accent)",
-                                      borderRadius: "var(--radius-md)",
-                                      letterSpacing: "var(--tracking-wider)",
-                                      textDecoration: "none",
-                                      transition: "var(--transition-fast)",
-                                    }}
-                                  >
-                                    Shop
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                      <path d="M7 17L17 7M17 7H7M17 7v10" />
-                                    </svg>
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          </motion.div>
-                        );
-                      })}
-                    </motion.div>
+                    {filteredProducts.length === 0 && (
+                      <EmptyCloset category={category} onFocusInput={() => setShowAddModal(true)} />
+                    )}
                   </>
                 )}
+              </div>
+            </motion.div>
+          )}
 
-                {filteredProducts.length === 0 && !loading && (
-                  <EmptyCloset category={category} onFocusInput={() => inputRef.current?.focus()} />
-                )}
-              </>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          {/* ===== OUTFITS TAB ===== */}
+          {tab === "outfits" && (
+            <motion.div
+              key="outfits"
+              custom={tabDirection}
+              variants={tabContentVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              className="px-4 sm:px-6 max-w-5xl mx-auto pt-6"
+            >
+              <div className="flex items-center justify-between mb-6 px-1">
+                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-xl)", color: "var(--text-primary)" }}>
+                  Your Outfits
+                </h2>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleCreateOutfit}
+                  className="px-4 py-2"
+                  data-testid="add-button"
+                  style={{
+                    borderRadius: "var(--radius-md)",
+                    background: "var(--accent)",
+                    color: "var(--bg-base)",
+                    fontSize: "var(--text-xs)",
+                    fontWeight: "var(--weight-semibold)",
+                    letterSpacing: "var(--tracking-wider)",
+                  }}
+                >
+                  + New Outfit
+                </motion.button>
+              </div>
+
+              {initialLoading ? (
+                <SkeletonGrid count={4} cols="grid-cols-2 sm:grid-cols-3" />
+              ) : (
+                <>
+                  <motion.div
+                    variants={gridVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"
+                  >
+                    {outfits.map((outfit) => {
+                      const imgs = getOutfitPreviewImages(outfit);
+                      const price = getOutfitPrice(outfit);
+                      const itemCount = Object.values(outfit.items).filter((v) =>
+                        Array.isArray(v) ? v.length > 0 : !!v
+                      ).length;
+
+                      return (
+                        <motion.div
+                          key={outfit.id}
+                          variants={cardVariants}
+                          whileHover={{ y: -2 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                          className="overflow-hidden cursor-pointer card-hover group"
+                          style={{
+                            background: "rgba(255,255,255,0.03)",
+                            border: "none",
+                            borderRadius: "12px",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                          }}
+                          onClick={() => router.push(`/outfit/${outfit.id}`)}
+                        >
+                          <div className="aspect-[2/3] relative overflow-hidden card-gradient" style={{ background: "var(--bg-elevated)" }}>
+                            {imgs.length === 0 ? (
+                              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" strokeLinecap="round" style={{ opacity: 0.3 }}>
+                                  <rect x="3" y="3" width="7" height="9" rx="1" />
+                                  <rect x="14" y="3" width="7" height="5" rx="1" />
+                                  <rect x="14" y="12" width="7" height="9" rx="1" />
+                                  <rect x="3" y="16" width="7" height="5" rx="1" />
+                                </svg>
+                                <span style={{ fontSize: "var(--text-caption)", color: "var(--text-tertiary)", letterSpacing: "var(--tracking-wider)" }}>
+                                  No items yet
+                                </span>
+                              </div>
+                            ) : imgs.length === 1 ? (
+                              <Image src={imgs[0]} alt={`${outfit.name} preview`} fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover card-image" loading="lazy" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
+                            ) : (
+                              <div className="grid grid-cols-2 grid-rows-2 absolute inset-0">
+                                {imgs.slice(0, 4).map((img, i) => (
+                                  <div key={i} className="relative overflow-hidden">
+                                    <Image src={img} alt={`${outfit.name} item ${i + 1}`} fill sizes="(max-width: 640px) 25vw, 17vw" className="object-cover card-image" loading="lazy" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Item count badge */}
+                            <div
+                              className="absolute top-3 left-3 px-2.5 py-1 z-10"
+                              style={{
+                                fontSize: "var(--text-caption)",
+                                fontWeight: "var(--weight-semibold)",
+                                background: "var(--accent)",
+                                color: "var(--bg-base)",
+                                borderRadius: "var(--radius-sm)",
+                                letterSpacing: "var(--tracking-wide)",
+                              }}
+                            >
+                              {itemCount} {itemCount === 1 ? "item" : "items"}
+                            </div>
+
+                            {/* Delete */}
+                            <motion.button
+                              whileTap={{ scale: 0.9 }}
+                              aria-label={`Delete outfit ${outfit.name}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteOutfit(outfit.id);
+                              }}
+                              className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-80"
+                              style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", color: "var(--text-secondary)", fontSize: "var(--text-xs)", transition: "var(--transition-fast)" }}
+                            >
+                              ✕
+                            </motion.button>
+                          </div>
+
+                          <div className="p-3.5">
+                            <h3 className="line-clamp-1 mb-1" style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", color: "var(--text-primary)", lineHeight: "var(--leading-tight)" }}>
+                              {outfit.name}
+                            </h3>
+                            {price > 0 && (
+                              <span style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-semibold)", color: "var(--accent)" }}>
+                                {formatPrice(price)}
+                              </span>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </motion.div>
+
+                  {outfits.length === 0 && (
+                    <EmptyOutfits onCreateOutfit={handleCreateOutfit} />
+                  )}
+                </>
+              )}
+            </motion.div>
+          )}
+
+          {/* ===== SETTINGS TAB ===== */}
+          {tab === "settings" && (
+            <motion.div
+              key="settings"
+              custom={tabDirection}
+              variants={tabContentVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              className="max-w-lg mx-auto px-5 pt-6"
+            >
+              <h2 className="mb-6" style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-xl)", color: "var(--text-primary)" }}>
+                Settings
+              </h2>
+
+              <div className="space-y-5">
+                {/* Reference Photo */}
+                <motion.section
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 }}
+                  className="p-5"
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    border: "none",
+                    borderRadius: "12px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  <h3
+                    className="mb-4"
+                    style={{ fontFamily: "var(--font-display)", fontSize: "10px", letterSpacing: "0.15em", fontWeight: "var(--weight-semibold)", color: "var(--text-tertiary)", textTransform: "uppercase" }}
+                  >
+                    Reference Photo
+                  </h3>
+                  <div className="flex items-center gap-5">
+                    {refPhoto ? (
+                      <div className="relative w-20 h-20 rounded-full overflow-hidden flex-shrink-0" style={{ border: "2px solid var(--accent-muted)" }}>
+                        <Image src={refPhotoSrc!} alt="Reference" width={80} height={80} className="object-cover w-full h-full" />
+                      </div>
+                    ) : (
+                      <div
+                        className="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{ background: "var(--bg-elevated)", border: "2px dashed var(--border-default)" }}
+                      >
+                        <span style={{ fontSize: "24px", opacity: 0.3, color: "var(--text-tertiary)" }}>+</span>
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <p className="mb-2" style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)" }}>
+                        {refPhoto ? "Update your reference photo" : "Upload a clear face photo"}
+                      </p>
+                      <label>
+                        <motion.span
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          className="inline-block px-4 py-2 cursor-pointer"
+                          style={{
+                            borderRadius: "var(--radius-md)",
+                            fontSize: "var(--text-xs)",
+                            fontWeight: "var(--weight-semibold)",
+                            background: "var(--bg-elevated)",
+                            color: "var(--text-primary)",
+                            border: "1px solid var(--border-default)",
+                          }}
+                        >
+                          {settingsUploading ? "Uploading..." : "Choose Photo"}
+                        </motion.span>
+                        <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} disabled={settingsUploading} />
+                      </label>
+                    </div>
+                  </div>
+                </motion.section>
+
+                {/* App info */}
+                <motion.section
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="text-center py-4"
+                >
+                  <p style={{ fontSize: "var(--text-caption)", color: "var(--text-tertiary)", letterSpacing: "var(--tracking-wider)" }}>
+                    mirror -- Virtual Fitting Room
+                  </p>
+                </motion.section>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Lightbox */}
       <AnimatePresence>
@@ -769,7 +861,7 @@ export default function Home() {
             url={lightbox.product.url}
             images={lightbox.images}
             currentIndex={lightbox.index}
-            onClose={() => setLightbox(null)}
+            onClose={() => { window.history.back(); }}
             onNext={() => setLightbox((p) => p ? { ...p, index: (p.index + 1) % p.images.length } : null)}
             onPrev={() => setLightbox((p) => p ? { ...p, index: (p.index - 1 + p.images.length) % p.images.length } : null)}
             onGoTo={(i) => setLightbox((p) => (p ? { ...p, index: i } : null))}
@@ -777,15 +869,61 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Mobile bottom fade */}
-      <div
-        className="fixed bottom-0 left-0 right-0 sm:hidden z-30 pointer-events-none"
+      {/* ===== BOTTOM TAB BAR ===== */}
+      <nav
+        className="fixed bottom-0 z-50"
         style={{
-          background: "linear-gradient(to top, var(--bg-base) 60%, transparent)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "100%",
+          maxWidth: "430px",
+          background: "var(--bg-frosted)",
+          backdropFilter: "blur(24px) saturate(1.6)",
+          WebkitBackdropFilter: "blur(24px) saturate(1.6)",
+          borderTop: "1px solid var(--border-subtle)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          height: "80px",
         }}
-      />
+      >
+        <div className="flex items-stretch justify-around max-w-lg mx-auto" style={{ height: "var(--tab-bar-height)" }}>
+          {TAB_ITEMS.map(({ key, label, Icon }) => {
+            const active = tab === key;
+            return (
+              <button
+                key={key}
+                onClick={() => setTab(key)}
+                className="flex flex-col items-center justify-center flex-1 gap-1 relative"
+                style={{ background: "none", border: "none" }}
+              >
+                {active && (
+                  <motion.div
+                    layoutId="tab-pill"
+                    className="absolute top-1.5"
+                    style={{
+                      width: 20,
+                      height: 3,
+                      borderRadius: "var(--radius-full)",
+                      background: "var(--accent)",
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <Icon active={active} />
+                <span
+                  style={{
+                    fontSize: "var(--text-caption)",
+                    fontWeight: active ? "var(--weight-semibold)" : "var(--weight-regular)",
+                    color: active ? "var(--accent)" : "var(--text-secondary)",
+                    letterSpacing: "var(--tracking-wide)",
+                    transition: "var(--transition-fast)",
+                  }}
+                >
+                  {label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </main>
   );
 }
