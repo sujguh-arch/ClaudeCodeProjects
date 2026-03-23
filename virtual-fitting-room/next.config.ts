@@ -19,6 +19,11 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.net-a-porter.com" },
       { protocol: "https", hostname: "**.asos.com" },
       { protocol: "https", hostname: "**.zara.com" },
+      { protocol: "https", hostname: "**.ohpolly.com" },
+      { protocol: "https", hostname: "**.houseofcb.com" },
+      { protocol: "https", hostname: "**.peppermayo.com" },
+      { protocol: "https", hostname: "**.princesspolly.com" },
+      { protocol: "https", hostname: "**.princesspolly.com.au" },
     ],
     // Enable Next.js image optimization for production
     // unoptimized: true,

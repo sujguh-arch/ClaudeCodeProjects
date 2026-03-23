@@ -61,7 +61,26 @@ dress, shoes, tights, bag, accessories, other
 5. If blocked, try alternate product URLs from the same store
 
 ## Supported Image Domains (in next.config.ts)
-cdn.shopify.com, *.cloudfront.net, replicate.delivery, *.wolford.com, *.nordstrom.com, *.farfetch.com, *.mytheresa.com, *.ssense.com, *.net-a-porter.com, *.asos.com, *.zara.com
+cdn.shopify.com, *.cloudfront.net, replicate.delivery, *.wolford.com, *.nordstrom.com, *.farfetch.com, *.mytheresa.com, *.ssense.com, *.net-a-porter.com, *.asos.com, *.zara.com, *.ohpolly.com, *.houseofcb.com, *.peppermayo.com, *.princesspolly.com
+
+## Target Stores (ALL must be represented in products.json)
+1. Princess Polly (us.princesspolly.com) — Shopify store
+2. Peppermayo (us.peppermayo.com) — Shopify store
+3. Oh Polly (ohpolly.com) — may need Playwright browser automation
+4. House of CB (houseofcb.com) — exempt from $100 price limit, may need browser automation
+5. Wolford (wolford.com) — NOT Shopify, tights and stockings only
+
+## Eval Gates (eval-gates/)
+Each phase has a Playwright eval gate that tests REAL user interactions (not element presence).
+- eval-gates/phase1-design.spec.ts — UI quality, navigation, styling
+- eval-gates/phase2-catalog.spec.ts — products from all stores, constraint enforcement
+- eval-gates/phase3-integration.spec.ts — full user flow, API routes, real generation
+- eval-gates/phase4-final.spec.ts — complete E2E flows, dedup, visual quality
+- Run with: npx playwright test --config=eval-gates/playwright.config.ts [file]
+
+## ALWAYS use production build for testing
+- NEVER use `npm run dev` — it leaks memory and crashes
+- Always: `npm run build && npm start` (or use eval-gates/playwright.config.ts which does this automatically)
 
 ## Design Conventions
 - Use CSS custom properties (var(--...)) not raw values

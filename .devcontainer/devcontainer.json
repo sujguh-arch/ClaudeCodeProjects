@@ -1,5 +1,5 @@
 {
-  "name": "VFR Dev",
+  "name": "VFR Autonomous Session",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
   "features": {
     "ghcr.io/devcontainers/features/sshd:1": {
@@ -7,17 +7,22 @@
     }
   },
   "hostRequirements": {
-    "cpus": 4,
-    "memory": "16gb",
-    "storage": "32gb"
+    "cpus": 8,
+    "memory": "32gb",
+    "storage": "64gb"
   },
-  "postCreateCommand": "cd virtual-fitting-room && npm install && npx playwright install --with-deps chromium",
+  "postCreateCommand": "bash .devcontainer/setup.sh",
   "forwardPorts": [3000],
   "customizations": {
     "vscode": {
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash"
       }
+    }
+  },
+  "secrets": {
+    "REPLICATE_API_TOKEN": {
+      "description": "Replicate API token for AI generation"
     }
   }
 }
