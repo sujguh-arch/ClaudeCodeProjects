@@ -8,6 +8,58 @@ const GENERATED_DIR = path.join(process.cwd(), "public", "generated");
 if (!fs.existsSync(GENERATED_DIR))
   fs.mkdirSync(GENERATED_DIR, { recursive: true });
 
+export const POSES: Record<string, string> = {
+  editorial: "Standing in a confident editorial pose, one hand on hip, direct gaze at camera",
+  walking: "Mid-stride walking pose, natural movement, candid street style",
+  seated: "Elegantly seated with legs crossed, relaxed but poised",
+  candid: "Caught mid-laugh, looking slightly off-camera, natural and relaxed",
+  leaning: "Leaning casually against a wall, relaxed confident posture",
+  "evening-out": "Glamorous night-out pose, slight turn showing the full outfit silhouette",
+};
+
+const POSE_VARIATIONS: Record<string, string[]> = {
+  editorial: [
+    "Standing confidently with one hand on hip, direct eye contact with camera",
+    "Three-quarter turn, looking over shoulder with a slight smile",
+    "Bending forward deeply at the waist, picking up her clutch from the floor, showing the outfit from a dramatic angle. Full body visible.",
+    "Arms relaxed at sides, weight on one leg, serene expression",
+  ],
+  walking: [
+    "Mid-stride on a sidewalk, one foot forward, confident gaze ahead",
+    "Pausing mid-step to glance back over her shoulder, hair in motion",
+    "Bending forward deeply at the waist mid-walk, reaching down to pick up a dropped item from the ground, outfit visible from a dramatic low angle. Full body visible.",
+    "Casual stroll with hands in motion, looking to the side, carefree energy",
+  ],
+  seated: [
+    "Seated with legs crossed elegantly, hands resting on knee, poised expression",
+    "Perched on the edge of a chair leaning slightly forward, engaged and warm",
+    "Bending forward deeply at the waist from a seated position, reaching toward the floor to grab her bag, showing the full outfit from above. Full body visible.",
+    "Reclined back with one arm draped over the chair, relaxed and confident",
+  ],
+  candid: [
+    "Caught mid-laugh, hands near her face, natural joy, looking slightly off-camera",
+    "Glancing down with a soft smile, tucking hair behind her ear",
+    "Bending forward deeply at the waist, picking something up off the ground in a candid moment, outfit shown from a dramatic overhead angle. Full body visible.",
+    "Looking up with wide eyes and a surprised smile, spontaneous and bright",
+  ],
+  leaning: [
+    "Leaning against a wall with one shoulder, arms crossed, cool and confident",
+    "Leaning back with hands in pockets, chin slightly tilted up, effortless attitude",
+    "Bending forward deeply at the waist while leaning on a railing, reaching down to pick up her clutch from the floor, outfit displayed from a dramatic angle. Full body visible.",
+    "Leaning on one elbow against a surface, relaxed half-smile, looking at camera",
+  ],
+  "evening-out": [
+    "Glamorous pose with slight turn showing the full outfit silhouette, one hand on hip",
+    "Walking toward camera under evening lights, sultry confident gaze",
+    "Bending forward deeply at the waist under nighttime lighting, picking up her clutch from the floor, showing the outfit from a dramatic low angle. Full body visible.",
+    "Standing tall with clutch in hand, looking off into the distance, elegant and poised",
+  ],
+};
+
+export function getPoseVariations(vibe: string): string[] {
+  return POSE_VARIATIONS[vibe] || POSE_VARIATIONS.editorial;
+}
+
 const GENERATION_TIMEOUT_MS = 60_000;
 const MAX_RETRIES = 2;
 const RETRY_BASE_MS = 2_000;
@@ -59,7 +111,8 @@ export interface OutfitItem {
 
 function buildOutfitPromptAndImages(
   refPhotoUrl: string,
-  outfitItems: OutfitItem[]
+  outfitItems: OutfitItem[],
+  poseDesc?: string
 ): { prompt: string; image_input: string[] } {
   const image_input: string[] = [refPhotoUrl];
   const lines: string[] = [];
@@ -80,7 +133,11 @@ function buildOutfitPromptAndImages(
     imgNum++;
   }
 
-  const prompt = `Generate a full-body fashion photo of the woman from the first image wearing a complete outfit. She must be wearing ALL of these items together:\n${lines.join("\n")}\nKeep her exact face, skin tone, hair color and style from image 1. Full body shot showing all items clearly. Professional fashion photography with elegant lighting. Every item must be visible in the final image.`;
+  let prompt = `Generate a full-body fashion photo of the woman from the first image wearing a complete outfit. She must be wearing ALL of these items together:\n${lines.join("\n")}\nKeep her exact face, skin tone, hair color and style from image 1. Full body shot showing all items clearly. Professional fashion photography with elegant lighting. Every item must be visible in the final image.`;
+
+  if (poseDesc) {
+    prompt += ` Pose: ${poseDesc}`;
+  }
 
   return { prompt, image_input };
 }
@@ -90,19 +147,10 @@ export async function generateRendering(
   images: string[],
   category: string,
   renderingId: string,
-  outfitItems?: OutfitItem[]
+  outfitItems?: OutfitItem[],
+  pose?: string,
+  poseVariationOverride?: string
 ): Promise<string> {
-  // Dedup: check if a completed rendering already exists for this product
-  const existing = getRenderings().find(
-    (r) =>
-      r.productId === productId &&
-      r.originalImage === images[0] &&
-      r.status === "done" &&
-      r.generatedImage
-  );
-  if (existing) {
-    return existing.generatedImage;
-  }
 
   const settings = getSettings();
   const replicate = new Replicate({ auth: settings.replicateToken });
@@ -131,60 +179,90 @@ export async function generateRendering(
       refPhotoUrl = uploaded.urls.get;
     }
 
+    const poseDesc = poseVariationOverride || POSES[pose || "editorial"];
+
     // If outfitItems provided, use multi-image outfit prompt
     if (outfitItems && outfitItems.length > 0) {
-      const { prompt: outfitPrompt, image_input } = buildOutfitPromptAndImages(refPhotoUrl, outfitItems);
+      // Find the dress item to cycle through its images on sensitive content errors
+      const dressItem = outfitItems.find((i) => i.category === "dress");
+      const dressImages = dressItem?.images ?? [];
+      const maxImageAttempts = Math.max(dressImages.length, 1);
 
-      let lastError: Error | undefined;
-      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-        try {
-          const output = await withTimeout(
-            replicate.run(settings.model as `${string}/${string}`, {
-              input: {
-                prompt: outfitPrompt,
-                image_input,
-                resolution: "1K",
-                aspect_ratio: "3:4",
-                safety_tolerance: 5,
-              },
-            }),
-            GENERATION_TIMEOUT_MS
-          );
-
-          const url = Array.isArray(output) ? String(output[0]) : String(output);
-          const resp = await fetch(url, { signal: AbortSignal.timeout(30_000) });
-          if (!resp.ok) throw new Error("Download failed: " + resp.status);
-          const buffer = Buffer.from(await resp.arrayBuffer());
-
-          const filename = `${renderingId}.jpg`;
-          const outPath = path.join(GENERATED_DIR, filename);
-          fs.writeFileSync(outPath, buffer);
-
-          rendering.originalImage = images[0];
-          rendering.generatedImage = `/api/images/${filename}`;
-          rendering.status = "done";
-          upsertRendering(rendering);
-
-          return rendering.generatedImage;
-        } catch (err) {
-          lastError = err instanceof Error ? err : new Error(String(err));
-          if (isSensitiveContentError(lastError)) break;
-          const is429 =
-            lastError.message.includes("429") ||
-            lastError.message.includes("rate limit") ||
-            lastError.message.includes("too many requests");
-          if (is429 && attempt < MAX_RETRIES) {
-            await sleep(RETRY_BASE_MS * Math.pow(2, attempt));
-            continue;
+      for (let imgIdx = 0; imgIdx < maxImageAttempts; imgIdx++) {
+        // Rebuild outfit prompt with the current dress image index
+        const itemsForPrompt = outfitItems.map((item) => {
+          if (item.category === "dress" && imgIdx > 0 && item.images.length > imgIdx) {
+            return { ...item, images: [item.images[imgIdx], ...item.images.slice(0, imgIdx), ...item.images.slice(imgIdx + 1)] };
           }
-          throw lastError;
+          return item;
+        });
+        const { prompt: outfitPrompt, image_input } = buildOutfitPromptAndImages(refPhotoUrl, itemsForPrompt, poseDesc);
+
+        let lastError: Error | undefined;
+        for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+          try {
+            const output = await withTimeout(
+              replicate.run(settings.model as `${string}/${string}`, {
+                input: {
+                  prompt: outfitPrompt,
+                  image_input,
+                  resolution: "1K",
+                  aspect_ratio: "3:4",
+                  safety_tolerance: 5,
+                },
+              }),
+              GENERATION_TIMEOUT_MS
+            );
+
+            const url = Array.isArray(output) ? String(output[0]) : String(output);
+            const resp = await fetch(url, { signal: AbortSignal.timeout(30_000) });
+            if (!resp.ok) throw new Error("Download failed: " + resp.status);
+            const buffer = Buffer.from(await resp.arrayBuffer());
+
+            const filename = `${renderingId}.jpg`;
+            const outPath = path.join(GENERATED_DIR, filename);
+            fs.writeFileSync(outPath, buffer);
+
+            rendering.originalImage = images[0];
+            rendering.generatedImage = `/api/images/${filename}`;
+            rendering.status = "done";
+            upsertRendering(rendering);
+
+            return rendering.generatedImage;
+          } catch (err) {
+            lastError = err instanceof Error ? err : new Error(String(err));
+            if (isSensitiveContentError(lastError)) break; // break retry loop, try next image
+            const is429 =
+              lastError.message.includes("429") ||
+              lastError.message.includes("rate limit") ||
+              lastError.message.includes("too many requests");
+            if (is429 && attempt < MAX_RETRIES) {
+              await sleep(RETRY_BASE_MS * Math.pow(2, attempt));
+              continue;
+            }
+            throw lastError;
+          }
         }
+
+        // If sensitive content error and more images to try, continue to next image
+        if (lastError && isSensitiveContentError(lastError) && imgIdx < maxImageAttempts - 1) {
+          continue;
+        }
+
+        // Last image was also flagged
+        if (lastError && isSensitiveContentError(lastError)) {
+          throw new Error("All product images were flagged as sensitive content by the AI model");
+        }
+
+        if (lastError) throw lastError;
       }
-      if (lastError) throw lastError;
       throw new Error("Generation failed");
     }
 
-    const prompt = PROMPTS[category] || PROMPTS.other;
+    let prompt = PROMPTS[category] || PROMPTS.other;
+    if (poseDesc) {
+      prompt += ` Pose: ${poseDesc}`;
+    }
 
     // Try each product image — if one is flagged as sensitive, try the next angle
     for (let imgIdx = 0; imgIdx < images.length; imgIdx++) {

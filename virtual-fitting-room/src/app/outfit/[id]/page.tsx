@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, use } from "react";
+import { useState, useEffect, useCallback, useRef, use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useToast } from "@/components/Toast";
@@ -66,8 +66,21 @@ export default function OutfitPage({
   const [outfitName, setOutfitName] = useState("");
   const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);
   const [generating, setGenerating] = useState(false);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [generatedImages, setGeneratedImages] = useState<(string | null)[]>([]);
   const [showResult, setShowResult] = useState(false);
+  const [selectedPose, setSelectedPose] = useState("editorial");
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [showSwipeHint, setShowSwipeHint] = useState(true);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+
+  const POSE_OPTIONS = [
+    { key: "editorial", label: "Editorial" },
+    { key: "walking", label: "Walking" },
+    { key: "seated", label: "Seated" },
+    { key: "candid", label: "Candid" },
+    { key: "leaning", label: "Leaning" },
+    { key: "evening-out", label: "Evening Out" },
+  ];
 
   const load = useCallback(async () => {
     const [oRes, rRes, pRes] = await Promise.all([
@@ -84,7 +97,7 @@ export default function OutfitPage({
     const renderings: Rendering[] = await rRes.json();
     setCatalogProducts(await pRes.json());
 
-    // Check if any product in this outfit already has a completed rendering
+    // Check if any products in this outfit already have completed renderings
     if (found) {
       const allItemIds = [
         found.items.dress,
@@ -93,11 +106,11 @@ export default function OutfitPage({
         found.items.bag,
         ...(found.items.accessories || []),
       ].filter(Boolean);
-      const doneRendering = renderings.find(
+      const doneRenderings = renderings.filter(
         (r) => allItemIds.includes(r.productId) && r.status === "done" && r.generatedImage?.startsWith("/api/images/")
       );
-      if (doneRendering) {
-        setGeneratedImage(doneRendering.generatedImage);
+      if (doneRenderings.length > 0) {
+        setGeneratedImages(doneRenderings.map((r) => r.generatedImage));
         setShowResult(true);
       }
     }
@@ -210,6 +223,10 @@ export default function OutfitPage({
     if (!firstFilled) return;
 
     setGenerating(true);
+    setGeneratedImages([null, null, null, null]);
+    setShowResult(true);
+    setCarouselIndex(0);
+
     try {
       // Collect all filled outfit items for multi-image generation
       const allItems = SLOTS
@@ -228,15 +245,18 @@ export default function OutfitPage({
         body: JSON.stringify({
           productId: firstFilled.id,
           outfitItems: allItems.length > 1 ? allItems : undefined,
+          pose: selectedPose,
         }),
       });
       if (!res.ok) throw new Error("Generation failed");
       const data = await res.json();
-      if (data.results && data.results.length > 0 && data.results[0].generatedImage) {
-        setGeneratedImage(data.results[0].generatedImage);
-        setShowResult(true);
-        toast("Look generated!", "success");
-      } else if (data.errors > 0) {
+
+      if (data.results && data.results.length > 0) {
+        const images = data.results.map((r: { generatedImage: string }) => r.generatedImage);
+        setGeneratedImages(images);
+        setShowSwipeHint(true);
+        toast(`${images.length} look${images.length > 1 ? "s" : ""} generated!`, "success");
+      } else {
         const detail = data.errors_detail?.[0]?.error || "Generation failed";
         throw new Error(detail);
       }
@@ -248,9 +268,8 @@ export default function OutfitPage({
       } else {
         toast(msg, "error");
       }
-      // Keep generated look hidden on error
       setShowResult(false);
-      setGeneratedImage(null);
+      setGeneratedImages([]);
     } finally {
       setGenerating(false);
     }
@@ -532,6 +551,59 @@ export default function OutfitPage({
               </p>
             )}
 
+            {/* Pose selector */}
+            <div className="mt-4">
+              <p
+                className="mb-2 px-1"
+                style={{
+                  fontSize: "10px",
+                  letterSpacing: "var(--tracking-widest)",
+                  fontWeight: "var(--weight-semibold)",
+                  color: "var(--text-tertiary)",
+                  textTransform: "uppercase",
+                }}
+              >
+                Choose your vibe
+              </p>
+              <div
+                className="flex gap-2 overflow-x-auto pb-1"
+                style={{
+                  scrollbarWidth: "none",
+                  scrollSnapType: "x mandatory",
+                }}
+              >
+                {POSE_OPTIONS.map((pose) => (
+                  <button
+                    key={pose.key}
+                    onClick={() => setSelectedPose(pose.key)}
+                    className="flex-shrink-0"
+                    style={{
+                      scrollSnapAlign: "start",
+                      fontSize: "11px",
+                      padding: "6px 12px",
+                      borderRadius: "var(--radius-md)",
+                      fontWeight: selectedPose === pose.key ? 600 : 400,
+                      background:
+                        selectedPose === pose.key
+                          ? "var(--accent)"
+                          : "transparent",
+                      color:
+                        selectedPose === pose.key
+                          ? "var(--bg-base)"
+                          : "var(--text-secondary)",
+                      border:
+                        selectedPose === pose.key
+                          ? "1px solid var(--accent)"
+                          : "1px solid var(--border-default)",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    {pose.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* GENERATE MY LOOK button */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -584,18 +656,18 @@ export default function OutfitPage({
         )}
       </div>
 
-      {/* YOUR GENERATED LOOK Section */}
+      {/* YOUR LOOKS Carousel Section */}
       <AnimatePresence>
-        {showResult && generatedImage && (
+        {showResult && generatedImages.length > 0 && (
           <motion.div
             data-testid="generated-result"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="px-4 max-w-4xl mx-auto mt-8"
+            className="max-w-4xl mx-auto mt-8"
           >
             <p
-              className="mb-3 px-1"
+              className="mb-3 px-5"
               style={{
                 fontSize: "var(--text-caption)",
                 letterSpacing: "var(--tracking-widest)",
@@ -604,28 +676,60 @@ export default function OutfitPage({
                 textTransform: "uppercase",
               }}
             >
-              Your generated look
+              Your looks
             </p>
-            <div
-              className="overflow-hidden"
-              style={{
-                borderRadius: "var(--radius-lg)",
-                background: "var(--bg-card)",
-                border: "1px solid var(--border-default)",
-                boxShadow: "var(--shadow-card)",
-              }}
+            <ImageCarousel
+              images={generatedImages}
+              currentIndex={carouselIndex}
+              onIndexChange={setCarouselIndex}
+              onImageTap={setFullscreenImage}
+              showSwipeHint={showSwipeHint}
+              onSwipeHintDismiss={() => setShowSwipeHint(false)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Fullscreen image overlay */}
+      <AnimatePresence>
+        {fullscreenImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{
+              background: "rgba(0,0,0,0.95)",
+              backdropFilter: "blur(20px)",
+            }}
+            onClick={() => setFullscreenImage(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="relative w-full h-full flex items-center justify-center p-4"
             >
               <Image
-                src={generatedImage}
-                alt="Generated outfit look"
+                src={fullscreenImage}
+                alt="Generated look fullscreen"
                 width={768}
                 height={1024}
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="w-full h-auto"
-                placeholder="blur"
-                blurDataURL={BLUR_PLACEHOLDER}
+                className="max-w-full max-h-full object-contain"
+                sizes="100vw"
               />
-            </div>
+              <button
+                className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full"
+                style={{
+                  background: "rgba(255,255,255,0.1)",
+                  color: "var(--text-primary)",
+                  fontSize: "18px",
+                }}
+                onClick={() => setFullscreenImage(null)}
+              >
+                ✕
+              </button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -928,6 +1032,133 @@ export default function OutfitPage({
         )}
       </AnimatePresence>
     </main>
+  );
+}
+
+/* ─── Image Carousel Component ─── */
+
+function ImageCarousel({
+  images,
+  currentIndex,
+  onIndexChange,
+  onImageTap,
+  showSwipeHint,
+  onSwipeHintDismiss,
+}: {
+  images: (string | null)[];
+  currentIndex: number;
+  onIndexChange: (i: number) => void;
+  onImageTap: (url: string) => void;
+  showSwipeHint: boolean;
+  onSwipeHintDismiss: () => void;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const hasScrolled = useRef(false);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const handleScroll = () => {
+      if (!hasScrolled.current) {
+        hasScrolled.current = true;
+        onSwipeHintDismiss();
+      }
+      const scrollLeft = el.scrollLeft;
+      const itemWidth = el.offsetWidth * 0.85 + 12; // width + gap
+      const idx = Math.round(scrollLeft / itemWidth);
+      onIndexChange(Math.max(0, Math.min(idx, images.length - 1)));
+    };
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [images.length, onIndexChange, onSwipeHintDismiss]);
+
+  return (
+    <div>
+      <div
+        ref={scrollRef}
+        className="flex gap-3 overflow-x-auto px-4"
+        style={{
+          scrollSnapType: "x mandatory",
+          scrollbarWidth: "none",
+          WebkitOverflowScrolling: "touch",
+          msOverflowStyle: "none",
+        }}
+      >
+        {images.map((img, i) => (
+          <div
+            key={i}
+            className="flex-shrink-0 overflow-hidden"
+            style={{
+              width: "85%",
+              scrollSnapAlign: "start",
+              borderRadius: "var(--radius-lg)",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-default)",
+              boxShadow: "var(--shadow-card)",
+            }}
+          >
+            {img ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
+                className="cursor-pointer"
+                onClick={() => onImageTap(img)}
+              >
+                <Image
+                  src={img}
+                  alt={`Generated look ${i + 1}`}
+                  width={768}
+                  height={1024}
+                  sizes="85vw"
+                  className="w-full h-auto"
+                  style={{ aspectRatio: "3/4", objectFit: "cover" }}
+                  placeholder="blur"
+                  blurDataURL={BLUR_PLACEHOLDER}
+                />
+              </motion.div>
+            ) : (
+              <div
+                className="w-full shimmer"
+                style={{ aspectRatio: "3/4" }}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Dot indicators */}
+      <div className="flex items-center justify-center gap-2 mt-3">
+        {images.map((_, i) => (
+          <div
+            key={i}
+            style={{
+              width: currentIndex === i ? 16 : 6,
+              height: 6,
+              borderRadius: 3,
+              background: currentIndex === i ? "var(--accent)" : "var(--border-default)",
+              transition: "all 0.2s ease",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Swipe hint */}
+      {showSwipeHint && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center mt-2"
+          style={{
+            fontSize: "var(--text-xs)",
+            color: "var(--text-tertiary)",
+            letterSpacing: "var(--tracking-wide)",
+          }}
+        >
+          Swipe to browse
+        </motion.p>
+      )}
+    </div>
   );
 }
 

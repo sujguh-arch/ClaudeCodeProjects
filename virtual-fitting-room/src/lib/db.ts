@@ -85,16 +85,12 @@ export function getRenderingsForProduct(productId: string): Rendering[] {
 
 export function upsertRendering(rendering: Rendering) {
   const renderings = getRenderings();
-  // Dedup by (productId + originalImage) to prevent duplicate generations
-  const dupeIdx = renderings.findIndex(
-    (r) => r.productId === rendering.productId && r.originalImage === rendering.originalImage
-  );
-  if (dupeIdx >= 0) {
-    renderings[dupeIdx] = rendering;
+  // Update by ID first (supports multiple renderings per product, e.g. pose variations)
+  const idx = renderings.findIndex((r) => r.id === rendering.id);
+  if (idx >= 0) {
+    renderings[idx] = rendering;
   } else {
-    const idx = renderings.findIndex((r) => r.id === rendering.id);
-    if (idx >= 0) renderings[idx] = rendering;
-    else renderings.push(rendering);
+    renderings.push(rendering);
   }
   saveRenderings(renderings);
 }

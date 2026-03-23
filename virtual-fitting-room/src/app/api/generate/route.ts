@@ -4,7 +4,7 @@ import {
   getRenderings,
   getRenderingsForProduct,
 } from "@/lib/db";
-import { generateRendering } from "@/lib/generate";
+import { generateRendering, getPoseVariations } from "@/lib/generate";
 import { randomUUID } from "crypto";
 
 export const maxDuration = 300; // 5 min timeout for Vercel
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { productId, outfitItems } = await req.json();
+  const { productId, outfitItems, pose } = await req.json();
   const product = getProduct(productId);
 
   if (!product) {
@@ -30,70 +30,55 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Product has no images" }, { status: 400 });
   }
 
-  // Skip if already generated for this product+image combo
-  const existing = getRenderingsForProduct(productId);
-  const alreadyDone = existing.find(
-    (r) => r.originalImage === firstImage && r.status === "done"
+  // Get 4 pose variations for the selected vibe
+  const poseVariations = getPoseVariations(pose || "editorial");
+
+  // Generate 4 unique rendering IDs
+  const renderingIds = poseVariations.map(() => randomUUID());
+
+  // Fire all 4 generation calls in parallel
+  const results = await Promise.allSettled(
+    poseVariations.map((poseVariation, i) =>
+      generateRendering(
+        productId,
+        product.images,
+        product.category,
+        renderingIds[i],
+        outfitItems,
+        pose || "editorial",
+        poseVariation
+      )
+    )
   );
-  if (alreadyDone) {
-    return NextResponse.json({
-      productId,
-      generated: 0,
-      skipped: 1,
-      results: [{ originalImage: firstImage, generatedImage: alreadyDone.generatedImage, status: "done" }],
-      remaining: 0,
+
+  const successResults = results
+    .map((r, i) => {
+      if (r.status === "fulfilled") {
+        return {
+          renderingId: renderingIds[i],
+          originalImage: firstImage,
+          generatedImage: r.value,
+          status: "done" as const,
+        };
+      }
+      return {
+        renderingId: renderingIds[i],
+        originalImage: firstImage,
+        error: r.reason instanceof Error ? r.reason.message : String(r.reason),
+        status: "error" as const,
+      };
     });
-  }
 
-  const renderingId = randomUUID();
-  try {
-    const generated = await generateRendering(
-      productId,
-      product.images,
-      product.category,
-      renderingId,
-      outfitItems
-    );
+  const generated = successResults.filter((r) => r.status === "done").length;
+  const errors = successResults.filter((r) => r.status === "error").length;
 
-    // Fire-and-forget: generate remaining images in background
-    const remainingImages = product.images.slice(1);
-    if (remainingImages.length > 0) {
-      generateRemainingInBackground(productId, remainingImages, product.category);
-    }
-
-    return NextResponse.json({
-      productId,
-      generated: 1,
-      errors: 0,
-      results: [{ originalImage: firstImage, generatedImage: generated, status: "done" }],
-      remaining: remainingImages.length,
-    });
-  } catch (err) {
-    return NextResponse.json({
-      productId,
-      generated: 0,
-      errors: 1,
-      results: [],
-      errors_detail: [{ originalImage: firstImage, error: err instanceof Error ? err.message : String(err), status: "error" }],
-    });
-  }
-}
-
-// Background generation for remaining images — no await, runs after response
-function generateRemainingInBackground(
-  productId: string,
-  images: string[],
-  category: string
-) {
-  const BATCH_SIZE = 3;
-  (async () => {
-    for (let i = 0; i < images.length; i += BATCH_SIZE) {
-      const batch = images.slice(i, i + BATCH_SIZE);
-      await Promise.allSettled(
-        batch.map((image) => generateRendering(productId, [image], category, randomUUID()))
-      );
-    }
-  })().catch(() => {
-    // Silently handle — errors are recorded in rendering status
+  return NextResponse.json({
+    productId,
+    generated,
+    errors,
+    renderingIds,
+    results: successResults.filter((r) => r.status === "done"),
+    errors_detail: successResults.filter((r) => r.status === "error"),
+    costEstimate: generated * 0.15,
   });
 }

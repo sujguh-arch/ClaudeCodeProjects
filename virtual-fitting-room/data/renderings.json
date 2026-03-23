@@ -1,100 +1,66 @@
 [
   {
-    "id": "9f620c22-e656-4453-a608-cf4aba38ac38",
-    "productId": "45bb1d2d-ab01-4e16-a491-6e3cbc12ac0f",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/15381-Black_Eirlys_9.jpg?v=1773665447",
-    "generatedImage": "/api/images/9f620c22-e656-4453-a608-cf4aba38ac38.jpg",
-    "status": "done",
-    "createdAt": "2026-03-23T19:23:36.890Z"
-  },
-  {
-    "id": "c7c7f520-e669-4a69-bb84-966f6068972b",
-    "productId": "45bb1d2d-ab01-4e16-a491-6e3cbc12ac0f",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/15381-Black_Eirlys_10.jpg?v=1773665447",
+    "id": "5a3eff5d-66d3-4bbd-a7cc-d803ed6bbe72",
+    "productId": "e7a53341-fa8f-4fac-afee-011f11a06e79",
+    "originalImage": "https://d166chel5lrjm5.cloudfront.net/images/detailed/108/holly-9576a-1b.jpg",
     "generatedImage": "",
-    "status": "error",
-    "createdAt": "2026-03-23T19:24:19.521Z",
-    "error": "All product images were flagged as sensitive content by the AI model"
+    "status": "generating",
+    "createdAt": "2026-03-23T21:39:19.356Z"
   },
   {
-    "id": "a57e1396-de04-4573-bd6f-6f9ecbad890c",
-    "productId": "45bb1d2d-ab01-4e16-a491-6e3cbc12ac0f",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/15381-Black_Eirlys_5.jpg?v=1773665447",
-    "generatedImage": "/api/images/a57e1396-de04-4573-bd6f-6f9ecbad890c.jpg",
-    "status": "done",
-    "createdAt": "2026-03-23T19:24:19.525Z"
-  },
-  {
-    "id": "76eb3f51-eb03-4e86-9e46-b06a4b8ac442",
-    "productId": "45bb1d2d-ab01-4e16-a491-6e3cbc12ac0f",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/15381-Black_Eirlys_3.jpg?v=1773665447",
-    "generatedImage": "/api/images/76eb3f51-eb03-4e86-9e46-b06a4b8ac442.jpg",
-    "status": "done",
-    "createdAt": "2026-03-23T19:24:19.529Z"
-  },
-  {
-    "id": "690ae334-9016-4161-9ba6-ac334ac242cd",
-    "productId": "45bb1d2d-ab01-4e16-a491-6e3cbc12ac0f",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/15381-Black_Eirlys_4.jpg?v=1773665447",
+    "id": "0d835581-0aeb-4fa5-a706-a0edc8715b4a",
+    "productId": "e7a53341-fa8f-4fac-afee-011f11a06e79",
+    "originalImage": "https://d166chel5lrjm5.cloudfront.net/images/detailed/108/holly-9576a-1b.jpg",
     "generatedImage": "",
-    "status": "error",
-    "createdAt": "2026-03-23T19:24:57.230Z",
-    "error": "All product images were flagged as sensitive content by the AI model"
+    "status": "generating",
+    "createdAt": "2026-03-23T21:39:19.359Z"
   },
   {
-    "id": "c8f15b81-125a-4b90-a58d-470dbc1fbf59",
-    "productId": "45bb1d2d-ab01-4e16-a491-6e3cbc12ac0f",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/15381-Black_Eirlys_1.jpg?v=1773665447",
-    "generatedImage": "/api/images/c8f15b81-125a-4b90-a58d-470dbc1fbf59.jpg",
-    "status": "done",
-    "createdAt": "2026-03-23T19:24:57.232Z"
+    "id": "e473054a-41f9-42ce-b6b7-ddbb43ac3ee5",
+    "productId": "e7a53341-fa8f-4fac-afee-011f11a06e79",
+    "originalImage": "https://d166chel5lrjm5.cloudfront.net/images/detailed/108/holly-9576a-1b.jpg",
+    "generatedImage": "",
+    "status": "generating",
+    "createdAt": "2026-03-23T21:39:19.363Z"
   },
   {
-    "id": "0089674f-343c-4187-8f43-9a7e72bd9c56",
-    "productId": "0a6094d9-8834-4586-ae95-db18ec4e7e18",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/EternaMiniDressBlack6Peppermayo.jpg?v=1761018039",
-    "generatedImage": "/api/images/0089674f-343c-4187-8f43-9a7e72bd9c56.jpg",
-    "status": "done",
-    "createdAt": "2026-03-23T19:27:35.494Z"
+    "id": "b84a8a6e-ab5e-4444-b045-e4ac4bac225c",
+    "productId": "e7a53341-fa8f-4fac-afee-011f11a06e79",
+    "originalImage": "https://d166chel5lrjm5.cloudfront.net/images/detailed/108/holly-9576a-1b.jpg",
+    "generatedImage": "",
+    "status": "generating",
+    "createdAt": "2026-03-23T21:39:19.367Z"
   },
   {
-    "id": "791c42bc-0945-4142-99ce-2246346aff3e",
-    "productId": "0a6094d9-8834-4586-ae95-db18ec4e7e18",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/EternaMiniDressBlack1Peppermayo.jpg?v=1761018039",
-    "generatedImage": "/api/images/791c42bc-0945-4142-99ce-2246346aff3e.jpg",
+    "id": "c4ba18a7-804f-49c3-b254-5255c24ccd22",
+    "productId": "2f78cc1c-393c-4ebe-9f0b-d00651cd21b9",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/16104-ButterYellow_Sorelle_5.jpg?v=1772185373",
+    "generatedImage": "/api/images/c4ba18a7-804f-49c3-b254-5255c24ccd22.jpg",
     "status": "done",
-    "createdAt": "2026-03-23T19:28:13.342Z"
+    "createdAt": "2026-03-23T21:44:18.523Z"
   },
   {
-    "id": "02cf7603-aaaf-4220-80e9-67066bd5225a",
-    "productId": "0a6094d9-8834-4586-ae95-db18ec4e7e18",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/EternaMiniDressBlack2Peppermayo.jpg?v=1761018038",
-    "generatedImage": "/api/images/02cf7603-aaaf-4220-80e9-67066bd5225a.jpg",
+    "id": "86f39865-a23f-4a49-8001-040099bbd262",
+    "productId": "2f78cc1c-393c-4ebe-9f0b-d00651cd21b9",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/16104-ButterYellow_Sorelle_5.jpg?v=1772185373",
+    "generatedImage": "/api/images/86f39865-a23f-4a49-8001-040099bbd262.jpg",
     "status": "done",
-    "createdAt": "2026-03-23T19:28:13.344Z"
+    "createdAt": "2026-03-23T21:44:18.529Z"
   },
   {
-    "id": "19102717-e51f-4483-942d-233e811d7680",
-    "productId": "0a6094d9-8834-4586-ae95-db18ec4e7e18",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/EternaMiniDressBlack3Peppermayo.jpg?v=1761018039",
-    "generatedImage": "/api/images/19102717-e51f-4483-942d-233e811d7680.jpg",
+    "id": "005e629f-a1c2-4328-9517-1695c8f80321",
+    "productId": "2f78cc1c-393c-4ebe-9f0b-d00651cd21b9",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/16104-ButterYellow_Sorelle_5.jpg?v=1772185373",
+    "generatedImage": "/api/images/005e629f-a1c2-4328-9517-1695c8f80321.jpg",
     "status": "done",
-    "createdAt": "2026-03-23T19:28:13.346Z"
+    "createdAt": "2026-03-23T21:44:18.534Z"
   },
   {
-    "id": "3a00224a-8600-4c12-896a-c333b2fbfb28",
-    "productId": "0a6094d9-8834-4586-ae95-db18ec4e7e18",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/EternaMiniDressBlack4Peppermayo.jpg?v=1761018038",
-    "generatedImage": "/api/images/3a00224a-8600-4c12-896a-c333b2fbfb28.jpg",
+    "id": "c7b778a3-2025-4251-a8bf-1e454c2cd30f",
+    "productId": "2f78cc1c-393c-4ebe-9f0b-d00651cd21b9",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0594/1506/8881/files/16104-ButterYellow_Sorelle_5.jpg?v=1772185373",
+    "generatedImage": "/api/images/c7b778a3-2025-4251-a8bf-1e454c2cd30f.jpg",
     "status": "done",
-    "createdAt": "2026-03-23T19:28:48.192Z"
-  },
-  {
-    "id": "22cb6c6f-e382-4c09-9cb5-f0a1d2ed8118",
-    "productId": "0a6094d9-8834-4586-ae95-db18ec4e7e18",
-    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/EternaMiniDressBlack5Peppermayo.jpg?v=1761018038",
-    "generatedImage": "/api/images/22cb6c6f-e382-4c09-9cb5-f0a1d2ed8118.jpg",
-    "status": "done",
-    "createdAt": "2026-03-23T19:28:48.194Z"
+    "createdAt": "2026-03-23T21:44:18.539Z"
   }
 ]
