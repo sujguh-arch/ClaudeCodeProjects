@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSettings, saveSettings } from "@/lib/db";
+import { getSettings, saveSettings, setImageBuffer } from "@/lib/db";
 import fs from "fs";
 import path from "path";
+
+const IS_VERCEL = !!process.env.VERCEL;
 
 export async function GET() {
   const settings = getSettings();
@@ -22,15 +24,20 @@ export async function POST(req: NextRequest) {
     const settings = getSettings();
 
     if (photo && photo.size > 0) {
-      const uploadsDir = path.join(process.cwd(), "public", "uploads");
-      if (!fs.existsSync(uploadsDir))
-        fs.mkdirSync(uploadsDir, { recursive: true });
-
       const buffer = Buffer.from(await photo.arrayBuffer());
       const filename = `reference_${Date.now()}.jpg`;
-      const filePath = path.join(uploadsDir, filename);
-      fs.writeFileSync(filePath, buffer);
-      settings.referencePhoto = `/uploads/${filename}`;
+
+      if (IS_VERCEL) {
+        // Store in memory on Vercel — serve via /api/images/
+        setImageBuffer(filename, buffer);
+        settings.referencePhoto = `/api/images/${filename}`;
+      } else {
+        const uploadsDir = path.join(process.cwd(), "public", "uploads");
+        if (!fs.existsSync(uploadsDir))
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        fs.writeFileSync(path.join(uploadsDir, filename), buffer);
+        settings.referencePhoto = `/uploads/${filename}`;
+      }
     }
 
     if (token && token !== "***configured***") {

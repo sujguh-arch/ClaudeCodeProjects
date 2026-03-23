@@ -36,9 +36,11 @@ export async function POST(req: NextRequest) {
   // Generate 4 unique rendering IDs
   const renderingIds = poseVariations.map(() => randomUUID());
 
-  // Fire all 4 generation calls in parallel
-  const results = await Promise.allSettled(
-    poseVariations.map((poseVariation, i) =>
+  // Stagger generation calls with 2s delay to avoid Replicate rate limiting
+  const generationPromises = [];
+  for (const [i, poseVariation] of poseVariations.entries()) {
+    if (i > 0) await new Promise((r) => setTimeout(r, 2000));
+    generationPromises.push(
       generateRendering(
         productId,
         product.images,
@@ -48,8 +50,9 @@ export async function POST(req: NextRequest) {
         pose || "editorial",
         poseVariation
       )
-    )
-  );
+    );
+  }
+  const results = await Promise.allSettled(generationPromises);
 
   const successResults = results
     .map((r, i) => {

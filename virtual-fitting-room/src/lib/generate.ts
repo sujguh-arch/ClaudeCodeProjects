@@ -1,11 +1,12 @@
 import Replicate from "replicate";
 import fs from "fs";
 import path from "path";
-import { getSettings, getRenderings, upsertRendering, type Rendering } from "./db";
+import { getSettings, getRenderings, upsertRendering, setImageBuffer, type Rendering } from "./db";
 
+const IS_VERCEL = !!process.env.VERCEL;
 const GENERATED_DIR = path.join(process.cwd(), "public", "generated");
 
-if (!fs.existsSync(GENERATED_DIR))
+if (!IS_VERCEL && !fs.existsSync(GENERATED_DIR))
   fs.mkdirSync(GENERATED_DIR, { recursive: true });
 
 export const POSES: Record<string, string> = {
@@ -220,8 +221,11 @@ export async function generateRendering(
             const buffer = Buffer.from(await resp.arrayBuffer());
 
             const filename = `${renderingId}.jpg`;
-            const outPath = path.join(GENERATED_DIR, filename);
-            fs.writeFileSync(outPath, buffer);
+            if (IS_VERCEL) {
+              setImageBuffer(filename, buffer);
+            } else {
+              fs.writeFileSync(path.join(GENERATED_DIR, filename), buffer);
+            }
 
             rendering.originalImage = images[0];
             rendering.generatedImage = `/api/images/${filename}`;

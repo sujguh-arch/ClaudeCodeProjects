@@ -62,5 +62,40 @@
     "generatedImage": "/api/images/c7b778a3-2025-4251-a8bf-1e454c2cd30f.jpg",
     "status": "done",
     "createdAt": "2026-03-23T21:44:18.539Z"
+  },
+  {
+    "id": "662d6f5d-c02f-43ab-9964-416d3bcb653f",
+    "productId": "d805830f-5cef-4822-8314-0a5a39970702",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/1-modelinfo-anna-us2_38769425-8931-4ab3-b313-cd0e24ae462a.jpg?v=1690761713",
+    "generatedImage": "",
+    "status": "error",
+    "createdAt": "2026-03-23T22:54:06.662Z",
+    "error": "Request to https://api.replicate.com/v1/models/google/nano-banana-pro/predictions failed with status 429 Too Many Requests: {\"detail\":\"Request was throttled. Your rate limit for creating predictions is reduced to 6 requests per minute with a burst of 1 requests while you have less than $5.0 in credit. Your rate limit resets in ~4s.\",\"status\":429,\"retry_after\":4}\n."
+  },
+  {
+    "id": "a1c420d1-ba0d-4c20-bf52-becca4153d62",
+    "productId": "d805830f-5cef-4822-8314-0a5a39970702",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/1-modelinfo-anna-us2_38769425-8931-4ab3-b313-cd0e24ae462a.jpg?v=1690761713",
+    "generatedImage": "/api/images/a1c420d1-ba0d-4c20-bf52-becca4153d62.jpg",
+    "status": "done",
+    "createdAt": "2026-03-23T22:54:06.664Z"
+  },
+  {
+    "id": "d9827a80-55af-45d2-b5bf-895babc1d4cc",
+    "productId": "d805830f-5cef-4822-8314-0a5a39970702",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/1-modelinfo-anna-us2_38769425-8931-4ab3-b313-cd0e24ae462a.jpg?v=1690761713",
+    "generatedImage": "",
+    "status": "error",
+    "createdAt": "2026-03-23T22:54:06.667Z",
+    "error": "Request to https://api.replicate.com/v1/models/google/nano-banana-pro/predictions failed with status 429 Too Many Requests: {\"detail\":\"Request was throttled. Your rate limit for creating predictions is reduced to 6 requests per minute with a burst of 1 requests while you have less than $5.0 in credit. Your rate limit resets in ~3s.\",\"status\":429,\"retry_after\":3}\n."
+  },
+  {
+    "id": "0d518f5c-0666-4c74-9414-9dbb8fe21aa3",
+    "productId": "d805830f-5cef-4822-8314-0a5a39970702",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0061/8627/0804/files/1-modelinfo-anna-us2_38769425-8931-4ab3-b313-cd0e24ae462a.jpg?v=1690761713",
+    "generatedImage": "",
+    "status": "error",
+    "createdAt": "2026-03-23T22:54:06.671Z",
+    "error": "Request to https://api.replicate.com/v1/models/google/nano-banana-pro/predictions failed with status 429 Too Many Requests: {\"detail\":\"Request was throttled. Your rate limit for creating predictions is reduced to 6 requests per minute with a burst of 1 requests while you have less than $5.0 in credit. Your rate limit resets in ~3s.\",\"status\":429,\"retry_after\":3}\n."
   }
 ]

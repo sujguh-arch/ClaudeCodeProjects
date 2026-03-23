@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 
+const IS_VERCEL = !!process.env.VERCEL;
 const DATA_DIR = process.env.VFR_DATA_DIR || path.join(process.cwd(), "data");
 const PRODUCTS_FILE = path.join(DATA_DIR, "products.json");
 const RENDERINGS_FILE = path.join(DATA_DIR, "renderings.json");
@@ -8,8 +9,27 @@ const SETTINGS_FILE = path.join(DATA_DIR, "settings.json");
 const OUTFITS_FILE = path.join(DATA_DIR, "outfits.json");
 
 function ensureDir() {
-  if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (!IS_VERCEL && !fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 }
+
+// --------------- In-memory stores for Vercel (serverless, no fs writes) ---------------
+
+let memRenderings: Rendering[] | null = null;
+let memOutfits: Outfit[] | null = null;
+let memSettings: Settings | null = null;
+
+// Generated images stored in memory on Vercel (Buffer keyed by filename)
+const memImages = new Map<string, Buffer>();
+
+export function getImageBuffer(filename: string): Buffer | undefined {
+  return memImages.get(filename);
+}
+
+export function setImageBuffer(filename: string, buffer: Buffer): void {
+  memImages.set(filename, buffer);
+}
+
+// --------------- Types ---------------
 
 export interface Product {
   id: string;
@@ -40,7 +60,22 @@ export interface Settings {
   model: string;
 }
 
-// Products
+export interface Outfit {
+  id: string;
+  name: string;
+  items: {
+    dress?: string;
+    shoes?: string;
+    tights?: string;
+    bag?: string;
+    accessories?: string[];
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+// --------------- Products (read-only static data, always from disk) ---------------
+
 export function getProducts(): Product[] {
   ensureDir();
   if (!fs.existsSync(PRODUCTS_FILE)) return [];
@@ -67,14 +102,27 @@ export function deleteProduct(id: string) {
   saveProducts(products);
 }
 
-// Renderings
-export function getRenderings(): Rendering[] {
+// --------------- Renderings ---------------
+
+function loadRenderingsFromDisk(): Rendering[] {
   ensureDir();
   if (!fs.existsSync(RENDERINGS_FILE)) return [];
   return JSON.parse(fs.readFileSync(RENDERINGS_FILE, "utf-8"));
 }
 
+export function getRenderings(): Rendering[] {
+  if (IS_VERCEL) {
+    if (!memRenderings) memRenderings = [];
+    return memRenderings;
+  }
+  return loadRenderingsFromDisk();
+}
+
 export function saveRenderings(renderings: Rendering[]) {
+  if (IS_VERCEL) {
+    memRenderings = renderings;
+    return;
+  }
   ensureDir();
   fs.writeFileSync(RENDERINGS_FILE, JSON.stringify(renderings, null, 2));
 }
@@ -85,7 +133,6 @@ export function getRenderingsForProduct(productId: string): Rendering[] {
 
 export function upsertRendering(rendering: Rendering) {
   const renderings = getRenderings();
-  // Update by ID first (supports multiple renderings per product, e.g. pose variations)
   const idx = renderings.findIndex((r) => r.id === rendering.id);
   if (idx >= 0) {
     renderings[idx] = rendering;
@@ -95,28 +142,27 @@ export function upsertRendering(rendering: Rendering) {
   saveRenderings(renderings);
 }
 
-// Outfits
-export interface Outfit {
-  id: string;
-  name: string;
-  items: {
-    dress?: string;
-    shoes?: string;
-    tights?: string;
-    bag?: string;
-    accessories?: string[];
-  };
-  createdAt: string;
-  updatedAt: string;
-}
+// --------------- Outfits ---------------
 
-export function getOutfits(): Outfit[] {
+function loadOutfitsFromDisk(): Outfit[] {
   ensureDir();
   if (!fs.existsSync(OUTFITS_FILE)) return [];
   return JSON.parse(fs.readFileSync(OUTFITS_FILE, "utf-8"));
 }
 
+export function getOutfits(): Outfit[] {
+  if (IS_VERCEL) {
+    if (!memOutfits) memOutfits = loadOutfitsFromDisk();
+    return memOutfits;
+  }
+  return loadOutfitsFromDisk();
+}
+
 export function saveOutfits(outfits: Outfit[]) {
+  if (IS_VERCEL) {
+    memOutfits = outfits;
+    return;
+  }
   ensureDir();
   fs.writeFileSync(OUTFITS_FILE, JSON.stringify(outfits, null, 2));
 }
@@ -147,8 +193,19 @@ export function deleteOutfit(id: string) {
   saveOutfits(outfits);
 }
 
-// Settings
+// --------------- Settings ---------------
+
 export function getSettings(): Settings {
+  if (IS_VERCEL) {
+    if (!memSettings) {
+      memSettings = {
+        referencePhoto: "/uploads/reference.jpg",
+        replicateToken: process.env.REPLICATE_API_TOKEN || "",
+        model: "google/nano-banana-pro",
+      };
+    }
+    return memSettings;
+  }
   ensureDir();
   if (!fs.existsSync(SETTINGS_FILE)) {
     return {
@@ -165,6 +222,10 @@ export function getSettings(): Settings {
 }
 
 export function saveSettings(settings: Settings) {
+  if (IS_VERCEL) {
+    memSettings = settings;
+    return;
+  }
   ensureDir();
   fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2));
 }

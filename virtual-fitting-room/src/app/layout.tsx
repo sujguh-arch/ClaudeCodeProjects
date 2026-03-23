@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "mirror",
   description: "See yourself in anything",
   manifest: "/manifest.json",
+  icons: {
+    apple: "/icon-192.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -18,7 +21,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
-  themeColor: "#111110",
+  themeColor: "#0A0A0A",
 };
 
 export default function RootLayout({
