@@ -1,7 +1,7 @@
 import { chromium } from '@playwright/test';
 import { mkdirSync } from 'fs';
 
-const OUT = 'eval/visual-audit-v2';
+const OUT = 'eval/visual-audit-v3';
 mkdirSync(OUT, { recursive: true });
 
 const viewports = [

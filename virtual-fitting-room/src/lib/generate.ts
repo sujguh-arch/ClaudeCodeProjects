@@ -21,37 +21,37 @@ const POSE_VARIATIONS: Record<string, string[]> = {
   editorial: [
     "Standing confidently with one hand on hip, direct eye contact with camera",
     "Three-quarter turn, looking over shoulder with a slight smile",
-    "Bending forward deeply at the waist, picking up her clutch from the floor, showing the outfit from a dramatic angle. Full body visible.",
+    "Leaning forward deeply over a counter or bar, elbows resting on the surface, back arched, looking at camera with a confident flirty expression. Full body visible from the side showing the complete outfit including shoes and accessories. Legs straight, weight on feet. Glamorous studio setting with marble counter.",
     "Arms relaxed at sides, weight on one leg, serene expression",
   ],
   walking: [
     "Mid-stride on a sidewalk, one foot forward, confident gaze ahead",
     "Pausing mid-step to glance back over her shoulder, hair in motion",
-    "Bending forward deeply at the waist mid-walk, reaching down to pick up a dropped item from the ground, outfit visible from a dramatic low angle. Full body visible.",
+    "Leaning forward deeply over a counter or bar, elbows resting on the surface, back arched, looking at camera with a confident flirty expression. Full body visible from the side showing the complete outfit including shoes and accessories. Legs straight, weight on feet. Glamorous street-side bar setting.",
     "Casual stroll with hands in motion, looking to the side, carefree energy",
   ],
   seated: [
     "Seated with legs crossed elegantly, hands resting on knee, poised expression",
     "Perched on the edge of a chair leaning slightly forward, engaged and warm",
-    "Bending forward deeply at the waist from a seated position, reaching toward the floor to grab her bag, showing the full outfit from above. Full body visible.",
+    "Leaning forward deeply over a counter or bar, elbows resting on the surface, back arched, looking at camera with a confident flirty expression. Full body visible from the side showing the complete outfit including shoes and accessories. Legs straight, weight on feet. Glamorous lounge setting with a velvet bar.",
     "Reclined back with one arm draped over the chair, relaxed and confident",
   ],
   candid: [
     "Caught mid-laugh, hands near her face, natural joy, looking slightly off-camera",
     "Glancing down with a soft smile, tucking hair behind her ear",
-    "Bending forward deeply at the waist, picking something up off the ground in a candid moment, outfit shown from a dramatic overhead angle. Full body visible.",
+    "Leaning forward deeply over a counter or bar, elbows resting on the surface, back arched, looking at camera with a confident flirty expression. Full body visible from the side showing the complete outfit including shoes and accessories. Legs straight, weight on feet. Glamorous cocktail bar setting.",
     "Looking up with wide eyes and a surprised smile, spontaneous and bright",
   ],
   leaning: [
     "Leaning against a wall with one shoulder, arms crossed, cool and confident",
     "Leaning back with hands in pockets, chin slightly tilted up, effortless attitude",
-    "Bending forward deeply at the waist while leaning on a railing, reaching down to pick up her clutch from the floor, outfit displayed from a dramatic angle. Full body visible.",
+    "Leaning forward deeply over a counter or bar, elbows resting on the surface, back arched, looking at camera with a confident flirty expression. Full body visible from the side showing the complete outfit including shoes and accessories. Legs straight, weight on feet. Glamorous rooftop bar setting.",
     "Leaning on one elbow against a surface, relaxed half-smile, looking at camera",
   ],
   "evening-out": [
     "Glamorous pose with slight turn showing the full outfit silhouette, one hand on hip",
     "Walking toward camera under evening lights, sultry confident gaze",
-    "Bending forward deeply at the waist under nighttime lighting, picking up her clutch from the floor, showing the outfit from a dramatic low angle. Full body visible.",
+    "Leaning forward deeply over a counter or bar, elbows resting on the surface, back arched, looking at camera with a confident flirty expression. Full body visible from the side showing the complete outfit including shoes and accessories. Legs straight, weight on feet. Glamorous upscale nightclub setting with moody lighting.",
     "Standing tall with clutch in hand, looking off into the distance, elegant and poised",
   ],
 };

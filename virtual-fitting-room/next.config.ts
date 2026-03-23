@@ -24,6 +24,13 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.peppermayo.com" },
       { protocol: "https", hostname: "**.princesspolly.com" },
       { protocol: "https", hostname: "**.princesspolly.com.au" },
+      { protocol: "https", hostname: "**.revolve.com" },
+      { protocol: "https", hostname: "is4.revolveassets.com" },
+      { protocol: "https", hostname: "images.asos-media.com" },
+      { protocol: "https", hostname: "**.abercrombie.com" },
+      { protocol: "https", hostname: "**.scene7.com" },
+      { protocol: "https", hostname: "**.coachoutlet.com" },
+      { protocol: "https", hostname: "static.zara.net" },
     ],
     // Enable Next.js image optimization for production
     // unoptimized: true,
