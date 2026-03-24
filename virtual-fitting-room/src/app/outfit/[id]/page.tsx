@@ -110,7 +110,7 @@ export default function OutfitPage({
       // Check renderings from localStorage
       const renderings = cs.getRenderings();
       const doneRenderings = renderings.filter(
-        (r) => allIds.includes(r.productId) && r.status === "done" && r.generatedImage?.startsWith("/api/images/")
+        (r) => allIds.includes(r.productId) && r.status === "done" && r.generatedImage && (r.generatedImage.startsWith("/api/images/") || r.generatedImage.startsWith("https://"))
       );
       if (doneRenderings.length > 0) {
         setGeneratedImages(doneRenderings.map((r) => r.generatedImage));
@@ -708,13 +708,11 @@ export default function OutfitPage({
               exit={{ scale: 0.9 }}
               className="relative w-full h-full flex items-center justify-center p-4"
             >
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={fullscreenImage}
                 alt="Generated look fullscreen"
-                width={768}
-                height={1024}
                 className="max-w-full max-h-full object-contain"
-                sizes="100vw"
               />
               <button
                 className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full"
@@ -1103,16 +1101,12 @@ function ImageCarousel({
                 className="cursor-pointer"
                 onClick={() => onImageTap(img)}
               >
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={img}
                   alt={`Generated look ${i + 1}`}
-                  width={768}
-                  height={1024}
-                  sizes="85vw"
                   className="w-full h-auto"
                   style={{ aspectRatio: "3/4", objectFit: "cover" }}
-                  placeholder="blur"
-                  blurDataURL={BLUR_PLACEHOLDER}
                 />
               </motion.div>
             ) : (

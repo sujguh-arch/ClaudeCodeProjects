@@ -3,12 +3,6 @@ import fs from "fs";
 import path from "path";
 import { getSettings, getRenderings, upsertRendering, setImageBuffer, type Rendering } from "./db";
 
-const IS_VERCEL = !!process.env.VERCEL;
-const GENERATED_DIR = path.join(process.cwd(), "public", "generated");
-
-if (!IS_VERCEL && !fs.existsSync(GENERATED_DIR))
-  fs.mkdirSync(GENERATED_DIR, { recursive: true });
-
 export const POSES: Record<string, string> = {
   editorial: "Standing in a confident editorial pose, one hand on hip, direct gaze at camera",
   walking: "Mid-stride walking pose, natural movement, candid street style",
@@ -216,19 +210,9 @@ export async function generateRendering(
             );
 
             const url = Array.isArray(output) ? String(output[0]) : String(output);
-            const resp = await fetch(url, { signal: AbortSignal.timeout(30_000) });
-            if (!resp.ok) throw new Error("Download failed: " + resp.status);
-            const buffer = Buffer.from(await resp.arrayBuffer());
-
-            const filename = `${renderingId}.jpg`;
-            if (IS_VERCEL) {
-              setImageBuffer(filename, buffer);
-            } else {
-              fs.writeFileSync(path.join(GENERATED_DIR, filename), buffer);
-            }
 
             rendering.originalImage = images[0];
-            rendering.generatedImage = `/api/images/${filename}`;
+            rendering.generatedImage = url;
             rendering.status = "done";
             upsertRendering(rendering);
 
@@ -290,16 +274,9 @@ export async function generateRendering(
           );
 
           const url = Array.isArray(output) ? String(output[0]) : String(output);
-          const resp = await fetch(url, { signal: AbortSignal.timeout(30_000) });
-          if (!resp.ok) throw new Error("Download failed: " + resp.status);
-          const buffer = Buffer.from(await resp.arrayBuffer());
-
-          const filename = `${renderingId}.jpg`;
-          const outPath = path.join(GENERATED_DIR, filename);
-          fs.writeFileSync(outPath, buffer);
 
           rendering.originalImage = productImage;
-          rendering.generatedImage = `/api/images/${filename}`;
+          rendering.generatedImage = url;
           rendering.status = "done";
           upsertRendering(rendering);
 
