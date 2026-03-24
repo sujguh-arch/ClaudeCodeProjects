@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { getImageBuffer } from "@/lib/db";
+import { getImageBuffer, getImageBufferAsync } from "@/lib/db";
 
 const IS_VERCEL = !!process.env.VERCEL;
 
@@ -22,9 +22,13 @@ export async function GET(
     ext === ".webp" ? "image/webp" :
     "image/jpeg";
 
-  // On Vercel, serve from in-memory store
+  // On Vercel, serve from in-memory store or KV
   if (IS_VERCEL) {
-    const buffer = getImageBuffer(filename);
+    // Try sync memory first, then async KV
+    let buffer = getImageBuffer(filename);
+    if (!buffer) {
+      buffer = (await getImageBufferAsync(filename)) ?? undefined;
+    }
     if (!buffer) {
       return new NextResponse("Not found", { status: 404 });
     }

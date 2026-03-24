@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { getImageBuffer } from "@/lib/db";
+import { getImageBuffer, getImageBufferAsync } from "@/lib/db";
 
 const IS_VERCEL = !!process.env.VERCEL;
 
 export async function GET() {
-  // On Vercel, check in-memory store first
+  // On Vercel, check in-memory store then KV
   if (IS_VERCEL) {
-    // Try to find any reference image in memory
-    const memBuffer = getImageBuffer("reference.jpg");
+    let memBuffer = getImageBuffer("reference.jpg");
+    if (!memBuffer) {
+      memBuffer = (await getImageBufferAsync("reference.jpg")) ?? undefined;
+    }
     if (memBuffer) {
       return new NextResponse(new Uint8Array(memBuffer), {
         headers: {

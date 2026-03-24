@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -153,6 +153,9 @@ export default function Home() {
   const [showOnboard, setShowOnboard] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(20);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // Settings state
   const [settingsUploading, setSettingsUploading] = useState(false);
@@ -187,6 +190,27 @@ export default function Home() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Reset visible count when category changes
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [category]);
+
+  // Infinite scroll with IntersectionObserver
+  useEffect(() => {
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => prev + 20);
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   function getGenerated(pid: string): string[] {
     return renderings
@@ -318,11 +342,177 @@ export default function Home() {
   const filteredProducts = category === "all"
     ? products
     : products.filter((p) => p.category === category);
+  const paginatedProducts = filteredProducts.slice(0, visibleCount);
+  const hasMore = paginatedProducts.length < filteredProducts.length;
 
   return (
     <main className="min-h-screen relative">
+      {/* ===== SPLASH SCREEN ===== */}
+      <AnimatePresence>
+        {showSplash && (
+          <motion.div
+            key="splash"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
+            style={{ background: "var(--bg-base)" }}
+          >
+            {/* Logo */}
+            <motion.h1
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "48px",
+                color: "var(--accent)",
+                letterSpacing: "0.3em",
+                textTransform: "uppercase",
+                marginBottom: "8px",
+              }}
+            >
+              mirror
+            </motion.h1>
+
+            {/* Tagline */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "14px",
+                color: "var(--text-tertiary)",
+                letterSpacing: "var(--tracking-wide)",
+              }}
+            >
+              See yourself in anything
+            </motion.p>
+
+            {/* Shimmer divider */}
+            <motion.div
+              initial={{ scaleX: 0, opacity: 0 }}
+              animate={{ scaleX: 1, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.7, ease: "easeOut" }}
+              className="my-8"
+              style={{
+                width: "60px",
+                height: "1px",
+                background: "linear-gradient(90deg, transparent, var(--accent-muted), transparent)",
+              }}
+            />
+
+            {/* Reference photo circle */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.9, type: "spring", stiffness: 200, damping: 20 }}
+              className="mb-10"
+            >
+              {refPhoto ? (
+                <div
+                  className="relative overflow-hidden rounded-full"
+                  style={{
+                    width: "200px",
+                    height: "200px",
+                    border: "2px solid var(--accent-muted)",
+                    boxShadow: "0 0 40px rgba(212,175,97,0.1)",
+                  }}
+                >
+                  <Image
+                    src={refPhotoSrc!}
+                    alt=""
+                    width={200}
+                    height={200}
+                    className="object-cover w-full h-full"
+                    priority
+                  />
+                </div>
+              ) : (
+                <div
+                  className="flex items-center justify-center rounded-full"
+                  style={{
+                    width: "200px",
+                    height: "200px",
+                    border: "2px dashed var(--border-default)",
+                    background: "var(--bg-surface)",
+                  }}
+                >
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                    <circle cx="12" cy="8" r="5" />
+                    <path d="M20 21a8 8 0 0 0-16 0" />
+                  </svg>
+                </div>
+              )}
+            </motion.div>
+
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 1.2, ease: "easeOut" }}
+              className="flex flex-col gap-3 w-full px-10"
+              style={{ maxWidth: "320px" }}
+            >
+              <motion.button
+                whileHover={{ scale: 1.02, boxShadow: "0 4px 20px rgba(212,175,97,0.25)" }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => { setShowSplash(false); setTab("closet"); }}
+                className="w-full py-3.5"
+                style={{
+                  borderRadius: "var(--radius-md)",
+                  background: "var(--accent)",
+                  color: "var(--bg-base)",
+                  fontSize: "var(--text-sm)",
+                  fontWeight: "var(--weight-semibold)",
+                  letterSpacing: "var(--tracking-wider)",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                My Closet
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => { setShowSplash(false); setTab("outfits"); handleCreateOutfit(); }}
+                className="w-full py-3.5"
+                style={{
+                  borderRadius: "var(--radius-md)",
+                  background: "transparent",
+                  color: "var(--accent)",
+                  fontSize: "var(--text-sm)",
+                  fontWeight: "var(--weight-semibold)",
+                  letterSpacing: "var(--tracking-wider)",
+                  border: "1.5px solid var(--accent-muted)",
+                  cursor: "pointer",
+                }}
+              >
+                Create Outfit
+              </motion.button>
+            </motion.div>
+
+            {/* Bottom counter */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 1.5 }}
+              className="absolute bottom-8"
+              style={{
+                fontSize: "var(--text-caption)",
+                color: "var(--text-tertiary)",
+                letterSpacing: "var(--tracking-wider)",
+              }}
+            >
+              {products.length > 0 ? `${products.length} pieces from ${new Set(products.map(p => p.store)).size} stores` : ""}
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Top header bar */}
-      <header
+      {!showSplash && <header
         className="sticky top-0 z-40 px-5 py-3 flex items-center justify-between"
         style={{
           background: "var(--bg-frosted)",
@@ -368,7 +558,7 @@ export default function Home() {
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
         </motion.button>
-      </header>
+      </header>}
 
       {/* Add Product Modal */}
       <AnimatePresence>
@@ -459,7 +649,7 @@ export default function Home() {
       </AnimatePresence>
 
       {/* Tab Content */}
-      <div style={{ paddingBottom: "calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px) + 16px)" }}>
+      {!showSplash && <div style={{ paddingBottom: "calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px) + 16px)" }}>
         <AnimatePresence mode="wait" custom={tabDirection}>
           {/* ===== CLOSET TAB ===== */}
           {tab === "closet" && (
@@ -531,7 +721,7 @@ export default function Home() {
                           animate="visible"
                           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"
                         >
-                          {filteredProducts.map((product) => {
+                          {paginatedProducts.map((product, idx) => {
                             const gen = getGenerated(product.id);
                             const isGen = generating.has(product.id);
                             const img = gen.length > 0 ? gen[0] : product.images[0];
@@ -554,7 +744,7 @@ export default function Home() {
                               >
                                 <div className="relative aspect-[3/4] overflow-hidden" style={{ background: "var(--bg-elevated)", borderRadius: "12px 12px 0 0" }}>
                                   {img && (
-                                    <ImageWithFallback store={product.store} src={img} alt={product.title} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" className="object-cover card-image" loading="lazy" placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
+                                    <ImageWithFallback store={product.store} src={img} alt={product.title} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" className="object-cover card-image" {...(idx < 4 ? { priority: true } : { loading: "lazy" as const })} placeholder="blur" blurDataURL={BLUR_PLACEHOLDER} />
                                   )}
 
                                   {/* Delete button */}
@@ -604,6 +794,21 @@ export default function Home() {
                             );
                           })}
                         </motion.div>
+
+                        {/* Infinite scroll sentinel */}
+                        {hasMore && (
+                          <div
+                            ref={loadMoreRef}
+                            className="flex items-center justify-center py-6"
+                          >
+                            <span style={{ fontSize: "var(--text-xs)", color: "var(--text-tertiary)", letterSpacing: "var(--tracking-wide)" }}>
+                              Loading more...
+                            </span>
+                          </div>
+                        )}
+                        {!hasMore && filteredProducts.length > 20 && (
+                          <div ref={loadMoreRef} />
+                        )}
                       </>
                     )}
 
@@ -849,7 +1054,7 @@ export default function Home() {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </div>}
 
       {/* Lightbox */}
       <AnimatePresence>
@@ -870,7 +1075,7 @@ export default function Home() {
       </AnimatePresence>
 
       {/* ===== BOTTOM TAB BAR ===== */}
-      <nav
+      {!showSplash && <nav
         className="fixed bottom-0 z-50"
         style={{
           left: "50%",
@@ -923,7 +1128,7 @@ export default function Home() {
             );
           })}
         </div>
-      </nav>
+      </nav>}
     </main>
   );
 }
