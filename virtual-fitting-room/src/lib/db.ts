@@ -133,7 +133,10 @@ export function getRenderingsForProduct(productId: string): Rendering[] {
 
 export function upsertRendering(rendering: Rendering) {
   const renderings = getRenderings();
-  const idx = renderings.findIndex((r) => r.id === rendering.id);
+  // Deduplicate by (productId + originalImage) composite key
+  const idx = renderings.findIndex(
+    (r) => r.productId === rendering.productId && r.originalImage === rendering.originalImage
+  );
   if (idx >= 0) {
     renderings[idx] = rendering;
   } else {

@@ -50,7 +50,7 @@ describe("deep generation tests (all mocked)", () => {
     });
 
     const { generateRendering } = await import("@/lib/generate");
-    await generateRendering("prod-1", "https://img.com/dress.jpg", "dress", "render-1");
+    await generateRendering("prod-1", ["https://img.com/dress.jpg"], "dress", "render-1");
 
     expect(capturedInput).not.toBeNull();
     expect(capturedInput!.prompt).toBeDefined();
@@ -90,12 +90,12 @@ describe("deep generation tests (all mocked)", () => {
     const { generateRendering } = await import("@/lib/generate");
     const result = await generateRendering(
       "prod-2",
-      "https://img.com/dress2.jpg",
+      ["https://img.com/dress2.jpg"],
       "dress",
       "render-2"
     );
 
-    expect(result).toContain("/generated/render-2.jpg");
+    expect(result).toContain("/api/images/render-2.jpg");
 
     const renderings = getRenderingsForProduct("prod-2");
     const rendering = renderings.find((r) => r.id === "render-2");
@@ -123,7 +123,7 @@ describe("deep generation tests (all mocked)", () => {
 
     const { generateRendering } = await import("@/lib/generate");
     await expect(
-      generateRendering("prod-3", "https://img.com/dress3.jpg", "dress", "render-3")
+      generateRendering("prod-3", ["https://img.com/dress3.jpg"], "dress", "render-3")
     ).rejects.toThrow("Prediction timed out");
 
     const renderings = getRenderingsForProduct("prod-3");
@@ -153,7 +153,7 @@ describe("deep generation tests (all mocked)", () => {
 
     const { generateRendering } = await import("@/lib/generate");
     await expect(
-      generateRendering("prod-4", "https://img.com/dress4.jpg", "dress", "render-4")
+      generateRendering("prod-4", ["https://img.com/dress4.jpg"], "dress", "render-4")
     ).rejects.toThrow("Rate limit");
 
     const renderings = getRenderingsForProduct("prod-4");
@@ -226,7 +226,7 @@ describe("deep generation tests (all mocked)", () => {
     });
 
     const { generateRendering } = await import("@/lib/generate");
-    await generateRendering("prod-shoes", "https://img.com/shoes.jpg", "shoes", "render-shoes");
+    await generateRendering("prod-shoes", ["https://img.com/shoes.jpg"], "shoes", "render-shoes");
 
     expect(usedPrompt).toContain("shoes");
   });
@@ -259,7 +259,7 @@ describe("deep generation tests (all mocked)", () => {
 
     const { generateRendering } = await import("@/lib/generate");
     await expect(
-      generateRendering("prod-dl-fail", "https://img.com/dl.jpg", "dress", "render-dl")
+      generateRendering("prod-dl-fail", ["https://img.com/dl.jpg"], "dress", "render-dl")
     ).rejects.toThrow("Download failed");
 
     const renderings = getRenderingsForProduct("prod-dl-fail");
@@ -303,7 +303,7 @@ describe("deep generation tests (all mocked)", () => {
     const { generateRendering } = await import("@/lib/generate");
     await generateRendering(
       "prod-local",
-      "https://img.com/dress-local.jpg",
+      ["https://img.com/dress-local.jpg"],
       "dress",
       "render-local"
     );

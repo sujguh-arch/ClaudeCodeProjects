@@ -45,8 +45,9 @@ export default function AddProductModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center"
-      style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
+      className="fixed inset-0 flex items-end justify-center"
+      data-testid="add-product-modal"
+      style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", zIndex: 60 }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div

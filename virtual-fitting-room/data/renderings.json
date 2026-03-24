@@ -97,5 +97,13 @@
     "status": "error",
     "createdAt": "2026-03-23T22:54:06.671Z",
     "error": "Request to https://api.replicate.com/v1/models/google/nano-banana-pro/predictions failed with status 429 Too Many Requests: {\"detail\":\"Request was throttled. Your rate limit for creating predictions is reduced to 6 requests per minute with a burst of 1 requests while you have less than $5.0 in credit. Your rate limit resets in ~3s.\",\"status\":429,\"retry_after\":3}\n."
+  },
+  {
+    "id": "dcf9cb36-991a-46bd-8ccb-2dff0f19c294",
+    "productId": "b9a56118-b686-49db-8222-abeb41cae03c",
+    "originalImage": "https://cdn.shopify.com/s/files/1/0506/5886/9443/files/CerinaHighNeckMiniDressNavy4Peppermayo.jpg?v=1764654211",
+    "generatedImage": "/api/images/dcf9cb36-991a-46bd-8ccb-2dff0f19c294.jpg",
+    "status": "done",
+    "createdAt": "2026-03-24T00:06:27.484Z"
   }
 ]

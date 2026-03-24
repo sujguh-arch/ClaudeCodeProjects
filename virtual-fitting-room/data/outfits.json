@@ -57,5 +57,260 @@
     },
     "createdAt": "2026-03-23T22:52:39.510Z",
     "updatedAt": "2026-03-23T22:54:03.819Z"
+  },
+  {
+    "id": "e8288159-dabe-4a1a-9ff6-eed6c7184465",
+    "name": "New Outfit",
+    "items": {},
+    "createdAt": "2026-03-23T23:46:09.007Z",
+    "updatedAt": "2026-03-23T23:46:09.008Z"
+  },
+  {
+    "id": "031fea29-588c-4a36-9e43-4c6b701eff58",
+    "name": "New Outfit",
+    "items": {
+      "dress": "b9a56118-b686-49db-8222-abeb41cae03c",
+      "shoes": "bef6e645-9678-4796-88bc-e7949e85325b",
+      "tights": "99cc8853-602e-473f-83d9-14524230b3c2"
+    },
+    "createdAt": "2026-03-23T23:46:47.505Z",
+    "updatedAt": "2026-03-23T23:46:52.781Z"
+  },
+  {
+    "id": "093150db-4579-4b0e-acb5-4258134371cb",
+    "name": "New Outfit",
+    "items": {
+      "dress": "b9a56118-b686-49db-8222-abeb41cae03c",
+      "shoes": "bef6e645-9678-4796-88bc-e7949e85325b",
+      "tights": "99cc8853-602e-473f-83d9-14524230b3c2"
+    },
+    "createdAt": "2026-03-23T23:47:25.354Z",
+    "updatedAt": "2026-03-23T23:47:30.170Z"
+  },
+  {
+    "id": "47a3aca6-0d56-4842-8b7c-9c2cce125b25",
+    "name": "New Outfit",
+    "items": {
+      "dress": "b9a56118-b686-49db-8222-abeb41cae03c"
+    },
+    "createdAt": "2026-03-23T23:48:07.719Z",
+    "updatedAt": "2026-03-23T23:48:09.382Z"
+  },
+  {
+    "id": "f6fb5f55-314b-4ae0-bc81-44e26e1d0d38",
+    "name": "New Outfit",
+    "items": {},
+    "createdAt": "2026-03-23T23:50:38.178Z",
+    "updatedAt": "2026-03-23T23:50:38.178Z"
+  },
+  {
+    "id": "4e733ade-e498-4cfe-854c-031c156efc9b",
+    "name": "New Outfit",
+    "items": {
+      "dress": "b9a56118-b686-49db-8222-abeb41cae03c",
+      "shoes": "bef6e645-9678-4796-88bc-e7949e85325b",
+      "tights": "99cc8853-602e-473f-83d9-14524230b3c2"
+    },
+    "createdAt": "2026-03-23T23:50:41.195Z",
+    "updatedAt": "2026-03-23T23:50:46.443Z"
+  },
+  {
+    "id": "7ed1e61e-fab3-4e31-8b94-b3200ddec30b",
+    "name": "New Outfit",
+    "items": {
+      "dress": "b9a56118-b686-49db-8222-abeb41cae03c",
+      "shoes": "bef6e645-9678-4796-88bc-e7949e85325b",
+      "tights": "99cc8853-602e-473f-83d9-14524230b3c2"
+    },
+    "createdAt": "2026-03-23T23:50:49.411Z",
+    "updatedAt": "2026-03-23T23:50:54.193Z"
+  },
+  {
+    "id": "fa3c0b52-f02b-41ca-a903-0a35609540f8",
+    "name": "New Outfit",
+    "items": {
+      "dress": "b9a56118-b686-49db-8222-abeb41cae03c"
+    },
+    "createdAt": "2026-03-23T23:50:57.778Z",
+    "updatedAt": "2026-03-23T23:50:59.425Z"
+  },
+  {
+    "id": "671942b4-f27d-4161-806e-547f067da1af",
+    "name": "New Outfit",
+    "items": {},
+    "createdAt": "2026-03-23T23:53:32.722Z",
+    "updatedAt": "2026-03-23T23:53:32.722Z"
+  },
+  {
+    "id": "62d7fa1a-8c13-4418-9b80-e1ac87358ac2",
+    "name": "Date Night Outfit",
+    "items": {},
+    "createdAt": "2026-03-23T23:53:38.560Z",
+    "updatedAt": "2026-03-23T23:53:39.752Z"
+  },
+  {
+    "id": "174313e7-2b66-472e-a8b1-166927828dbd",
+    "name": "New Outfit",
+    "items": {},
+    "createdAt": "2026-03-23T23:54:11.387Z",
+    "updatedAt": "2026-03-23T23:54:11.387Z"
+  },
+  {
+    "id": "9a52c9db-d072-4fb4-8f42-884c65357326",
+    "name": "New Outfit",
+    "items": {
+      "dress": "b9a56118-b686-49db-8222-abeb41cae03c",
+      "shoes": "bef6e645-9678-4796-88bc-e7949e85325b",
+      "tights": "99cc8853-602e-473f-83d9-14524230b3c2"
+    },
+    "createdAt": "2026-03-23T23:54:14.420Z",
+    "updatedAt": "2026-03-23T23:54:19.635Z"
+  },
+  {
+    "id": "c655b994-7d12-4dac-8b56-d1966be7abcd",
+    "name": "New Outfit",
+    "items": {
+      "dress": "b9a56118-b686-49db-8222-abeb41cae03c",
+      "shoes": "bef6e645-9678-4796-88bc-e7949e85325b",
+      "tights": "99cc8853-602e-473f-83d9-14524230b3c2"
+    },
+    "createdAt": "2026-03-23T23:54:22.553Z",
+    "updatedAt": "2026-03-23T23:54:27.404Z"
+  },
+  {
+    "id": "4aa51834-1f2f-4580-b5ce-3c1649079efe",
+    "name": "New Outfit",
+    "items": {
+      "dress": "b9a56118-b686-49db-8222-abeb41cae03c"
+    },
+    "createdAt": "2026-03-23T23:54:30.969Z",
+    "updatedAt": "2026-03-23T23:54:32.650Z"
+  },
+  {
+    "id": "76ccc87b-b922-49dc-8249-652238ec1c2d",
+    "name": "New Outfit",
+    "items": {},
+    "createdAt": "2026-03-24T00:03:36.631Z",
+    "updatedAt": "2026-03-24T00:03:36.631Z"
+  },
+  {
+    "id": "782601bb-a652-4082-9672-a1f24a0432dd",
+    "name": "New Outfit",
+    "items": {},
+    "createdAt": "2026-03-24T00:04:04.165Z",
+    "updatedAt": "2026-03-24T00:04:04.165Z"
+  },
+  {
+    "id": "e6302fd0-f75d-49c4-acc4-7bd6e9a4d451",
+    "name": "New Outfit",
+    "items": {
+      "dress": "b9a56118-b686-49db-8222-abeb41cae03c",
+      "shoes": "bef6e645-9678-4796-88bc-e7949e85325b",
+      "tights": "99cc8853-602e-473f-83d9-14524230b3c2",
+      "bag": "5b1f9fa8-58b7-46a2-bb08-570e6f0e6cf3",
+      "accessories": [
+        "b5f5a339-b3f6-4398-8ee7-62dda9597148"
+      ]
+    },
+    "createdAt": "2026-03-24T00:04:16.946Z",
+    "updatedAt": "2026-03-24T00:04:25.326Z"
+  },
+  {
+    "id": "0aca568d-db49-4505-bb2c-8c51f4f24d2c",
+    "name": "Date Night Outfit",
+    "items": {},
+    "createdAt": "2026-03-24T00:04:42.695Z",
+    "updatedAt": "2026-03-24T00:04:43.876Z"
+  },
+  {
+    "id": "ad196bbd-174e-4e04-b350-337154ef2716",
+    "name": "New Outfit",
+    "items": {
+      "shoes": "39c28ed8-08b9-4699-87eb-407e6084455c",
+      "dress": "3feb2b52-8e09-4564-bd70-d44fadbdcb97"
+    },
+    "createdAt": "2026-03-24T00:04:51.329Z",
+    "updatedAt": "2026-03-24T00:05:08.875Z"
+  },
+  {
+    "id": "3335db50-850c-42bd-807b-a99893e9effc",
+    "name": "Date Night Outfit",
+    "items": {},
+    "createdAt": "2026-03-24T00:05:44.609Z",
+    "updatedAt": "2026-03-24T00:05:45.790Z"
+  },
+  {
+    "id": "917eec7f-6d2c-4bf2-abbc-63e3e8ad5b97",
+    "name": "New Outfit",
+    "items": {},
+    "createdAt": "2026-03-24T00:05:58.342Z",
+    "updatedAt": "2026-03-24T00:05:58.342Z"
+  },
+  {
+    "id": "ab99c158-86b9-4b92-9dab-d83b5a3b949e",
+    "name": "New Outfit",
+    "items": {},
+    "createdAt": "2026-03-24T00:05:59.639Z",
+    "updatedAt": "2026-03-24T00:05:59.639Z"
+  },
+  {
+    "id": "577eb897-9dc3-4350-9040-78bb06e8eb9f",
+    "name": "New Outfit",
+    "items": {
+      "dress": "b9a56118-b686-49db-8222-abeb41cae03c",
+      "shoes": "bef6e645-9678-4796-88bc-e7949e85325b",
+      "tights": "99cc8853-602e-473f-83d9-14524230b3c2",
+      "bag": "5b1f9fa8-58b7-46a2-bb08-570e6f0e6cf3",
+      "accessories": [
+        "b5f5a339-b3f6-4398-8ee7-62dda9597148"
+      ]
+    },
+    "createdAt": "2026-03-24T00:06:13.091Z",
+    "updatedAt": "2026-03-24T00:06:21.455Z"
+  },
+  {
+    "id": "00c6ad07-29e5-443e-81b2-9dd962788007",
+    "name": "New Outfit",
+    "items": {},
+    "createdAt": "2026-03-24T00:06:46.540Z",
+    "updatedAt": "2026-03-24T00:06:46.540Z"
+  },
+  {
+    "id": "a18b80cf-f3e5-44ee-9d0a-9659480ad079",
+    "name": "New Outfit",
+    "items": {},
+    "createdAt": "2026-03-24T00:06:47.838Z",
+    "updatedAt": "2026-03-24T00:06:47.838Z"
+  },
+  {
+    "id": "fe40c3f1-6c91-4cdc-b26c-f3dc7fc7e1dd",
+    "name": "New Outfit",
+    "items": {
+      "shoes": "39c28ed8-08b9-4699-87eb-407e6084455c",
+      "dress": "3feb2b52-8e09-4564-bd70-d44fadbdcb97"
+    },
+    "createdAt": "2026-03-24T00:06:53.923Z",
+    "updatedAt": "2026-03-24T00:07:11.360Z"
+  },
+  {
+    "id": "0fd25337-4fe2-4022-b8db-c4484f5a2c57",
+    "name": "New Outfit",
+    "items": {},
+    "createdAt": "2026-03-24T00:07:22.938Z",
+    "updatedAt": "2026-03-24T00:07:22.938Z"
+  },
+  {
+    "id": "5b661e74-c2ff-4cf2-8d91-8989a83a096d",
+    "name": "Date Night Outfit",
+    "items": {},
+    "createdAt": "2026-03-24T00:07:48.154Z",
+    "updatedAt": "2026-03-24T00:07:49.319Z"
+  },
+  {
+    "id": "c296d32a-7688-4b3a-924d-08a52340fde8",
+    "name": "New Outfit",
+    "items": {},
+    "createdAt": "2026-03-24T00:07:59.435Z",
+    "updatedAt": "2026-03-24T00:07:59.435Z"
   }
 ]
