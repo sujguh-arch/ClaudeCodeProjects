@@ -518,9 +518,9 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Top header bar */}
+      {/* Top header nav bar */}
       {!showSplash && <header
-        className="sticky top-0 z-40 px-5 py-3 flex items-center justify-between"
+        className="sticky top-0 z-40 px-6 py-3 flex items-center justify-between"
         style={{
           background: "var(--bg-frosted)",
           backdropFilter: "blur(20px) saturate(1.4)",
@@ -552,19 +552,59 @@ export default function Home() {
             mirror
           </h1>
         </div>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setShowAddModal(true)}
-          data-testid="add-button"
-          className="w-9 h-9 flex items-center justify-center rounded-full"
-          style={{ background: "var(--accent)", color: "var(--bg-base)", border: "none", cursor: "pointer" }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </motion.button>
+        <div className="flex items-center gap-1">
+          {/* Nav links */}
+          {TAB_ITEMS.map(({ key, label }) => {
+            const active = tab === key;
+            return (
+              <button
+                key={key}
+                onClick={() => setTab(key)}
+                className="relative px-4 py-2"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "var(--text-sm)",
+                  fontWeight: active ? "var(--weight-semibold)" : "var(--weight-regular)",
+                  color: active ? "var(--accent)" : "var(--text-secondary)",
+                  letterSpacing: "var(--tracking-wide)",
+                  transition: "var(--transition-fast)",
+                }}
+              >
+                {label}
+                {active && (
+                  <motion.div
+                    layoutId="nav-indicator"
+                    className="absolute bottom-0 left-1/2"
+                    style={{
+                      width: 20,
+                      height: 2,
+                      borderRadius: "var(--radius-full)",
+                      background: "var(--accent)",
+                      transform: "translateX(-50%)",
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </button>
+            );
+          })}
+          {/* Add button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowAddModal(true)}
+            data-testid="add-button"
+            className="w-9 h-9 flex items-center justify-center rounded-full ml-3"
+            style={{ background: "var(--accent)", color: "var(--bg-base)", border: "none", cursor: "pointer" }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </motion.button>
+        </div>
       </header>}
 
       {/* Add Product Modal */}
@@ -656,7 +696,7 @@ export default function Home() {
       </AnimatePresence>
 
       {/* Tab Content */}
-      {!showSplash && <div style={{ paddingBottom: "calc(var(--tab-bar-height) + env(safe-area-inset-bottom, 0px) + 16px)" }}>
+      {!showSplash && <div style={{ paddingBottom: "32px" }}>
         <AnimatePresence mode="wait" custom={tabDirection}>
           {/* ===== CLOSET TAB ===== */}
           {tab === "closet" && (
@@ -669,8 +709,8 @@ export default function Home() {
               exit="exit"
             >
               {/* Category filter chips */}
-              <div className="px-4 pt-5 max-w-5xl mx-auto">
-                <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 no-scrollbar" data-testid="category-tab">
+              <div className="px-6 pt-6 max-w-5xl mx-auto">
+                <div className="flex gap-3 mb-5 overflow-x-auto pb-1 no-scrollbar" data-testid="category-tab">
                   {CATEGORIES.map((cat) => {
                     const count = cat.key === "all"
                       ? products.length
@@ -680,7 +720,7 @@ export default function Home() {
                         key={cat.key}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => setCategory(cat.key)}
-                        className="px-3 py-1.5 whitespace-nowrap flex-shrink-0"
+                        className="px-5 py-2.5 whitespace-nowrap flex-shrink-0"
                         data-testid={`category-${cat.key}`}
                         data-category={cat.key}
                         style={{
@@ -688,7 +728,7 @@ export default function Home() {
                           background: category === cat.key ? "var(--accent)" : "transparent",
                           color: category === cat.key ? "var(--bg-base)" : "var(--text-secondary)",
                           border: `1px solid ${category === cat.key ? "var(--accent)" : "var(--border-default)"}`,
-                          fontSize: "12px",
+                          fontSize: "14px",
                           fontWeight: "var(--weight-medium)",
                           letterSpacing: "var(--tracking-wide)",
                           transition: "var(--transition-fast)",
@@ -702,9 +742,9 @@ export default function Home() {
               </div>
 
               {/* Product grid */}
-              <div className="px-4 sm:px-6 max-w-5xl mx-auto">
+              <div className="px-6 max-w-5xl mx-auto">
                 {initialLoading ? (
-                  <SkeletonGrid count={6} cols="grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" />
+                  <SkeletonGrid count={8} cols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4" />
                 ) : (
                   <>
                     {filteredProducts.length > 0 && (
@@ -726,7 +766,7 @@ export default function Home() {
                           variants={gridVariants}
                           initial="hidden"
                           animate="visible"
-                          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"
+                          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
                         >
                           {paginatedProducts.map((product, idx) => {
                             const gen = getGenerated(product.id);
@@ -837,7 +877,7 @@ export default function Home() {
               initial="enter"
               animate="center"
               exit="exit"
-              className="px-4 sm:px-6 max-w-5xl mx-auto pt-6"
+              className="px-6 max-w-5xl mx-auto pt-6"
             >
               <div className="flex items-center justify-between mb-6 px-1">
                 <h2 style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-xl)", color: "var(--text-primary)" }}>
@@ -863,14 +903,14 @@ export default function Home() {
               </div>
 
               {initialLoading ? (
-                <SkeletonGrid count={4} cols="grid-cols-2 sm:grid-cols-3" />
+                <SkeletonGrid count={4} cols="grid-cols-2 sm:grid-cols-3 md:grid-cols-4" />
               ) : (
                 <>
                   <motion.div
                     variants={gridVariants}
                     initial="hidden"
                     animate="visible"
-                    className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4"
+                    className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
                   >
                     {outfits.map((outfit) => {
                       const imgs = getOutfitPreviewImages(outfit);
@@ -1081,61 +1121,6 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* ===== BOTTOM TAB BAR ===== */}
-      {!showSplash && <nav
-        className="fixed bottom-0 z-50"
-        style={{
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "100%",
-          maxWidth: "430px",
-          background: "var(--bg-frosted)",
-          backdropFilter: "blur(24px) saturate(1.6)",
-          WebkitBackdropFilter: "blur(24px) saturate(1.6)",
-          borderTop: "1px solid var(--border-subtle)",
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
-        }}
-      >
-        <div className="flex items-stretch justify-around max-w-lg mx-auto" style={{ height: "var(--tab-bar-height)" }}>
-          {TAB_ITEMS.map(({ key, label, Icon }) => {
-            const active = tab === key;
-            return (
-              <button
-                key={key}
-                onClick={() => setTab(key)}
-                className="flex flex-col items-center justify-center flex-1 gap-1 relative"
-                style={{ background: "none", border: "none" }}
-              >
-                {active && (
-                  <motion.div
-                    layoutId="tab-pill"
-                    className="absolute top-1.5"
-                    style={{
-                      width: 20,
-                      height: 3,
-                      borderRadius: "var(--radius-full)",
-                      background: "var(--accent)",
-                    }}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <Icon active={active} />
-                <span
-                  style={{
-                    fontSize: "var(--text-caption)",
-                    fontWeight: active ? "var(--weight-semibold)" : "var(--weight-regular)",
-                    color: active ? "var(--accent)" : "var(--text-secondary)",
-                    letterSpacing: "var(--tracking-wide)",
-                    transition: "var(--transition-fast)",
-                  }}
-                >
-                  {label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>}
     </main>
   );
 }

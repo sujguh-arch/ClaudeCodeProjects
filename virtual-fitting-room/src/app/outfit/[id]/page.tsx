@@ -449,10 +449,10 @@ export default function OutfitPage({
           Your items
         </p>
 
-        {/* Row 1: Dress (col-span-2 row-span-2), Shoes, Tights */}
-        <div className="grid grid-cols-3 gap-3">
-          {/* Dress — large slot */}
-          <div className="col-span-2 row-span-2">
+        {/* Laptop layout: Dress left half, other items 2x2 grid on right */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Dress — left half */}
+          <div>
             <SlotCard
               slot={SLOTS[0]}
               product={getProductForSlot("dress")}
@@ -464,31 +464,26 @@ export default function OutfitPage({
               large
             />
           </div>
-          {/* Shoes */}
-          <SlotCard
-            slot={SLOTS[1]}
-            product={getProductForSlot("shoes")}
-            onAdd={() => {
-              setAddingSlot("shoes");
-              setSlotUrl("");
-            }}
-            onRemove={() => handleRemoveItem("shoes")}
-          />
-          {/* Tights */}
-          <SlotCard
-            slot={SLOTS[2]}
-            product={getProductForSlot("tights")}
-            onAdd={() => {
-              setAddingSlot("tights");
-              setSlotUrl("");
-            }}
-            onRemove={() => handleRemoveItem("tights")}
-          />
-        </div>
-
-        {/* Row 2: Bag + Accessories centered */}
-        <div className="grid grid-cols-3 gap-3 mt-3">
-          <div className="col-start-1 col-span-1">
+          {/* Other items — 2x2 grid on right */}
+          <div className="grid grid-cols-2 gap-3">
+            <SlotCard
+              slot={SLOTS[1]}
+              product={getProductForSlot("shoes")}
+              onAdd={() => {
+                setAddingSlot("shoes");
+                setSlotUrl("");
+              }}
+              onRemove={() => handleRemoveItem("shoes")}
+            />
+            <SlotCard
+              slot={SLOTS[2]}
+              product={getProductForSlot("tights")}
+              onAdd={() => {
+                setAddingSlot("tights");
+                setSlotUrl("");
+              }}
+              onRemove={() => handleRemoveItem("tights")}
+            />
             <SlotCard
               slot={SLOTS[3]}
               product={getProductForSlot("bag")}
@@ -498,8 +493,6 @@ export default function OutfitPage({
               }}
               onRemove={() => handleRemoveItem("bag")}
             />
-          </div>
-          <div className="col-start-2 col-span-1">
             <SlotCard
               slot={SLOTS[4]}
               product={getProductForSlot("accessories")}
@@ -662,7 +655,7 @@ export default function OutfitPage({
         )}
       </div>
 
-      {/* YOUR LOOKS Carousel Section */}
+      {/* YOUR LOOKS Grid Section */}
       <AnimatePresence>
         {showResult && generatedImages.length > 0 && (
           <motion.div
@@ -696,14 +689,43 @@ export default function OutfitPage({
                 </p>
               )}
             </div>
-            <ImageCarousel
-              images={generatedImages.filter((img): img is string => img !== null)}
-              currentIndex={carouselIndex}
-              onIndexChange={setCarouselIndex}
-              onImageTap={setFullscreenImage}
-              showSwipeHint={showSwipeHint && generatedImages.filter(Boolean).length > 1}
-              onSwipeHintDismiss={() => setShowSwipeHint(false)}
-            />
+            {/* Side-by-side grid on larger screens, scrollable carousel on mobile */}
+            <div className="hidden md:grid md:grid-cols-2 gap-4 px-5">
+              {generatedImages.filter((img): img is string => img !== null).map((img, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.4, delay: i * 0.1 }}
+                  className="cursor-pointer overflow-hidden"
+                  style={{
+                    borderRadius: "var(--radius-lg)",
+                    background: "var(--bg-card)",
+                    border: "1px solid var(--border-default)",
+                    boxShadow: "var(--shadow-card)",
+                  }}
+                  onClick={() => setFullscreenImage(img)}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={img}
+                    alt={`Generated look ${i + 1}`}
+                    className="w-full h-auto"
+                    style={{ aspectRatio: "3/4", objectFit: "cover" }}
+                  />
+                </motion.div>
+              ))}
+            </div>
+            <div className="md:hidden">
+              <ImageCarousel
+                images={generatedImages.filter((img): img is string => img !== null)}
+                currentIndex={carouselIndex}
+                onIndexChange={setCarouselIndex}
+                onImageTap={setFullscreenImage}
+                showSwipeHint={showSwipeHint && generatedImages.filter(Boolean).length > 1}
+                onSwipeHintDismiss={() => setShowSwipeHint(false)}
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -45,11 +45,9 @@ export default function RootLayout({
       </head>
       <body>
         <div style={{
-          maxWidth: "430px",
+          maxWidth: "1200px",
           margin: "0 auto",
           minHeight: "100vh",
-          borderLeft: "1px solid rgba(255,255,255,0.06)",
-          borderRight: "1px solid rgba(255,255,255,0.06)",
           position: "relative",
         }}>
           <ClientProviders>{children}</ClientProviders>
