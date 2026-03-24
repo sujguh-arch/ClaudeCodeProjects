@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useToast } from "@/components/Toast";
 import Link from "next/link";
+import * as cs from "@/lib/client-storage";
 
 const BLUR_PLACEHOLDER =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iIzFFMUQxQSIvPjwvc3ZnPg==";
@@ -83,31 +84,33 @@ export default function OutfitPage({
   ];
 
   const load = useCallback(async () => {
-    const [oRes, rRes, pRes] = await Promise.all([
-      fetch("/api/outfits"),
-      fetch("/api/generate"),
-      fetch("/api/products"),
-    ]);
-    const outfits: Outfit[] = await oRes.json();
-    const found = outfits.find((o) => o.id === id);
-    if (found) {
-      setOutfit(found);
-      setOutfitName(found.name);
-    }
-    const renderings: Rendering[] = await rRes.json();
-    setCatalogProducts(await pRes.json());
+    // Products from server, outfits+renderings from localStorage
+    const pRes = await fetch("/api/products");
+    const allProducts: Product[] = await pRes.json();
+    setCatalogProducts(allProducts);
 
-    // Check if any products in this outfit already have completed renderings
+    const found = cs.getOutfit(id);
     if (found) {
-      const allItemIds = [
+      // Enrich outfit with product data
+      const productsMap: Record<string, Product> = {};
+      const allIds = [
         found.items.dress,
         found.items.shoes,
         found.items.tights,
         found.items.bag,
         ...(found.items.accessories || []),
-      ].filter(Boolean);
+      ].filter(Boolean) as string[];
+      for (const pid of allIds) {
+        const p = allProducts.find((pr) => pr.id === pid);
+        if (p) productsMap[pid] = p;
+      }
+      setOutfit({ ...found, products: productsMap });
+      setOutfitName(found.name);
+
+      // Check renderings from localStorage
+      const renderings = cs.getRenderings();
       const doneRenderings = renderings.filter(
-        (r) => allItemIds.includes(r.productId) && r.status === "done" && r.generatedImage?.startsWith("/api/images/")
+        (r) => allIds.includes(r.productId) && r.status === "done" && r.generatedImage?.startsWith("/api/images/")
       );
       if (doneRenderings.length > 0) {
         setGeneratedImages(doneRenderings.map((r) => r.generatedImage));
@@ -138,11 +141,7 @@ export default function OutfitPage({
     } else {
       (newItems as Record<string, string>)[slotKey] = product.id;
     }
-    await fetch("/api/outfits", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: outfit.id, items: newItems }),
-    });
+    cs.updateOutfit(outfit.id, { items: newItems });
     setAddingSlot(null);
     toast("Item added!", "success");
     await load();
@@ -167,11 +166,7 @@ export default function OutfitPage({
         (newItems as Record<string, string>)[slotKey] = product.id;
       }
 
-      await fetch("/api/outfits", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: outfit.id, items: newItems }),
-      });
+      cs.updateOutfit(outfit.id, { items: newItems });
 
       setSlotUrl("");
       setAddingSlot(null);
@@ -195,22 +190,14 @@ export default function OutfitPage({
     } else {
       delete (newItems as Record<string, string | undefined>)[slotKey];
     }
-    await fetch("/api/outfits", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: outfit.id, items: newItems }),
-    });
+    cs.updateOutfit(outfit.id, { items: newItems });
     await load();
     toast("Item removed", "info");
   }
 
   async function handleNameSave() {
     if (!outfit || !outfitName.trim()) return;
-    await fetch("/api/outfits", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: outfit.id, name: outfitName.trim() }),
-    });
+    cs.updateOutfit(outfit.id, { name: outfitName.trim() });
     setEditingName(false);
     await load();
   }
@@ -255,6 +242,17 @@ export default function OutfitPage({
         const images = data.results.map((r: { generatedImage: string }) => r.generatedImage);
         setGeneratedImages(images);
         setShowSwipeHint(true);
+        // Save renderings to localStorage
+        cs.addRenderings(
+          data.results.map((r: { id?: string; productId?: string; originalImage?: string; generatedImage: string; status?: string; createdAt?: string }) => ({
+            id: r.id || crypto.randomUUID(),
+            productId: r.productId || firstFilled.id,
+            originalImage: r.originalImage || firstFilled.images[0] || "",
+            generatedImage: r.generatedImage,
+            status: (r.status as "done") || "done",
+            createdAt: r.createdAt || new Date().toISOString(),
+          }))
+        );
         toast(`${images.length} look${images.length > 1 ? "s" : ""} generated!`, "success");
       } else {
         const detail = data.errors_detail?.[0]?.error || "Generation failed";

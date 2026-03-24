@@ -13,6 +13,7 @@ import SkeletonGrid from "@/components/SkeletonGrid";
 import { EmptyOutfits, EmptyCloset } from "@/components/EmptyState";
 import AddProductModal from "@/components/AddProductModal";
 import { useRouter } from "next/navigation";
+import * as cs from "@/lib/client-storage";
 
 const BLUR_PLACEHOLDER =
   "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iIzFFMUQxQSIvPjwvc3ZnPg==";
@@ -164,18 +165,17 @@ export default function Home() {
   const refPhotoSrc = refPhoto?.startsWith("/uploads/") ? "/api/reference-photo" : refPhoto;
 
   const load = useCallback(async () => {
-    const [pRes, rRes, sRes, oRes] = await Promise.all([
+    const [pRes, sRes] = await Promise.all([
       fetch("/api/products"),
-      fetch("/api/generate"),
       fetch("/api/settings"),
-      fetch("/api/outfits"),
     ]);
     setProducts(await pRes.json());
-    setRenderings(await rRes.json());
     const settings = await sRes.json();
     setRefPhoto(settings.referencePhoto);
     if (!settings.referencePhoto) setShowOnboard(true);
-    setOutfits(await oRes.json());
+    // Outfits and renderings from localStorage
+    setOutfits(cs.getOutfits());
+    setRenderings(cs.getRenderings());
     setInitialLoading(false);
   }, []);
 
@@ -219,28 +219,19 @@ export default function Home() {
   }
 
 
-  async function handleCreateOutfit() {
+  function handleCreateOutfit() {
     try {
-      const resp = await fetch("/api/outfits", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "New Outfit" }),
-      });
-      const outfit = await resp.json();
+      const outfit = cs.createOutfit("New Outfit");
       router.push(`/outfit/${outfit.id}`);
     } catch {
       toast("Failed to create outfit", "error");
     }
   }
 
-  async function handleDeleteOutfit(outfitId: string) {
+  function handleDeleteOutfit(outfitId: string) {
     try {
-      await fetch("/api/outfits", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: outfitId }),
-      });
-      await load();
+      cs.deleteOutfit(outfitId);
+      setOutfits(cs.getOutfits());
       toast("Outfit deleted", "info");
     } catch {
       toast("Failed to delete", "error");
@@ -314,29 +305,45 @@ export default function Home() {
     }
   }
 
+  const productsById = useCallback(() => {
+    const map = new Map<string, Product>();
+    for (const p of products) map.set(p.id, p);
+    return map;
+  }, [products]);
+
   function getOutfitPreviewImages(outfit: Outfit): string[] {
-    if (!outfit.products) return [];
+    const pMap = productsById();
     const imgs: string[] = [];
     for (const slot of ["dress", "shoes", "tights", "bag"] as const) {
       const pid = outfit.items[slot];
-      if (pid && outfit.products[pid]) {
+      const p = pid ? pMap.get(pid) : undefined;
+      if (pid && p) {
         const gen = getGenerated(pid);
-        imgs.push(gen[0] || outfit.products[pid]!.images[0]);
+        imgs.push(gen[0] || p.images[0]);
       }
     }
     if (outfit.items.accessories?.length) {
       const pid = outfit.items.accessories[0];
-      if (outfit.products[pid]) {
+      const p = pMap.get(pid);
+      if (p) {
         const gen = getGenerated(pid);
-        imgs.push(gen[0] || outfit.products[pid]!.images[0]);
+        imgs.push(gen[0] || p.images[0]);
       }
     }
     return imgs;
   }
 
   function getOutfitPrice(outfit: Outfit): number {
-    if (!outfit.products) return 0;
-    return Object.values(outfit.products).reduce((s, p) => s + (p?.price || 0), 0);
+    const pMap = productsById();
+    let total = 0;
+    for (const slot of ["dress", "shoes", "tights", "bag"] as const) {
+      const pid = outfit.items[slot];
+      if (pid) total += pMap.get(pid)?.price || 0;
+    }
+    for (const pid of outfit.items.accessories || []) {
+      total += pMap.get(pid)?.price || 0;
+    }
+    return total;
   }
 
   const filteredProducts = category === "all"
