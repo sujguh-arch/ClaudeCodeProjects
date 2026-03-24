@@ -68,6 +68,7 @@ export default function OutfitPage({
   const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);
   const [generating, setGenerating] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<(string | null)[]>([]);
+  const [totalAttempted, setTotalAttempted] = useState(4);
   const [showResult, setShowResult] = useState(false);
   const [selectedPose, setSelectedPose] = useState("editorial");
   const [carouselIndex, setCarouselIndex] = useState(0);
@@ -238,10 +239,13 @@ export default function OutfitPage({
       if (!res.ok) throw new Error("Generation failed");
       const data = await res.json();
 
+      const attempted = (data.generated || 0) + (data.errors || 0);
+      setTotalAttempted(attempted || 4);
+
       if (data.results && data.results.length > 0) {
         const images = data.results.map((r: { generatedImage: string }) => r.generatedImage);
         setGeneratedImages(images);
-        setShowSwipeHint(true);
+        setShowSwipeHint(images.length > 1);
         // Save renderings to localStorage
         cs.addRenderings(
           data.results.map((r: { id?: string; productId?: string; originalImage?: string; generatedImage: string; status?: string; createdAt?: string }) => ({
@@ -253,7 +257,11 @@ export default function OutfitPage({
             createdAt: r.createdAt || new Date().toISOString(),
           }))
         );
-        toast(`${images.length} look${images.length > 1 ? "s" : ""} generated!`, "success");
+        if (images.length < attempted) {
+          toast(`${images.length} of ${attempted} looks generated`, "info");
+        } else {
+          toast(`${images.length} look${images.length > 1 ? "s" : ""} generated!`, "success");
+        }
       } else {
         const detail = data.errors_detail?.[0]?.error || "Generation failed";
         throw new Error(detail);
@@ -664,24 +672,36 @@ export default function OutfitPage({
             exit={{ opacity: 0, y: 20 }}
             className="max-w-4xl mx-auto mt-8"
           >
-            <p
-              className="mb-3 px-5"
-              style={{
-                fontSize: "var(--text-caption)",
-                letterSpacing: "var(--tracking-widest)",
-                fontWeight: "var(--weight-semibold)",
-                color: "var(--text-tertiary)",
-                textTransform: "uppercase",
-              }}
-            >
-              Your looks
-            </p>
+            <div className="flex items-baseline justify-between mb-3 px-5">
+              <p
+                style={{
+                  fontSize: "var(--text-caption)",
+                  letterSpacing: "var(--tracking-widest)",
+                  fontWeight: "var(--weight-semibold)",
+                  color: "var(--text-tertiary)",
+                  textTransform: "uppercase",
+                }}
+              >
+                Your looks
+              </p>
+              {generatedImages.filter(Boolean).length > 0 && generatedImages.filter(Boolean).length < totalAttempted && (
+                <p
+                  style={{
+                    fontSize: "var(--text-xs)",
+                    color: "var(--text-tertiary)",
+                    letterSpacing: "var(--tracking-wide)",
+                  }}
+                >
+                  {generatedImages.filter(Boolean).length} of {totalAttempted} looks generated
+                </p>
+              )}
+            </div>
             <ImageCarousel
-              images={generatedImages}
+              images={generatedImages.filter((img): img is string => img !== null)}
               currentIndex={carouselIndex}
               onIndexChange={setCarouselIndex}
               onImageTap={setFullscreenImage}
-              showSwipeHint={showSwipeHint}
+              showSwipeHint={showSwipeHint && generatedImages.filter(Boolean).length > 1}
               onSwipeHintDismiss={() => setShowSwipeHint(false)}
             />
           </motion.div>
@@ -1041,13 +1061,14 @@ function ImageCarousel({
   showSwipeHint,
   onSwipeHintDismiss,
 }: {
-  images: (string | null)[];
+  images: string[];
   currentIndex: number;
   onIndexChange: (i: number) => void;
   onImageTap: (url: string) => void;
   showSwipeHint: boolean;
   onSwipeHintDismiss: () => void;
 }) {
+  const isSingle = images.length === 1;
   const scrollRef = useRef<HTMLDivElement>(null);
   const hasScrolled = useRef(false);
 
@@ -1085,7 +1106,7 @@ function ImageCarousel({
             key={i}
             className="flex-shrink-0 overflow-hidden"
             style={{
-              width: "85%",
+              width: isSingle ? "calc(100% - 32px)" : "85%",
               scrollSnapAlign: "start",
               borderRadius: "var(--radius-lg)",
               background: "var(--bg-card)",
@@ -1093,50 +1114,45 @@ function ImageCarousel({
               boxShadow: "var(--shadow-card)",
             }}
           >
-            {img ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }}
-                className="cursor-pointer"
-                onClick={() => onImageTap(img)}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={img}
-                  alt={`Generated look ${i + 1}`}
-                  className="w-full h-auto"
-                  style={{ aspectRatio: "3/4", objectFit: "cover" }}
-                />
-              </motion.div>
-            ) : (
-              <div
-                className="w-full shimmer"
-                style={{ aspectRatio: "3/4" }}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="cursor-pointer"
+              onClick={() => onImageTap(img)}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={img}
+                alt={`Generated look ${i + 1}`}
+                className="w-full h-auto"
+                style={{ aspectRatio: "3/4", objectFit: "cover" }}
               />
-            )}
+            </motion.div>
           </div>
         ))}
       </div>
 
-      {/* Dot indicators */}
-      <div className="flex items-center justify-center gap-2 mt-3">
-        {images.map((_, i) => (
-          <div
-            key={i}
-            style={{
-              width: currentIndex === i ? 16 : 6,
-              height: 6,
-              borderRadius: 3,
-              background: currentIndex === i ? "var(--accent)" : "var(--border-default)",
-              transition: "all 0.2s ease",
-            }}
-          />
-        ))}
-      </div>
+      {/* Dot indicators — only for multiple images */}
+      {!isSingle && (
+        <div className="flex items-center justify-center gap-2 mt-3">
+          {images.map((_, i) => (
+            <div
+              key={i}
+              style={{
+                width: currentIndex === i ? 16 : 6,
+                height: 6,
+                borderRadius: 3,
+                background: currentIndex === i ? "var(--accent)" : "var(--border-default)",
+                transition: "all 0.2s ease",
+              }}
+            />
+          ))}
+        </div>
+      )}
 
-      {/* Swipe hint */}
-      {showSwipeHint && (
+      {/* Swipe hint — only for multiple images */}
+      {!isSingle && showSwipeHint && (
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
