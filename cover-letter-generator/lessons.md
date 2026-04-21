@@ -1,0 +1,72 @@
+# Cover Letter Lessons
+
+**Purpose:** Capture what the iteration loop teaches us — failure modes, rhythm fixes, POV patterns that work, patterns that don't. Specific to cover letters (not general writing).
+
+**How to use:**
+- Read this file before drafting a new letter
+- After each QA iteration, append any new learning (one bullet per finding, with the cause)
+- **When the user gives feedback on a draft, capture it here verbatim in the "User feedback" section below before iterating** — user calibration is the most valuable signal we have
+- Prune entries once they become boilerplate — lessons should be punchy
+
+---
+
+## User feedback (verbatim → lesson)
+
+<!-- Record user-provided feedback here. Format:
+### [Company / date]
+> user's feedback (quoted)
+- Lesson extracted: …
+- Action taken in rewrite: …
+-->
+
+_(none yet — v3 Anthropic draft is awaiting first review)_
+
+---
+
+## v1 → v3 (Anthropic, Staff PM Agents)
+
+### Rhythm & AI tells
+
+- **Em-dashes >3 in a 180-200 word letter reads as AI.** Two em-dashes is safe; four was the tell. The fix is rarely "swap the dash" — it's "restructure the sentence" (colon, semicolon, or just two sentences).
+- **Two em-dashes in one sentence ("— clause —") almost always signals LLM.** Once we dropped the nested-dash hook, the letter sounded more like a person.
+- **Sentence variance <0.35 = monotone.** All 20-27 word sentences reads corporate, even when every individual sentence is good. You need at least one sentence under 12 words for rhythm.
+- **Better to split the hook into two sentences than to add a short sentence elsewhere.** The hook carries the most weight; a punchy second sentence right after the opener ("Product scaffolding is the next frontier, not bigger models.") lands harder than an interstitial short sentence inside the POV.
+
+### Structure
+
+- **The 4-sentence cap on POV is the right constraint.** 5-sentence POV drifted into "and another thing…" register. 3-4 sentences forces compression.
+- **Hook doesn't need to mention the role.** It should mention the company's most recent concrete move (a product, a decision, a thesis shift) and connect it to something specific about you.
+- **The POV paragraph needs one risk + one move.** A risk alone is commentary. A move alone is presumptuous. Together they read as someone who's been thinking about the business.
+- **Ending on a "learned this at [prior co]" line is stronger than ending on a generalization.** It grounds the POV in a specific experience — makes the opinion feel earned, not borrowed.
+
+### Opener patterns
+
+- **"[Company product] articulated the argument I've been making…"** works because it flips the register: you're not asking for a job, you're agreeing with them about something. Be careful it doesn't read as condescending — requires that the argument actually be yours.
+- **Never start with "I" in the first five words.** Even "I've been…" as sentence 2 is fine; it's the positioning that matters.
+
+### POV register
+
+- **Hedged-claim verbs ("I'd push", "the risk I'd watch", "where I'd lean") preserve humility while still making a claim.** Declarative POV ("Anthropic should…") reads as unwarranted.
+- **The POV must have one noun the company's leadership would recognize as specific.** "Bedrock and Vertex" worked. "The AI landscape" would not. Test: could the paragraph be pasted into a letter for a different company with only the company name swapped?
+
+### Close
+
+- **"Happy to walk through any of the above" beats "Looking forward to hearing from you."** Implies the letter has content worth walking through; the other implies the letter was an application, not an argument.
+- **Single-name sign-off (just "Sujoy") beats "Best, Sujoy" in short-form.** "Best regards" is a cover-letter AI tell.
+
+---
+
+## Open questions / hypotheses to test
+
+- Does a 130-150 word letter read stronger than a 180-200 word letter? The shorter might force more POV density.
+- Is there a hook pattern that works for a company that hasn't shipped anything recently / isn't news-worthy? (Everything so far assumes a recent product move to anchor to.)
+- For earlier-stage companies, does the POV paragraph benefit from a distribution angle vs. a product angle?
+
+---
+
+## Per-company notes
+
+### Anthropic (2026-04-21)
+- First letter in this system. POV: enterprise moat through Bedrock/Vertex is a co-dependency, not a moat.
+- Result: passed clean after 2 iterations (3 builds total).
+- If writing for Anthropic again, avoid: "product scaffolding", "first-party developer surface" (used here).
