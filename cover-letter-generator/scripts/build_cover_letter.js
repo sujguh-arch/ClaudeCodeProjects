@@ -25,18 +25,18 @@ const OUTPUT_FILE = `Sujoy_Guha_${COMPANY.replace(/\s+/g, "_")}_Cover_Letter`;
 // Beat 1 — Hook. 1-2 sentences. Anchored in something real about the company.
 // Do NOT start with "I". First words should be a concrete observation.
 const HOOK =
-  "Claude's Computer Use release articulated the argument I've been making inside my own org for two years. Product scaffolding is the next frontier, not bigger models.";
+  "Super interested in the Staff PM, Agents role — for two reasons.";
 
 // Beat 2 — Role fit. 2 lines. What about THIS role, not the company.
 const ROLE_FIT =
-  "The Staff PM, Agents role sits at the seam between research velocity and enterprise readiness, where a bad latency budget can kill a great model. That's been my last two years at Duetto — shipping an RL pricing engine into production for Hyatt and B&B Hotels, where explainability and millisecond tails decided whether the model was allowed to touch revenue.";
+  "One: product scaffolding is where the real 10x is, not model size, and Computer Use proved it. Two: I've been doing the research-to-enterprise seam at Duetto — shipping an RL pricing engine for Hyatt and B&B Hotels, where latency and explainability decided whether the model got to touch revenue. Lemme deep dive on where I'd push.";
 
 // Beat 3 — Business POV. The memo. Hedged-claim register, at least one opinion.
 const POV =
-  "The risk I'd watch is that Claude's enterprise moat runs through Bedrock and Vertex. If either reprices or ships a first-party agent, the GTM picture changes in a quarter. Where I'd push is a first-party developer surface that's a real workflow product, not a console, so the builder relationship isn't mediated by a cloud. I learned this at Capital One Shopping: borrowed distribution means the product has to be irreplaceable at the workflow layer, not the API layer.";
+  "Claude's enterprise moat runs through Bedrock and Vertex today — that's co-dependency, not a moat. If either ships a first-party agent, the GTM picture changes in a quarter. I'd bet on a first-party developer surface that's a workflow product, not a console, so the builder relationship isn't mediated by a cloud. Borrowed distribution was the lesson at Capital One Shopping: be irreplaceable at the workflow layer, not the API.";
 
 // Beat 4 — Close. One sentence. Not "looking forward to".
-const CLOSE = "Happy to walk through any of the above.";
+const CLOSE = "Happy to dig in.";
 
 // ============================================================================
 // FORMATTING — DO NOT MODIFY BELOW THIS LINE

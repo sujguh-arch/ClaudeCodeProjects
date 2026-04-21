@@ -21,6 +21,17 @@
 
 _(none yet — v3 Anthropic draft is awaiting first review)_
 
+### Anthropic v3 → v4 (2026-04-21)
+> "Hahaha. This is such shit. Way too AI generated and not authentic, short, to the point just how like I am. I'd rather say something like: Super interested in this role as x and X. Lemme deep dive"
+
+- **Lesson extracted — voice register is the whole game.** The QA was passing on a letter that sounded like a think-piece, not like the user. Short, blunt, contractions, fragments. "Lemme", "Super interested", "dig in" are the register. The essay-opener ("Claude's Computer Use release articulated the argument I've been making…") is AI-tell #1 even when it technically passes.
+- **Ban essayistic openers even when no banned phrase triggers.** Hooks that read as a New Yorker lede ("X articulated the argument…", "The bet behind Y…") are not in the user's voice. The user's hook starts with a declaration of interest, not a pundit observation.
+- **Preferred hook scaffold:** `Super interested in [role] — [reasons]`. Then bridge with `Lemme deep dive` into the POV.
+- **Shorter is better.** Target 120-160 words, not 180-200. The 130-200 word range in SKILL.md is too loose; tighten toward 120-160.
+- **Contractions + fragments are a feature, not a bug.** "That's co-dependency, not a moat." > "This is a co-dependency rather than a moat."
+- **Drop the semi-academic hedges** ("for two years", "where I've been trying to work", "the thing I've been betting on internally"). Say it plain: "I've been doing X at Y".
+- **Action in rewrite (v4):** Rebuild with "Super interested in [role] — for [N] reasons" opener, "Lemme deep dive" bridge, tight 120-160 word body. Kill the think-piece register.
+
 ---
 
 ## v1 → v3 (Anthropic, Staff PM Agents)
