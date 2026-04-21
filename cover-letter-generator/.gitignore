@@ -1,0 +1,4 @@
+node_modules/
+*.pdf
+*.docx
+!references/*.pdf
