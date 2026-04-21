@@ -21,6 +21,20 @@
 
 _(none yet — v3 Anthropic draft is awaiting first review)_
 
+### Anthropic v4 → v5 (2026-04-21)
+> "Ok so it should be: Super interested in X role because of X reason in the market and X. Keep these heuristic less creativity and hard facts the better. Then bullet 1 about relevant experience (strong preference for 0-1). Then bullet 2 about if there was one thing the role wanted how I did it. Standard length for both and keep them compact and heuristic and clear as to what I'd deliver in value. Try again."
+
+- **Structural lesson — the letter is now opener + 2 bullets, not 3 paragraphs of prose.**
+  - Opener: one sentence, two reasons — `Super interested in [role] because [market reason] and [company-specific reason]`.
+  - Bullet 1: relevant experience, **strong preference for 0-1**.
+  - Bullet 2: the one thing the role wants, how I did it.
+- **Register lesson — hard facts > creative analysis.** Drop hedged-claim prose ("I'd push", "where I'd lean", "co-dependency not moat"). Replace with heuristic + numbers ("agent adoption is gated by trust infrastructure, not accuracy"). Numbers are the anchor.
+- **Bullet calibration.** Standard length, compact, both similar in length. Each bullet must clearly say what value was delivered (quantified).
+- **Drop the think-piece POV paragraph entirely.** It was the AI-tell. Replace with a compact bullet that says "the role wants X, here's how I did it."
+- **Action in rewrite (v5):** Restructure builder to render bullets, update QA to check opener-has-reasons + each-bullet-has-metric + bullet-length-parity, drop hedged-claim warning (register no longer calls for it).
+
+---
+
 ### Anthropic v3 → v4 (2026-04-21)
 > "Hahaha. This is such shit. Way too AI generated and not authentic, short, to the point just how like I am. I'd rather say something like: Super interested in this role as x and X. Lemme deep dive"
 

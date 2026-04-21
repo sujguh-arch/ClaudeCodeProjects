@@ -3,8 +3,16 @@
  *
  * USAGE: node build_cover_letter.js
  *
+ * STRUCTURE (v5, per user feedback):
+ *   Salutation
+ *   Opener: "Super interested in [role] because [market reason] and [company reason]"
+ *   Bullet 1: relevant experience (strong preference for 0-1)
+ *   Bullet 2: one thing the role wants + how I did it
+ *   Close
+ *   Sign-off
+ *
  * HOW TO CUSTOMIZE:
- * 1. Modify the CONTENT section (COMPANY, RECIPIENT, HOOK, ROLE_FIT, POV, CLOSE)
+ * 1. Modify the CONTENT section
  * 2. NEVER modify the FORMATTING section
  *
  * OUTPUT: Writes .pdf next to this script.
@@ -19,23 +27,24 @@ const PDFDocument = require("pdfkit");
 // ============================================================================
 
 const COMPANY = "Anthropic";
+const ROLE = "Staff PM, Agents";
 const RECIPIENT = null; // null -> "Hiring Team". Otherwise "Jane Doe".
 const OUTPUT_FILE = `Sujoy_Guha_${COMPANY.replace(/\s+/g, "_")}_Cover_Letter`;
 
-// Beat 1 — Hook. 1-2 sentences. Anchored in something real about the company.
-// Do NOT start with "I". First words should be a concrete observation.
-const HOOK =
-  "Super interested in the Staff PM, Agents role — for two reasons.";
+// Opener: ONE sentence, TWO reasons. Market reason + company-specific reason.
+// Heuristic register — hard facts, not creative analysis.
+const OPENER =
+  "Super interested in the Staff PM, Agents role because enterprise agent adoption is gated by trust infrastructure — latency, explainability, audit — more than model accuracy, and Anthropic is the only foundation lab shipping product surfaces against that reality.";
 
-// Beat 2 — Role fit. 2 lines. What about THIS role, not the company.
-const ROLE_FIT =
-  "One: product scaffolding is where the real 10x is, not model size, and Computer Use proved it. Two: I've been doing the research-to-enterprise seam at Duetto — shipping an RL pricing engine for Hyatt and B&B Hotels, where latency and explainability decided whether the model got to touch revenue. Lemme deep dive on where I'd push.";
+// Bullet 1: relevant experience — STRONG PREFERENCE for 0-to-1.
+// Compact. Hard numbers. Clear on value delivered.
+const BULLET_1 =
+  "Shipped the industry's first agentic RL pricing engine from 0-to-1 at Duetto. Scaled to 40% of user base in 6 months, 10% RevPAR lift, 10x throughput. Landed Hyatt and B&B Hotels as anchor enterprise clients on explainability and millisecond latency.";
 
-// Beat 3 — Business POV. The memo. Hedged-claim register, at least one opinion.
-const POV =
-  "Claude's enterprise moat runs through Bedrock and Vertex today — that's co-dependency, not a moat. If either ships a first-party agent, the GTM picture changes in a quarter. I'd bet on a first-party developer surface that's a workflow product, not a console, so the builder relationship isn't mediated by a cloud. Borrowed distribution was the lesson at Capital One Shopping: be irreplaceable at the workflow layer, not the API.";
+// Bullet 2: one thing the role wants + how I did it. Same register as bullet 1.
+const BULLET_2 =
+  "The hardest problem in shipping agents is getting operators to trust autonomous decisions on real money. Drove pricing acceptance from 20% to 60%+ by making every agent decision explainable and reversible; retention up 10%, competitive wins vs IDeaS and Lighthouse.";
 
-// Beat 4 — Close. One sentence. Not "looking forward to".
 const CLOSE = "Happy to dig in.";
 
 // ============================================================================
@@ -46,6 +55,7 @@ const PAGE_MARGIN = 72; // 1 inch
 const FONT_SIZE = 11;
 const LINE_GAP = 3;
 const PARA_GAP = 12;
+const BULLET = "•"; // •
 
 function build() {
   const doc = new PDFDocument({
@@ -63,20 +73,25 @@ function build() {
 
   doc.font("Times-Roman").fontSize(FONT_SIZE);
 
-  const writePara = (text, { gap = PARA_GAP } = {}) => {
+  const writePara = (text, { gap = PARA_GAP, indent = 0 } = {}) => {
     doc.text(text, {
       align: "left",
       lineGap: LINE_GAP,
+      indent,
     });
     doc.moveDown(gap / FONT_SIZE);
+  };
+
+  const writeBullet = (text) => {
+    writePara(`${BULLET}  ${text}`, { gap: PARA_GAP });
   };
 
   const salutation = `Dear ${RECIPIENT || `${COMPANY} Hiring Team`},`;
 
   writePara(salutation);
-  writePara(HOOK);
-  writePara(ROLE_FIT);
-  writePara(POV);
+  writePara(OPENER);
+  writeBullet(BULLET_1);
+  writeBullet(BULLET_2);
   writePara(CLOSE, { gap: PARA_GAP * 2 });
   writePara("Sujoy", { gap: 0 });
 

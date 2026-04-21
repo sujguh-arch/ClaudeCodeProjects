@@ -1,28 +1,30 @@
 #!/usr/bin/env python3
 """
-Cover Letter QA Validator — anti-template checks, AI-tell detection, variety check.
+Cover Letter QA Validator (v2 — opener + 2 bullets scaffold).
+
+STRUCTURE: salutation, opener paragraph, bullet 1, bullet 2, close, signoff.
 
 HARD FAILS:
   1. Pages != 1
-  2. Word count outside 130-200
+  2. Word count outside 120-180
   3. Any paragraph > 4 sentences
   4. Banned phrase hit (AI tell / cliche from anti-patterns.md)
   5. Generic opener ("I am", "I'm writing", "I'm excited", "As a...")
-  6. POV paragraph has zero company-specific nouns
-  7. Metric cited that is not in fact-set.md
-  8. Variety collision: opener or POV n-gram matches letter in last 30 days
+  6. Opener missing reasoning marker ("because", "for [N] reasons", etc.)
+  7. Either bullet missing a hard metric (number / % / $ / Nx)
+  8. Metric cited that is not in fact-set.md
+  9. Variety collision: opener or bullet n-gram matches letter in last 30 days
 
 WARNINGS:
   - "I" count > 8
-  - Sentence-length variance too low
+  - Bullets differ in word count by >40% (want similar/compact)
   - Adverb density > 5%
   - Em-dash density > 3
-  - POV paragraph missing hedged-claim verb
-  - POV paragraph lacks opinion verb
+  - Bullet 1 does not mention 0-to-1 / 0-1 / zero-to-one (strong preference)
 
 USAGE:
   python3 validate_cover_letter.py <pdf_path> --company <CompanyName> [--detail]
-  python3 validate_cover_letter.py <pdf_path> --company <CompanyName> --commit  # save to history on pass
+  python3 validate_cover_letter.py <pdf_path> --company <CompanyName> --commit
 """
 
 import argparse
@@ -131,34 +133,39 @@ def split_paragraphs(text):
 
 
 def identify_beats(paras):
-    """Identify salutation, hook, role_fit, pov, close, signoff."""
-    beats = {"salutation": None, "hook": None, "role_fit": None,
-             "pov": None, "close": None, "signoff": None}
+    """Identify salutation, opener, bullet_1, bullet_2, close, signoff.
+
+    Bullets are paragraphs starting with a bullet glyph (•, ●, or *)."""
+    beats = {"salutation": None, "opener": None, "bullet_1": None,
+             "bullet_2": None, "close": None, "signoff": None}
     if not paras:
         return beats
-    # Salutation
     if re.match(r"^Dear\b", paras[0], re.IGNORECASE):
         beats["salutation"] = paras[0]
         paras = paras[1:]
-    # Signoff = last short paragraph (<=3 words)
     if paras and len(paras[-1].split()) <= 3:
         beats["signoff"] = paras[-1]
         paras = paras[:-1]
-    # Close = second-to-last if short
     if paras and len(paras[-1].split()) <= 15:
         beats["close"] = paras[-1]
         paras = paras[:-1]
-    # Remaining: hook, role_fit, pov in order
-    if len(paras) >= 1:
-        beats["hook"] = paras[0]
-    if len(paras) >= 2:
-        beats["role_fit"] = paras[1]
-    if len(paras) >= 3:
-        beats["pov"] = paras[2]
-    if len(paras) > 3:
-        # Extra paragraphs: merge into pov for counting but flag
-        beats["pov"] = " ".join(paras[2:])
-        beats["_extra_paras"] = len(paras) - 3
+
+    # Strip bullet glyphs for content comparison
+    def strip_bullet(p):
+        return re.sub(r"^[•●\*]\s*", "", p).strip()
+
+    # Opener = first remaining paragraph (non-bullet)
+    if paras:
+        beats["opener"] = strip_bullet(paras[0])
+        paras = paras[1:]
+    if paras:
+        beats["bullet_1"] = strip_bullet(paras[0])
+        paras = paras[1:]
+    if paras:
+        beats["bullet_2"] = strip_bullet(paras[0])
+        paras = paras[1:]
+    if paras:
+        beats["_extra_paras"] = len(paras)
     return beats
 
 
@@ -188,6 +195,31 @@ def check_banned_phrases(body, hard_phrases, soft_phrases):
         if re.search(pat, low):
             hits_soft.append(p)
     return hits_hard, hits_soft
+
+
+def check_opener_has_reasons(opener):
+    """Opener must contain a reasoning marker — this is the scaffold."""
+    if not opener:
+        return False
+    markers = [
+        r"\bbecause\b", r"\bfor \d+ reasons\b", r"\bfor two reasons\b",
+        r"\bfor three reasons\b", r"\bsince\b", r"\bgiven\b",
+    ]
+    return any(re.search(m, opener, re.IGNORECASE) for m in markers)
+
+
+def check_bullet_has_metric(bullet):
+    """Each bullet must contain at least one hard metric (number/%/$/Nx)."""
+    if not bullet:
+        return False
+    return bool(re.search(r"\$?\d+(?:\.\d+)?[KMkm]?\+?|\d+(?:\.\d+)?\s*%|\d+x|\d+-to-\d+|0-to-1|zero-to-one",
+                          bullet))
+
+
+def check_bullet_mentions_0to1(bullet):
+    if not bullet:
+        return False
+    return bool(re.search(r"\b0-to-1\b|\bzero-to-one\b|\b0-1\b", bullet, re.IGNORECASE))
 
 
 def check_generic_opener(hook):
@@ -320,30 +352,38 @@ def save_to_history(entry):
     HISTORY_FILE.write_text(json.dumps(hist, indent=2))
 
 
-def check_variety(beats, window_days=30):
-    """Compare hook & POV 4-gram fingerprints against letters sent in last N days."""
+def check_variety(beats, company, window_days=30):
+    """Compare opener & bullet n-gram fingerprints against letters to OTHER companies
+    in last N days. Skip echoes against the same company (those are iterations)."""
     history = load_history()
     if not history:
         return []
     cutoff = datetime.now() - timedelta(days=window_days)
     recent = [h for h in history
-              if datetime.fromisoformat(h["timestamp"]) > cutoff]
+              if datetime.fromisoformat(h["timestamp"]) > cutoff
+              and h.get("company", "").lower() != company.lower()]
 
     hits = []
-    current_hook_ng = ngram_fingerprint(beats.get("hook") or "", n=4)
-    current_pov_ng = ngram_fingerprint(beats.get("pov") or "", n=4)
+    cur_open = ngram_fingerprint(beats.get("opener") or "", n=4)
+    cur_b1 = ngram_fingerprint(beats.get("bullet_1") or "", n=4)
+    cur_b2 = ngram_fingerprint(beats.get("bullet_2") or "", n=4)
 
     for past in recent:
-        past_hook_ng = set(past.get("hook_ngrams", []))
-        past_pov_ng = set(past.get("pov_ngrams", []))
-        hook_overlap = current_hook_ng & past_hook_ng
-        pov_overlap = current_pov_ng & past_pov_ng
-        if len(hook_overlap) >= 2:
-            hits.append(f"HOOK echoes letter to {past['company']} ({past['timestamp'][:10]}): "
-                       f"shared phrases: {list(hook_overlap)[:2]}")
-        if len(pov_overlap) >= 3:
-            hits.append(f"POV echoes letter to {past['company']} ({past['timestamp'][:10]}): "
-                       f"shared phrases: {list(pov_overlap)[:2]}")
+        past_open = set(past.get("opener_ngrams", past.get("hook_ngrams", [])))
+        past_b1 = set(past.get("bullet_1_ngrams", []))
+        past_b2 = set(past.get("bullet_2_ngrams", past.get("pov_ngrams", [])))
+        open_overlap = cur_open & past_open
+        b1_overlap = cur_b1 & past_b1
+        b2_overlap = cur_b2 & past_b2
+        if len(open_overlap) >= 2:
+            hits.append(f"OPENER echoes letter to {past['company']} ({past['timestamp'][:10]}): "
+                        f"shared: {list(open_overlap)[:2]}")
+        if len(b1_overlap) >= 3:
+            hits.append(f"BULLET_1 echoes letter to {past['company']} ({past['timestamp'][:10]}): "
+                        f"shared: {list(b1_overlap)[:2]}")
+        if len(b2_overlap) >= 3:
+            hits.append(f"BULLET_2 echoes letter to {past['company']} ({past['timestamp'][:10]}): "
+                        f"shared: {list(b2_overlap)[:2]}")
     return hits
 
 
@@ -375,21 +415,34 @@ def validate(pdf_path, company, commit=False):
     beats = identify_beats(paras)
     results["beats"] = beats
 
-    body_paras = [beats.get(k) for k in ("hook", "role_fit", "pov")
+    body_paras = [beats.get(k) for k in ("opener", "bullet_1", "bullet_2")
                   if beats.get(k)]
     body = " ".join(body_paras)
     full_body_with_close = " ".join(body_paras + [beats.get("close") or ""])
 
+    # Required beats present
+    for req in ("opener", "bullet_1", "bullet_2"):
+        if not beats.get(req):
+            results["pass"] = False
+            results["issues"].append(f"Missing required beat: {req}")
+
     # Word count (body only — exclude salutation/signoff)
     wc = count_words(full_body_with_close)
-    ok = 130 <= wc <= 200
-    results["checks"].append(f"{'OK' if ok else 'FAIL'} Word count: {wc} (target 130-200)")
+    ok = 120 <= wc <= 180
+    results["checks"].append(f"{'OK' if ok else 'FAIL'} Word count: {wc} (target 120-180)")
     if not ok:
         results["pass"] = False
-        results["issues"].append(f"Word count {wc} outside 130-200")
+        results["issues"].append(f"Word count {wc} outside 120-180")
+
+    # Opener has reasoning marker
+    ok = check_opener_has_reasons(beats.get("opener") or "")
+    results["checks"].append(f"{'OK' if ok else 'FAIL'} Opener has reasoning marker ('because', 'for N reasons')")
+    if not ok:
+        results["pass"] = False
+        results["issues"].append("Opener missing reasoning marker — scaffold requires 'Super interested because X and Y'")
 
     # Paragraph sentence count
-    for beat_name in ("hook", "role_fit", "pov"):
+    for beat_name in ("opener", "bullet_1", "bullet_2"):
         beat = beats.get(beat_name)
         if not beat:
             continue
@@ -399,7 +452,16 @@ def validate(pdf_path, company, commit=False):
             results["issues"].append(f"{beat_name} has {sc} sentences (max 4)")
     if beats.get("_extra_paras"):
         results["pass"] = False
-        results["issues"].append(f"Found {beats['_extra_paras']} extra paragraphs beyond the 3 beats")
+        results["issues"].append(f"Found {beats['_extra_paras']} extra paragraphs beyond opener + 2 bullets")
+
+    # Each bullet has a hard metric
+    for bn in ("bullet_1", "bullet_2"):
+        b = beats.get(bn)
+        if not b:
+            continue
+        if not check_bullet_has_metric(b):
+            results["pass"] = False
+            results["issues"].append(f"{bn} missing hard metric (number/%/$/Nx) — register is hard facts")
 
     # Banned phrases
     hard_phrases, soft_phrases = load_banned_phrases()
@@ -415,20 +477,12 @@ def validate(pdf_path, company, commit=False):
             results["warnings"].append(f"SOFT BANNED: '{p}'")
 
     # Generic opener
-    generic, label = check_generic_opener(beats.get("hook"))
+    generic, label = check_generic_opener(beats.get("opener"))
     ok = not generic
-    results["checks"].append(f"{'OK' if ok else 'FAIL'} Hook opener not generic")
+    results["checks"].append(f"{'OK' if ok else 'FAIL'} Opener not generic")
     if generic:
         results["pass"] = False
         results["issues"].append(f"Generic opener: {label}")
-
-    # Company nouns in POV
-    has_nouns, nouns = check_company_nouns(beats.get("pov") or "", company)
-    ok = has_nouns
-    results["checks"].append(f"{'OK' if ok else 'FAIL'} POV has company-specific nouns: {nouns}")
-    if not ok:
-        results["pass"] = False
-        results["issues"].append("POV paragraph has zero company-specific nouns")
 
     # Metric provenance
     fact_numbers = load_fact_numbers()
@@ -441,9 +495,9 @@ def validate(pdf_path, company, commit=False):
             results["issues"].append(f"Metric '{m}' not in fact-set.md")
 
     # Variety
-    variety_hits = check_variety(beats)
+    variety_hits = check_variety(beats, company)
     ok = len(variety_hits) == 0
-    results["checks"].append(f"{'OK' if ok else 'FAIL'} Variety (vs last 30 days): {len(variety_hits)} collisions")
+    results["checks"].append(f"{'OK' if ok else 'FAIL'} Variety (vs last 30 days, other companies): {len(variety_hits)} collisions")
     for h in variety_hits:
         results["pass"] = False
         results["issues"].append(h)
@@ -458,14 +512,19 @@ def validate(pdf_path, company, commit=False):
     ad = adverb_density(body)
     if ad > 5.0:
         results["warnings"].append(f"Adverb density: {ad:.1f}% (target <= 5%)")
-    slv = sentence_length_variance(body)
-    if slv < 0.35:
-        results["warnings"].append(f"Sentence-length variance low ({slv:.2f}) — rhythm too even")
-    if beats.get("pov"):
-        if not check_hedged_claims(beats["pov"]):
-            results["warnings"].append("POV missing hedged-claim verb ('I'd', 'the bet', 'the risk')")
-        if not check_opinion_verb(beats["pov"]):
-            results["warnings"].append("POV lacks opinion verb — reads as description")
+
+    # Bullet length parity — similar/compact
+    b1, b2 = beats.get("bullet_1"), beats.get("bullet_2")
+    if b1 and b2:
+        w1, w2 = count_words(b1), count_words(b2)
+        if max(w1, w2) > 0:
+            diff_pct = abs(w1 - w2) / max(w1, w2) * 100
+            if diff_pct > 40:
+                results["warnings"].append(f"Bullet length imbalance: {w1}w vs {w2}w ({diff_pct:.0f}% diff; target <40%)")
+
+    # Bullet 1 — strong preference for 0-to-1
+    if b1 and not check_bullet_mentions_0to1(b1):
+        results["warnings"].append("Bullet 1 does not mention 0-to-1 experience (strong preference)")
 
     # Commit to history
     if commit and results["pass"]:
@@ -473,8 +532,9 @@ def validate(pdf_path, company, commit=False):
             "timestamp": datetime.now().isoformat(),
             "company": company,
             "pdf": str(pdf_path),
-            "hook_ngrams": list(ngram_fingerprint(beats.get("hook") or "", n=4)),
-            "pov_ngrams": list(ngram_fingerprint(beats.get("pov") or "", n=4)),
+            "opener_ngrams": list(ngram_fingerprint(beats.get("opener") or "", n=4)),
+            "bullet_1_ngrams": list(ngram_fingerprint(beats.get("bullet_1") or "", n=4)),
+            "bullet_2_ngrams": list(ngram_fingerprint(beats.get("bullet_2") or "", n=4)),
             "word_count": wc,
         }
         save_to_history(entry)
@@ -493,7 +553,7 @@ def print_results(r, detail=False):
         print(f"\n  {'-' * 60}")
         print("  BEATS")
         print(f"  {'-' * 60}")
-        for k in ("salutation", "hook", "role_fit", "pov", "close", "signoff"):
+        for k in ("salutation", "opener", "bullet_1", "bullet_2", "close", "signoff"):
             v = r["beats"].get(k)
             if v:
                 preview = v if len(v) < 120 else v[:117] + "..."
